@@ -1,0 +1,18 @@
+.top-container{
+  background-color: #019688;
+}
+
+.game-options ul{
+display: flex;
+justify-content: space-around;
+}
+
+.game-counter{
+  display: flex;
+  justify-content: space-between;
+}
+
+.game-selection{
+  display: flex;
+  justify-content: space-between;
+}
