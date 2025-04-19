@@ -5,7 +5,7 @@ import './App.css'
 function App() {
 
   return (
-  <div className='sm:w-1/2 '>
+  <div className='max-w-[480px] mx-auto px-4 bg-white min-h-screen rounded-lg shadow'>
   <Dashboard/>
   </div>
   )
