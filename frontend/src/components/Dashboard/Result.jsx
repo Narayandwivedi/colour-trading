@@ -1,7 +1,8 @@
-import { useEffect ,useState } from "react";
-export default function Result({winners}) {
+import { useContext, useEffect ,useState } from "react";
+import { AppContext } from "../../context/AppContext";
+export default function Result() {
 
-  
+  const {winners} = useContext(AppContext)
   return (
     <div className="result-container">
       <p className="flex gap-4 text-gray-500 justify-center mb-3">

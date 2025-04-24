@@ -1,5 +1,8 @@
+import { useContext } from "react";
 import {Link} from "react-router-dom"
-export default function Topbar({availBalance}) {
+import { AppContext } from "../context/AppContext";
+export default function Topbar() {
+  const {availBalance} = useContext(AppContext)
   return (
     <div className="top-container p-3 m-3 mb-5">
       <div className="wrapper">

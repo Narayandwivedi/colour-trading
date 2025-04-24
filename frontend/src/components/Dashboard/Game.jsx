@@ -83,24 +83,50 @@ export default function Game({timer , onBetValueChange , onColorValueChange, ava
 
       {/* big small */}
 
-      <div className="flex justify-center mt-5 gap-3">
+      <div className="flex justify-center mt-6 gap-3">
         <button className="bg-yellow-500 text-white px-12 py-2 rounded-full">Big</button>
         <button className="bg-blue-500 text-white px-12 py-2 rounded-full">small</button>
       </div>
 
+
+{/* betting popup window on colour */}
 
     {
       isBetPopOpen && (
 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
   <div className="bg-white p-6  rounded-lg shadow-lg w-96 z-60">
     <h2 className="text-2xl font-semibold mb-4">Place your bet on {selectedColour} </h2>
+    
+    {/* bet amount input */}
+    <div className="flex gap-4 items-center justify-center mb-6 ">
+      {/* decrement button */}
+    <button onClick={()=>{setBetInp(betInp-10)}} className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md px-3 py-1 text-xl">-</button>
     <input
       type="number"
       placeholder="Enter amount"
       value={betInp}
       onChange={(e)=>{setBetInp(e.target.value)}}
-      className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+      className="w-[150px] p-2 border border-gray-300 rounded-lg"
     />
+      {/* increment button  */}
+    <button onClick={()=>{setBetInp(betInp+10)}} className="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-md px-3 py-1 text-xl">+</button>
+    </div>
+
+
+    {/* all bet amounts button */}
+        
+        <div className="flex gap-2 items-center justify-center mb-5">
+          <button onClick={()=>{setBetInp(10)}} className="border text-amber-900  border-black px-2">₹10</button>
+          <button onClick={()=>{setBetInp(50)}} className="border text-amber-900 border-black px-2">₹50</button>
+          <button onClick={()=>{setBetInp(100)}} className="border text-amber-900 border-black px-2">₹100</button>
+          <button onClick={()=>{setBetInp(200)}} className="border text-amber-900 border-black px-2">₹200</button>
+          <button onClick={()=>{setBetInp(500)}} className="border text-amber-900 border-black px-2">₹500</button>
+        </div>
+
+
+
+    {/* place bet and betting-close buttons */}
+
     <div className="flex justify-between">
       <button
         onClick={handelPlaceBet}

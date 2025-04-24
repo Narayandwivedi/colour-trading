@@ -36,30 +36,19 @@ export default function Dashboard() {
   useEffect(() => {
     if (timer === 0) {
       const randomNum = Math.floor(Math.random() * 3);
-      const colour = randomNum === 0 ? "red" : "green";
+      const colour = randomNum === 0 ? "red":randomNum===1?"green":"violet"
 
       // check winner
       if (selectedColour && betValue) {
         if (selectedColour == colour) {
-          console.log(
-            "you won",
-            "selected colur and bet value is",
-            selectedColour,
-            betValue
-          );
           let totalWin = betValue * 2;
           setWinAmt(totalWin);
           setShowWinner(true);
           setAvailBalance((prevValue) => {
             return prevValue + totalWin;
           });
-          console.log("you won rs", winAmt);
         } else {
-          console.log(
-            "you lost and your selected colour and bet amount is ",
-            selectedColour,
-            betValue
-          );
+          console.log("you lost" );
         }
       }
       setBetValue(null);
@@ -78,7 +67,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <Topbar availBalance={availBalance} />
+      <Topbar/>
       <Game
         timer={timer}
         onBetValueChange={handelBetValue}
@@ -86,7 +75,10 @@ export default function Dashboard() {
         availBalance={availBalance}
         setAvailBalance={setAvailBalance}
       />
-      <Result winners={winners} />
+      <Result/>
+
+
+      {/* win popup */}
 
       {showWinner && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
