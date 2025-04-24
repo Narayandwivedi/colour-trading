@@ -5,13 +5,6 @@ import Result from "./Result";
 import { AppContext } from "../../context/AppContext";
 
 export default function Dashboard() {
-  // const [selectedColour , setSelectedColour] = useState(null)
-  // const [winAmt , setWinAmt] = useState(0)
-  // const [showWinner, setShowWinner] = useState(false);
-  // const [timer, setTimer] = useState(10);
-  // const [availBalance, setAvailBalance] = useState(3000);
-  // const [winners, setWinners] = useState([]);
-  
 
   const {
     selectedColour,setSelectedColour,
@@ -72,8 +65,6 @@ export default function Dashboard() {
         timer={timer}
         onBetValueChange={handelBetValue}
         onColorValueChange={handelSelectedColorValue}
-        availBalance={availBalance}
-        setAvailBalance={setAvailBalance}
       />
       <Result/>
 
