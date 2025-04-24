@@ -24,7 +24,7 @@ export default function Topbar({availBalance}) {
           }}
           className="rounded-sm shadow-lg "
         >
-          Trend
+          withdraw
         </button>
       </div>
       </div>

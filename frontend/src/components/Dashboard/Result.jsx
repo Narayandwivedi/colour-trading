@@ -6,7 +6,7 @@ export default function Result({winners}) {
   
   return (
     <div className="result-container">
-      <p className="flex gap-4 text-gray-500 flex justify-center mb-3">
+      <p className="flex gap-4 text-gray-500 justify-center mb-3">
         <i className="fa-solid fa-trophy text-xl "></i>
         <span>Period</span>
       </p>
@@ -17,7 +17,7 @@ export default function Result({winners}) {
     <thead className="bg-gray-100">
       <tr>
         <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Period</th>
-        <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Price</th>
+        <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Big/small</th>
         <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Number</th>
         <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Result</th>
       </tr>
@@ -26,7 +26,7 @@ export default function Result({winners}) {
       {winners.map((item,index)=>
         <tr key={index} className="odd:bg-white even:bg-gray-50">
         <td className="border border-gray-300 px-4 py-2 text-gray-700">20230830313</td>
-        <td className="border border-gray-300 px-4 py-2 text-gray-700">40358</td>
+        <td className="border border-gray-300 px-4 py-2 text-gray-700">big</td>
         <td className="border border-gray-300 px-4 py-2 text-gray-700">3</td>
         <td>
     
