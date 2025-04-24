@@ -67,6 +67,8 @@ export default function Game({timer , onBetValueChange , onColorValueChange, ava
         </div>
       </div>
 
+      {/* select colours */}
+
       <div className="game-selection mt-8 text-white">
         <button onClick={()=>{handelBettingWindow("green")}} style={{ padding: "10px 12px", backgroundColor: "#4ab24a" }}>
           Join Green
@@ -77,6 +79,13 @@ export default function Game({timer , onBetValueChange , onColorValueChange, ava
         <button onClick={()=>{handelBettingWindow("red")}} style={{ padding: "10px 12px", backgroundColor: "#f64136" }}>
           Join Red
         </button>
+      </div>
+
+      {/* big small */}
+
+      <div className="flex justify-center mt-5 gap-3">
+        <button className="bg-yellow-500 text-white px-12 py-2 rounded-full">Big</button>
+        <button className="bg-blue-500 text-white px-12 py-2 rounded-full">small</button>
       </div>
 
 

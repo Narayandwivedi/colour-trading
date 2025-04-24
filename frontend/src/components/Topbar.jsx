@@ -1,7 +1,7 @@
 import {Link} from "react-router-dom"
 export default function Topbar({availBalance}) {
   return (
-    <div className="top-container p-3 m-3">
+    <div className="top-container p-3 m-3 mb-5">
       <div className="wrapper">
       <div className="balance mb-4">
         <p className="text-white">Available Balance : ₹ {availBalance}</p>
