@@ -1,3 +1,4 @@
+import {Link} from "react-router-dom"
 export default function Topbar({availBalance}) {
   return (
     <div className="top-container p-3 m-3">
@@ -6,6 +7,7 @@ export default function Topbar({availBalance}) {
         <p className="text-white">Available Balance : ₹ {availBalance}</p>
       </div>
       <div className="options flex gap-2">
+        <Link to={"/addbalance"}>
         <button
           className="text-white rounded-sm shadow-md"
           style={{
@@ -16,6 +18,7 @@ export default function Topbar({availBalance}) {
         >
           Recharge
         </button>
+        </Link>
         <button
           style={{
             backgroundColor: "white",

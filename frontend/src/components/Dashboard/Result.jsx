@@ -1,8 +1,6 @@
 import { useEffect ,useState } from "react";
 export default function Result({winners}) {
 
- 
-  
   
   return (
     <div className="result-container">
