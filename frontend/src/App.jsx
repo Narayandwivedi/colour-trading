@@ -4,6 +4,7 @@ import './App.css'
 import Addbalance from './components/Addbalance'
 import { Routes, Route } from 'react-router-dom'
 import Withdraw from './components/Withdraw'
+import Login from './components/Login'
 
 function App() {
 
@@ -13,6 +14,7 @@ function App() {
     <Route path='/' element={<Dashboard/>}/>
     <Route path='/addbalance' element={<Addbalance/>}/>
     <Route path='/withdraw' element={<Withdraw/>}/>
+    <Route path='/login' element={<Login/>  }/>
   </Routes>
   </div>
   )
