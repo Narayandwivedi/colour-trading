@@ -22,6 +22,8 @@ export default function Topbar() {
           Recharge
         </button>
         </Link>
+        
+        <Link to={"/withdraw"}>
         <button
           style={{
             backgroundColor: "white",
@@ -32,6 +34,7 @@ export default function Topbar() {
         >
           withdraw
         </button>
+        </Link>
       </div>
       </div>
     </div>

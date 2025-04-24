@@ -16,7 +16,7 @@ export default function Result() {
     <thead className="bg-gray-100">
       <tr>
         <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Period</th>
-        <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Big/small</th>
+        <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Big/Small</th>
         <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Number</th>
         <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Result</th>
       </tr>
