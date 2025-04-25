@@ -65,9 +65,10 @@ const handelUserLogin = async (req, res) => {
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
   
       res.cookie("token", token, {
-        httpOnly: true,
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly:true,           // protect from client side js access
+        sameSite:"None",       // protect from CSRF ATTACK
+        secure:true,
+        maxAge:7*24*60*60*1000 
       });
   
       return res.status(200).json({ success: true, message: "user logged in successfully" });
