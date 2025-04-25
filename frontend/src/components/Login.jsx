@@ -33,10 +33,32 @@ const Login = () => {
      }
   }
 
-  function handleSignup(){
+  async function handleSignup(){
     if( !fullName || !fullName.trim() || !email || !email.trim() || !password || !password.trim()){
       return toast.error(" name , email or password is missng")
   }
+
+  try{
+    const {data} = await axios.post(`${BACKEND_URL}/api/users/signup`,{
+      fullName,
+      email,
+      password
+    },
+    {
+      withCredentials:true
+    }
+  )
+  if(data.success){
+    toast.success(data.message)
+  }
+  }catch(err){
+
+    if(err.response.data){
+      toast.error(err.response.data.message)
+    }
+
+  }
+    
   }
 
 
@@ -126,7 +148,7 @@ const Login = () => {
           <button onClick={handleLogin} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition">
           Login
         </button>
-          ):<button onClick={handleSignup } className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition">
+          ):<button onClick={handleSignup} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition">
           Signup
         </button>
 
