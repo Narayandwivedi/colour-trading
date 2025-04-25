@@ -28,8 +28,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (timer === 0) {
+      // for colour
       const randomNum = Math.floor(Math.random() * 3);
       const colour = randomNum === 0 ? "red":"green"
+      // for big small
+      const randomForBigSmall = Math.floor(Math.random()*3)
+      const bigOrsmall = randomForBigSmall===0?"small":"big"
 
       // check winner
       if (selectedColour && betValue) {
@@ -45,7 +49,7 @@ export default function Dashboard() {
         }
       }
       setBetValue(null);
-      setWinners([{ winColour: colour }, ...winners]);
+      setWinners([{ winColour: colour , winBigSmall:bigOrsmall }, ...winners]);
       setTimer(10);
     }
   }, [timer]);
