@@ -24,7 +24,7 @@ export default function Result() {
     <tbody>
       {winners.map((item,index)=>
         <tr key={index} className="odd:bg-white even:bg-gray-50">
-        <td className="border border-gray-300 text-center py-2 text-gray-700">20230830313</td>
+        <td className="border text-[14px] border-gray-300 px-1 text-center py-2 text-gray-700">20230830313</td>
         <td className="border border-gray-300 text-center py-2 text-gray-700">big</td>
         <td className="border border-gray-300 text-center py-2 text-gray-700">3</td>
         <td>
