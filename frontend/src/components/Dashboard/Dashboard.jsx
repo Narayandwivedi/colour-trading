@@ -35,6 +35,10 @@ export default function Dashboard() {
       const randomForBigSmall = Math.floor(Math.random()*3)
       const bigOrsmall = randomForBigSmall===0?"small":"big"
 
+      // for numbers
+      const randomForNum = Math.floor(Math.random()*9)
+      const Number = randomForNum
+
       // check winner
       if (selectedColour && betValue) {
         if (selectedColour === colour) {
@@ -49,7 +53,7 @@ export default function Dashboard() {
         }
       }
       setBetValue(null);
-      setWinners([{ winColour: colour , winBigSmall:bigOrsmall }, ...winners]);
+      setWinners([{ winColour: colour , winBigSmall:bigOrsmall , winNum : Number }, ...winners]);
       setTimer(10);
     }
   }, [timer]);

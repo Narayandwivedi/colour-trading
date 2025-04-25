@@ -26,7 +26,7 @@ export default function Result() {
         <tr key={index} className="odd:bg-white even:bg-gray-50">
         <td className="border text-[14px] border-gray-300 px-1 text-center py-2 text-gray-700">20230830313</td>
         <td className="border border-gray-300 text-center py-2 text-gray-700">{item.winBigSmall}</td>
-        <td className="border border-gray-300 text-center py-2 text-gray-700">3</td>
+        <td className="border border-gray-300 text-center py-2 text-gray-700">{item.winNum}</td>
         <td>
     
                   <div
