@@ -41,13 +41,6 @@ export default function Topbar() {
         </div>
         </div>
         
-
-        {/* right */}
-        <div className="mr-2">
-          <Link to={'/login'}>
-          <button className="bg-white p-2 rounded-md">Login</button>
-          </Link>
-        </div>
       </div>
     </div>
   );
