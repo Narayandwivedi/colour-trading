@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {toast } from 'react-toastify';
+import axios from "axios"
+import { AppContext } from "../context/AppContext";
 
 const Login = () => {
   const [state, setState] = useState("login");
@@ -7,11 +9,28 @@ const Login = () => {
   const [email , setEmail] = useState("");
   const [password ,setPassword]= useState("")
   const [inviteCode , setInviteCode] = useState("");
+  const {BACKEND_URL} = useContext(AppContext)
 
-  function handleLogin(){
+  async function handleLogin(){
     if(!email || !email.trim() || !password || !password.trim()){
         return toast.error("email or password is missng")
     }
+    try{
+      const {data} = await axios.post(`${BACKEND_URL}/api/users/login`,{
+        email:email,
+        password:password
+      },{
+        withCredentials:true
+      })
+      if(data.success){
+        toast.success("user logged in successfully")
+      }
+     }catch(err){
+      if(err.response.data){
+        return toast.error(err.response.data.message)
+      }
+      toast.error(err.message)
+     }
   }
 
   function handleSignup(){

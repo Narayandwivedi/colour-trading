@@ -9,6 +9,7 @@ const {connectToDb} = require("./config/mongodb.js")
 const userRoute = require("./routes/userRoute.js")
 
 app.use(cors({
+    origin:["http://localhost:5173","https://colour-trading.vercel.app"],
     credentials:true
 }))
 app.use(cookieParser())
