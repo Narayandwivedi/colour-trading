@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const userModel = require("../models/userModel.js")
 
-    const handelUserSignup = async (req,res)=>{
+const handelUserSignup = async (req,res)=>{
         
         try{
             // checking req body
@@ -76,7 +76,21 @@ const handelUserLogin = async (req, res) => {
     }
   };
   
+const isloggedin = (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({ isLoggedIn: false, message: "No token found" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return res.status(200).json({ isLoggedIn: true, user: decoded });
+  } catch (err) {
+    return res.status(401).json({ isLoggedIn: false, message: "Invalid or expired token" });
+  }
+}
   
 
 
-module.exports = {handelUserSignup , handelUserLogin}
+module.exports = {handelUserSignup , handelUserLogin , isloggedin}
