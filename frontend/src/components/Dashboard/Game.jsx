@@ -88,17 +88,18 @@ export default function Game() {
       {/* numbers */}
 
       <div className="mt-8 grid grid-cols-5 gap-3">
-        <button className="bg-gradient-to-r from-red-500 to-green-500 w-[50px] h-[50px] text-white text-xl rounded-full">0</button>
-        <button className="bg-gradient-to-r from-green-500 to-red-500 w-[50px] h-[50px] text-white text-xl rounded-full">1</button>
-        <button className="bg-gradient-to-r from-red-500 to-green-500 w-[50px] h-[50px] text-white text-xl rounded-full">2</button>
-        <button className="bg-gradient-to-r from-green-500 to-red-500 w-[50px] h-[50px] text-white text-xl rounded-full">3</button>
-        <button className="bg-gradient-to-r from-red-500 to-green-500 w-[50px] h-[50px] text-white text-xl rounded-full">4</button>
-        <button className="bg-gradient-to-r from-green-500 to-red-500 w-[50px] h-[50px] text-white text-xl rounded-full">5</button>
-        <button className="bg-gradient-to-r from-red-500 to-green-500 w-[50px] h-[50px] text-white text-xl rounded-full">6</button>
-        <button className="bg-gradient-to-r from-green-500 to-red-500 w-[50px] h-[50px] text-white text-xl rounded-full">7</button>
-        <button className="bg-gradient-to-r from-red-500 to-green-500 w-[50px] h-[50px] text-white text-xl rounded-full">8</button>
-        <button className="bg-gradient-to-r from-green-500 to-red-500 w-[50px] h-[50px] text-white text-xl rounded-full">9</button>
-      </div>
+  <button className="bg-gradient-to-r from-red-500 to-violet-500 w-[40px] h-[40px] text-white text-xl rounded-full">0</button>
+  <button className="bg-gradient-to-r from-green-500 to-red-500 w-[40px] h-[40px] text-white text-xl rounded-full">1</button>
+  <button className="bg-gradient-to-r from-red-500 to-green-500 w-[40px] h-[40px] text-white text-xl rounded-full">2</button>
+  <button className="bg-gradient-to-r from-green-500 to-red-500 w-[40px] h-[40px] text-white text-xl rounded-full">3</button>
+  <button className="bg-gradient-to-r from-red-500 to-green-500 w-[40px] h-[40px] text-white text-xl rounded-full">4</button>
+  <button className="bg-gradient-to-r from-green-500 to-red-500 w-[40px] h-[40px] text-white text-xl rounded-full">5</button>
+  <button className="bg-gradient-to-r from-red-500 to-violet-500 w-[40px] h-[40px] text-white text-xl rounded-full">6</button>
+  <button className="bg-gradient-to-r from-green-500 to-red-500 w-[40px] h-[40px] text-white text-xl rounded-full">7</button>
+  <button className="bg-gradient-to-r from-red-500 to-green-500 w-[40px] h-[40px] text-white text-xl rounded-full">8</button>
+  <button className="bg-gradient-to-r from-green-500 to-red-500 w-[40px] h-[40px] text-white text-xl rounded-full">9</button>
+</div>
+
 
 
 {/* betting popup window on colour */}
