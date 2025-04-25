@@ -122,10 +122,10 @@ export default function Game() {
         {/* bet amount multiplier button */}
 
         <div className="flex items-center gap-4 justify-center mb-5 ">
-          <button onClick={()=>{setBetInp(betInp*2)}} className="shadow bg-yellow-300 px-2">2x</button>
-          <button onClick={()=>{setBetInp(betInp*3)}} className="shadow bg-yellow-300 px-2">3x</button>
-          <button onClick={()=>{setBetInp(betInp*5)}} className="shadow bg-yellow-300 px-2">5x</button>
-          <button onClick={()=>{setBetInp(betInp*10)}} className="shadow bg-yellow-300 px-2">10x</button>
+          <button onClick={()=>{setBetInp(betInp*2)}} className="shadow text-white bg-blue-500 px-2">2x</button>
+          <button onClick={()=>{setBetInp(betInp*3)}} className="shadow text-white bg-blue-500 px-2">3x</button>
+          <button onClick={()=>{setBetInp(betInp*5)}} className="shadow text-white bg-blue-500 px-2">5x</button>
+          <button onClick={()=>{setBetInp(betInp*10)}} className="shadow text-white bg-blue-500 px-2">10x</button>
         </div>
 
 
