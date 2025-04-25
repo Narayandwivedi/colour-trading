@@ -33,7 +33,8 @@ const handelUserSignup = async (req,res)=>{
          const token = jwt.sign({userId:newUser._id},process.env.JWT_SECRET , {expiresIn:"7d"})
          res.cookie("token",token,{
             httpOnly:true,           // protect from client side js access
-            sameSite:"strict",       // protect from CSRF ATTACK
+            sameSite:"None",       // protect from CSRF ATTACK
+            secure:true,
             maxAge:7*24*60*60*1000 // cookie expires in 7 days
          })
         
