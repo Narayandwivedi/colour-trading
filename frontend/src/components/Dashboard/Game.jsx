@@ -1,17 +1,16 @@
 import { useContext, useState } from "react";
 import { AppContext } from "../../context/AppContext";
  
-export default function Game({timer , onBetValueChange , onColorValueChange}) {
+export default function Game() {
   
-  const minutes = Math.floor(timer/60)
-  const seconds = timer%60
   const [isBetPopOpen, setIsBetPopOpen] = useState(false)
   const [betInp ,setBetInp] = useState(100)
-  const {selectedColour , setSelectedColour , availBalance ,setAvailBalance} = useContext(AppContext)
+  const {selectedColour,setSelectedColour,availBalance,setAvailBalance,timer,betValue,setBetValue} = useContext(AppContext)
+  const minutes = Math.floor(timer/60)
+  const seconds = timer%60
 
   function handelBettingWindow(colour){
     setIsBetPopOpen(true)
-    onColorValueChange(colour)
     setSelectedColour(colour)
   }
 
@@ -21,8 +20,7 @@ export default function Game({timer , onBetValueChange , onColorValueChange}) {
         alert('invalid bet amount');
         return;
     }
-
-      onBetValueChange(betInp)
+      setBetValue(betInp)
       setIsBetPopOpen(false)
     setAvailBalance((prevBalance)=>{
       return prevBalance-betInp
@@ -93,7 +91,7 @@ export default function Game({timer , onBetValueChange , onColorValueChange}) {
       isBetPopOpen && (
 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
   <div className="bg-white p-6  rounded-lg shadow-lg w-96 z-60">
-    <h2 className="text-2xl font-semibold mb-4">Place your bet on {selectedColour } </h2>
+    <h2 className="text-2xl font-semibold mb-4">Place your bet on {selectedColour} </h2>
     
     {/* bet amount input */}
     <div className="flex gap-4 items-center justify-center mb-6 ">

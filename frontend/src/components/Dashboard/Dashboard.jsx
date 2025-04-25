@@ -29,11 +29,11 @@ export default function Dashboard() {
   useEffect(() => {
     if (timer === 0) {
       const randomNum = Math.floor(Math.random() * 3);
-      const colour = randomNum === 0 ? "red":randomNum===1?"green":"violet"
+      const colour = randomNum === 0 ? "red":"green"
 
       // check winner
       if (selectedColour && betValue) {
-        if (selectedColour == colour) {
+        if (selectedColour === colour) {
           let totalWin = betValue * 2;
           setWinAmt(totalWin);
           setShowWinner(true);
@@ -50,22 +50,10 @@ export default function Dashboard() {
     }
   }, [timer]);
 
-  function handelSelectedColorValue(value) {
-    setSelectedColour(value);
-  }
-
-  function handelBetValue(value) {
-    setBetValue(value);
-  }
-
   return (
     <>
       <Topbar/>
-      <Game
-        timer={timer}
-        onBetValueChange={handelBetValue}
-        onColorValueChange={handelSelectedColorValue}
-      />
+      <Game/>
       <Result/>
 
 
