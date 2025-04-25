@@ -9,7 +9,7 @@ const Login = () => {
   const [email , setEmail] = useState("");
   const [password ,setPassword]= useState("")
   const [inviteCode , setInviteCode] = useState("");
-  const {BACKEND_URL} = useContext(AppContext)
+  const BACKEND_URL = `https://colour-trading-server.vercel.app`
 
   async function handleLogin(){
     if(!email || !email.trim() || !password || !password.trim()){
