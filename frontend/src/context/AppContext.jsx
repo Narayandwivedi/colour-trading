@@ -24,11 +24,16 @@ export const AppContextProvider = (props) => {
 
       if (res.data.isLoggedIn) {
         setUser(res.data.user);
+        console.log(user);
+        
       } else {
         setUser(null);
+        console.log(user);
+        
       }
     } catch (err) {
       setUser(null);
+      console.log(user);
     }
   };
 

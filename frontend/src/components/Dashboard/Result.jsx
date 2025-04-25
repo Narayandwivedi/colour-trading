@@ -15,18 +15,18 @@ export default function Result() {
   <table className="table-auto w-full border-collapse border border-gray-300 bg-white">
     <thead className="bg-gray-100">
       <tr>
-        <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Period</th>
-        <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Big/Small</th>
-        <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Number</th>
-        <th className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-600">Result</th>
+        <th className="border border-gray-300 px-2 py-2 text-left font-medium text-gray-600">Period</th>
+        <th className="border border-gray-300 px-2 py-2 text-left font-medium text-gray-600">Big/Small</th>
+        <th className="border border-gray-300 px-2 py-2 text-left font-medium text-gray-600">Number</th>
+        <th className="border border-gray-300 px-2 py-2 text-left font-medium text-gray-600">Result</th>
       </tr>
     </thead>
     <tbody>
       {winners.map((item,index)=>
         <tr key={index} className="odd:bg-white even:bg-gray-50">
-        <td className="border border-gray-300 px-4 py-2 text-gray-700">20230830313</td>
-        <td className="border border-gray-300 px-4 py-2 text-gray-700">big</td>
-        <td className="border border-gray-300 px-4 py-2 text-gray-700">3</td>
+        <td className="border border-gray-300 text-center py-2 text-gray-700">20230830313</td>
+        <td className="border border-gray-300 text-center py-2 text-gray-700">big</td>
+        <td className="border border-gray-300 text-center py-2 text-gray-700">3</td>
         <td>
     
                   <div
