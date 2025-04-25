@@ -12,6 +12,7 @@ export const AppContextProvider = (props)=>{
     const [availBalance, setAvailBalance] = useState(3000);
     const [winners, setWinners] = useState([]);
     const [betValue, setBetValue] = useState(null);
+    const BACKEND_URL =import.meta.env.VITE_BACKEND_URL
 
     const value = {
         selectedColour,setSelectedColour,
@@ -20,7 +21,8 @@ export const AppContextProvider = (props)=>{
         timer,setTimer,
         availBalance,setAvailBalance,
         winners , setWinners,
-        betValue , setBetValue
+        betValue , setBetValue,
+        BACKEND_URL
     }
 
     return (

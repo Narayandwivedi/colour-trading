@@ -5,11 +5,13 @@ import Addbalance from './components/Addbalance'
 import { Routes, Route } from 'react-router-dom'
 import Withdraw from './components/Withdraw'
 import Login from './components/Login'
+import { ToastContainer} from 'react-toastify';
 
 function App() {
 
   return (
   <div className='max-w-[480px] mx-auto bg-white min-h-screen rounded-lg shadow'>
+    <ToastContainer/>
   <Routes>
     <Route path='/' element={<Dashboard/>}/>
     <Route path='/addbalance' element={<Addbalance/>}/>
