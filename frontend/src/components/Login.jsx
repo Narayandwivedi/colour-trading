@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {toast } from 'react-toastify';
 
 const Login = () => {
   const [state, setState] = useState("login");
@@ -8,11 +9,15 @@ const Login = () => {
   const [inviteCode , setInviteCode] = useState("");
 
   function handleLogin(){
-
+    if(!email || !email.trim() || !password || !password.trim()){
+        return toast.error("email or password is missng")
+    }
   }
 
   function handleSignup(){
-
+    if( !fullName || !fullName.trim() || !email || !email.trim() || !password || !password.trim()){
+      return toast.error(" name , email or password is missng")
+  }
   }
 
 
