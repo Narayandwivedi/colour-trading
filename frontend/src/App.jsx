@@ -6,6 +6,7 @@ import { Routes, Route } from 'react-router-dom'
 import Withdraw from './components/Withdraw'
 import Login from './components/Login'
 import { ToastContainer} from 'react-toastify';
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
 
@@ -13,7 +14,7 @@ function App() {
   <div className='max-w-[480px] mx-auto bg-white min-h-screen rounded-lg shadow'>
     <ToastContainer/>
   <Routes>
-    <Route path='/' element={<Dashboard/>}/>
+    <Route path='/' element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
     <Route path='/addbalance' element={<Addbalance/>}/>
     <Route path='/withdraw' element={<Withdraw/>}/>
     <Route path='/login' element={<Login/>  }/>
