@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import {toast } from 'react-toastify';
 import axios from "axios"
 import { AppContext } from "../context/AppContext";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [state, setState] = useState("login");
@@ -10,6 +11,7 @@ const Login = () => {
   const [password ,setPassword]= useState("")
   const [inviteCode , setInviteCode] = useState("");
   const BACKEND_URL = `https://colour-trading-server.vercel.app`
+  const navigate = useNavigate();
 
   async function handleLogin(){
     if(!email || !email.trim() || !password || !password.trim()){
@@ -23,7 +25,9 @@ const Login = () => {
         withCredentials:true
       })
       if(data.success){
+        navigate("/")
         toast.success("user logged in successfully")
+
       }
      }catch(err){
       if(err.response.data){
@@ -49,7 +53,9 @@ const Login = () => {
     }
   )
   if(data.success){
+    navigate("/")
     toast.success(data.message)
+    
   }
   }catch(err){
 
