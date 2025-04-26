@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const transcationSchema = new mongoose.Schema({
+const transactionSchema = new mongoose.Schema({
     userId : {
         type:mongoose.Types.ObjectId,
         required : true
@@ -11,6 +11,7 @@ const transcationSchema = new mongoose.Schema({
     },
 
     status : {
+        type:"string",
         enum:["pending","success","rejected"],
         default:"pending"
     }
@@ -18,5 +19,5 @@ const transcationSchema = new mongoose.Schema({
     timestamps:true
 })
 
-const transactionModel = mongoose.model("transaction",transcationSchema)
+const transactionModel = mongoose.model("transaction",transactionSchema)
 module.exports = transactionModel;
