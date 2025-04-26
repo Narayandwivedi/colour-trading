@@ -10,7 +10,7 @@ const userRoute = require("./routes/userRoute.js")
 const transactionRoute = require("./routes/transactionRoute.js")
 
 app.use(cors({
-    origin:["https://colour-trading.vercel.app"],
+    origin:["https://colour-trading.vercel.app","http://localhost:5173"],
     credentials:true
 }))
 app.use(cookieParser())

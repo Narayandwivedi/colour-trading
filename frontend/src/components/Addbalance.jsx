@@ -17,10 +17,13 @@ const Addbalance = () => {
       return toast.error("please enter utr number")
     }
    try{
-    await axios.post(`${BACKEND_URL}/api/transaction`,{
+    const {data} = await axios.post(`${BACKEND_URL}/api/transaction`,{
       userId : userData._id,
       UTR: Utr
     })
+    if(data.success){
+      toast.success("money added")
+    }
    }catch(err){
     toast.error("some error in sending utr")
    }
