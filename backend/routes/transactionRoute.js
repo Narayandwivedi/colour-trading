@@ -5,3 +5,5 @@ const {createTransaction,getAllTransaction} = require("../controllers/transactio
 
 router.post("/",createTransaction)
 router.get("/",getAllTransaction)
+
+module.exports = router

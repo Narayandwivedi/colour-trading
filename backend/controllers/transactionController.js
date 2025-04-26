@@ -7,14 +7,13 @@ async function createTransaction(req,res) {
             return res.status(400).json({success:false, message:"invalid transaction"})
         }
 
-
        const newTransaction =  await transactionModel.create({
             userId,
             UTR
         })
         if(!newTransaction){
             console.log("some error in transaction");
-            res.send("some error in transcation please try again later")
+            return res.send("some error in transcation please try again later")
             
         }
         res.status(201).json({success:true, message:"balance will be added shortly after verifying UTR"})
