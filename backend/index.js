@@ -7,6 +7,7 @@ const {connectToDb} = require("./config/mongodb.js")
 
 // import routes
 const userRoute = require("./routes/userRoute.js")
+const transactionRoute = require("./routes/transactionRoute.js")
 
 app.use(cors({
     origin:["http://localhost:5173","https://colour-trading.vercel.app"],
@@ -20,6 +21,7 @@ app.get("/",(req,res)=>{
 })
 
 app.use("/api/users",userRoute)
+app.use("/api/transaction",transactionRoute)
 
 // server listen
 

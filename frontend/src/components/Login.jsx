@@ -13,6 +13,8 @@ const Login = () => {
   const BACKEND_URL = `https://colour-trading-server.vercel.app`
   const navigate = useNavigate();
 
+  const {availBalance, setAvailBalance , userData , setUserData} = useContext(AppContext);
+
   async function handleLogin(){
     if(!email || !email.trim() || !password || !password.trim()){
         return toast.error("email or password is missng")
@@ -25,7 +27,8 @@ const Login = () => {
         withCredentials:true
       })
       if(data.success){
-        console.log(data);
+        setUserData(data.userData)
+        setAvailBalance(data.userData.balance)
         navigate("/")
         toast.success("user logged in successfully")
 

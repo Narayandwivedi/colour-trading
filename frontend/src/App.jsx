@@ -15,7 +15,7 @@ function App() {
     <ToastContainer/>
   <Routes>
     <Route path='/' element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
-    <Route path='/addbalance' element={<Addbalance/>}/>
+    <Route path='/addbalance' element={<ProtectedRoute><Addbalance/></ProtectedRoute>}/>
     <Route path='/withdraw' element={<Withdraw/>}/>
     <Route path='/login' element={<Login/>  }/>
   </Routes>

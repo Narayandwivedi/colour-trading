@@ -11,6 +11,7 @@ export const AppContextProvider = (props) => {
   const [availBalance, setAvailBalance] = useState(0);
   const [winners, setWinners] = useState([]);
   const [betValue, setBetValue] = useState(null);
+  const [userData , setUserData] = useState(null)
 
   const [user, setUser] = useState(null); // 👈 For auth
   const BACKEND_URL = `https://colour-trading-server.vercel.app`;
@@ -49,6 +50,7 @@ export const AppContextProvider = (props) => {
     availBalance, setAvailBalance,
     winners, setWinners,
     betValue, setBetValue,
+    userData , setUserData,
     BACKEND_URL,
 
     // Auth values
