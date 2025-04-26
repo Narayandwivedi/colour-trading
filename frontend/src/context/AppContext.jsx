@@ -8,7 +8,7 @@ export const AppContextProvider = (props) => {
   const [winAmt, setWinAmt] = useState(0);
   const [showWinner, setShowWinner] = useState(false);
   const [timer, setTimer] = useState(10);
-  const [availBalance, setAvailBalance] = useState(3000);
+  const [availBalance, setAvailBalance] = useState(0);
   const [winners, setWinners] = useState([]);
   const [betValue, setBetValue] = useState(null);
 

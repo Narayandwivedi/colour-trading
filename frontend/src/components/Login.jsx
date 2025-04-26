@@ -25,6 +25,7 @@ const Login = () => {
         withCredentials:true
       })
       if(data.success){
+        console.log(data);
         navigate("/")
         toast.success("user logged in successfully")
 
