@@ -22,7 +22,7 @@ const Addbalance = () => {
       UTR: Utr
     })
     if(data.success){
-      toast.success("money added")
+      toast.success(data.message)
     }
    }catch(err){
     toast.error("some error in sending utr")
