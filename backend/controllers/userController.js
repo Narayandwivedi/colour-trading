@@ -112,7 +112,7 @@ const isloggedin = (req, res) => {
       const prevBalance = user.balance
        user.balance = prevBalance+totalAmount
        await user.save();
-      return res.json({ success: true, message: "Balance updated successfully", user });
+      return res.json({ success: true, message: `Balance updated successfully new balance is ${user.balance}`, user });
     } catch (err) {
       return res.status(500).json({ success: false, message: err.message });
     }
