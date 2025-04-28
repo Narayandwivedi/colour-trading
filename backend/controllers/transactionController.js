@@ -24,7 +24,16 @@ async function createTransaction(req,res) {
 
 
 async function getAllTransaction(req,res) {
-    console.log("all transaction");
+    
+    try{
+        const allTransaction = await transactionModel.find({})
+    if(!allTransaction){
+        return res.status(400).json({success:false , message:"error while fetching transaction"})
+    }
+    return res.json({success:true , allTransaction})
+    }catch(err){
+        res.status(500).json({success:false , message:err.message})
+    }
     
 }
 
