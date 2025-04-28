@@ -92,7 +92,35 @@ const isloggedin = (req, res) => {
     return res.status(401).json({ isLoggedIn: false, message: "Invalid or expired token" });
   }
 }
+
+  const handleUpdateBalance = async (req, res) => {
+    const { userId, totalAmount } = req.body;
+
+    if (!userId || totalAmount===undefined ) {
+      return res.status(400).json({ success: false, message: "Please provide a valid userId and balance" });
+    }
+    if(isNaN(Number(totalAmount))){
+      return res.status(400).json({success:false , message:"please provide valid amount"})
+    }
+
+    try {
+      const user = await userModel.findByIdAndUpdate(
+        userId,
+        { balance: totalAmount },
+        { new: true } // return updated user
+      );
+
+      if (!user) {
+        return res.status(400).json({ success: false, message: "User doesn't exist" });
+      }
+
+      return res.json({ success: true, message: "Balance updated successfully", user });
+    } catch (err) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  };
+
   
 
 
-module.exports = {handelUserSignup , handelUserLogin , isloggedin}
+module.exports = {handelUserSignup , handelUserLogin , isloggedin , handleUpdateBalance}

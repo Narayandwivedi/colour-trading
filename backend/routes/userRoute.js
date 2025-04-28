@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router()
 
-const {handelUserSignup , handelUserLogin , isloggedin} = require("../controllers/userController.js")
+const {handelUserSignup , handelUserLogin , isloggedin , handleUpdateBalance } = require("../controllers/userController.js")
 
 router.get("/isloggedin", isloggedin);
 router.post("/signup",handelUserSignup)
 router.post("/login",handelUserLogin)
-
+router.put("/updateBalance",handleUpdateBalance)
 
 module.exports = router

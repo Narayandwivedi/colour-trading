@@ -17,7 +17,7 @@ password:{
 },
 balance:{
     type:Number,
-    default:100
+    default:0
 },
 
 gameHistory:[{
