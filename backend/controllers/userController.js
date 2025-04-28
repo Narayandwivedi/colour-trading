@@ -99,6 +99,8 @@ const isloggedin = (req, res) => {
     if (!userId || totalAmount===undefined ) {
       return res.status(400).json({ success: false, message: "Please provide a valid userId and balance" });
     }
+
+    
     if(isNaN(Number(totalAmount))){
       return res.status(400).json({success:false , message:"please provide valid amount"})
     }
@@ -110,7 +112,7 @@ const isloggedin = (req, res) => {
         return res.status(400).json({ success: false, message: "User doesn't exist" });
       }
       const prevBalance = user.balance
-       user.balance = prevBalance+totalAmount
+       user.balance = prevBalance+Number(totalAmount)
        await user.save();
       return res.json({ success: true, message: `Balance updated successfully new balance is ${user.balance}`, user });
     } catch (err) {
