@@ -104,16 +104,14 @@ const isloggedin = (req, res) => {
     }
 
     try {
-      const user = await userModel.findByIdAndUpdate(
-        userId,
-        { balance: totalAmount },
-        { new: true } // return updated user
-      );
+      const user = await userModel.findById({id:userId})
 
       if (!user) {
         return res.status(400).json({ success: false, message: "User doesn't exist" });
       }
-
+      const prevBalance = user.balance
+       user.balance = prevBalance+totalAmount
+       await user.save();
       return res.json({ success: true, message: "Balance updated successfully", user });
     } catch (err) {
       return res.status(500).json({ success: false, message: err.message });

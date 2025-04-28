@@ -17,16 +17,14 @@ const Transaction = () => {
     }
 
     try {
-      const { data } = await axios.put(`${BACKEND_URL}/api/users/addbalance`, {
+      const { data } = await axios.put(`${BACKEND_URL}/api/users/updateBalance`, {
         userId,
         totalAmount
       });
 
       if (data.success) {
         toast.success(data.message);
-      } else {
-        toast.error(data.message);
-      }
+      } 
     } catch (err) {
       toast.error(err.message);
     }
