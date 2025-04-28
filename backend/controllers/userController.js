@@ -104,7 +104,7 @@ const isloggedin = (req, res) => {
     }
 
     try {
-      const user = await userModel.findById({id:userId})
+      const user = await userModel.findById(userId)
 
       if (!user) {
         return res.status(400).json({ success: false, message: "User doesn't exist" });

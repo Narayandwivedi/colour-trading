@@ -17,7 +17,7 @@ const Transaction = () => {
     }
 
     try {
-      const { data } = await axios.put(`${BACKEND_URL}/api/users/updateBalance`, {
+      const { data } = await axios.put(`${BACKEND_URL}/api/users/updatebalance`, {
         userId,
         totalAmount
       });

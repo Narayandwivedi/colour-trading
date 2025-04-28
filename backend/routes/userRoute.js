@@ -6,6 +6,6 @@ const {handelUserSignup , handelUserLogin , isloggedin , handleUpdateBalance } =
 router.get("/isloggedin", isloggedin);
 router.post("/signup",handelUserSignup)
 router.post("/login",handelUserLogin)
-router.put("/updateBalance",handleUpdateBalance)
+router.put("/updatebalance",handleUpdateBalance)
 
 module.exports = router
