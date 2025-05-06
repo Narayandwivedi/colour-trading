@@ -3,10 +3,21 @@ import { AppContext } from "../../context/AppContext";
 import axios from "axios";
 export default function Result() {
 
+  const [results , setResults] = useState([])
+  const BACKEND_URL = `https://colour-trading-server.vercel.app`;
   const {winners} = useContext(AppContext)
-  // useEffect(()=>{
-  //   await axios.get("/")
-  // },[])
+  useEffect(()=>{
+    const fetchData = async()=>{
+     try{
+      const {data} = await axios.get(`${BACKEND_URL}/api/latest/result`)
+      console.log(data);
+      setResults(data)
+     }catch(err){
+        console.log("some error while fetching result data",err.message);
+     }
+    }
+    fetchData()
+  },[])
   return (
     <div className="result-container">
       <p className="flex gap-4 text-gray-500 justify-center mb-3">
@@ -26,17 +37,16 @@ export default function Result() {
       </tr>
     </thead>
     <tbody>
-      {winners.map((item,index)=>
+      {results.map((item,index)=>
         <tr key={index} className="odd:bg-white even:bg-gray-50">
-        <td className="border text-[14px] border-gray-300 px-1 text-center py-2 text-gray-700">20230830313</td>
-        <td className="border border-gray-300 text-center py-2 text-gray-700">{item.winBigSmall}</td>
-        <td className="border border-gray-300 text-center py-2 text-gray-700">{item.winNum}</td>
+        <td className="border text-[14px] border-gray-300 px-1 text-center py-2 text-gray-700">{item.period}</td>
+        <td className="border border-gray-300 text-center py-2 text-gray-700">big</td>
+        <td className="border border-gray-300 text-center py-2 text-gray-700">4 </td>
         <td>
-    
-                  <div
-                    className={`w-4 h-4 ${item.winColour === 'red' ?"bg-red-500": "bg-green-500"} rounded-full mx-auto`}
-                  ></div>
-                </td>
+             <div
+               className={`w-4 h-4 ${item.colour === 'red' ?"bg-red-500": "bg-green-500"} rounded-full mx-auto`}
+             ></div>
+           </td>
       </tr>
       )}
      

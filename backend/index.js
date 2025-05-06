@@ -38,7 +38,7 @@ app.get("/api/latest/result", async (req, res) => {
       .sort({ createdAt: -1 }) // Most recent first
       .limit(30); // Limit to 30 results
 
-    res.json(results);
+    res.json({success:true , results});
   } catch (err) {
     res.status(500).json({ error: "Server error: " + err.message });
   }
