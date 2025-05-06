@@ -1,8 +1,12 @@
 import { useContext, useEffect ,useState } from "react";
 import { AppContext } from "../../context/AppContext";
+import axios from "axios";
 export default function Result() {
 
   const {winners} = useContext(AppContext)
+  // useEffect(()=>{
+  //   await axios.get("/")
+  // },[])
   return (
     <div className="result-container">
       <p className="flex gap-4 text-gray-500 justify-center mb-3">

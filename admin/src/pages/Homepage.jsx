@@ -6,8 +6,8 @@ const Homepage = () => {
   return (
     <div className='m-10 flex gap-2'>
       <Card heading={"Total Users"} data={150}/>
-      <Card heading={"Total Users"} data={150}/>
-      <Card heading={"Total Users"} data={150}/>
+      <Card heading={"Total bet today "} data={150}/>
+      <Card heading={"Total User"} data={150}/>
     </div>
   )
 }

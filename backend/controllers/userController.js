@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
-const userModel = require("../models/userModel.js")
+const userModel = require("../models/user")
 
 const handelUserSignup = async (req,res)=>{
         
