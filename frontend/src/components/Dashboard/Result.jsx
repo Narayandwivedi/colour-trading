@@ -11,7 +11,7 @@ export default function Result() {
      try{
       const {data} = await axios.get(`${BACKEND_URL}/api/latest/result`)
       console.log(data);
-      setResults(data)
+      setResults(data.results)
      }catch(err){
         console.log("some error while fetching result data",err.message);
      }
