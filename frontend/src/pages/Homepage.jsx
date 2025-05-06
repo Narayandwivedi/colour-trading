@@ -1,10 +1,10 @@
 import { useState, useEffect, useContext } from "react";
-import Topbar from "../Topbar";
-import Game from "./Game";
-import Result from "./Result";
-import { AppContext } from "../../context/AppContext";
+import Topbar from "../components/Topbar"
+import Game from "../components/Game";
+import Result from "../components/Result";
+import { AppContext } from "../context/AppContext";
 
-export default function Dashboard() {
+export default function Homepage() {
 
   const {
     selectedColour,setSelectedColour,
@@ -63,7 +63,7 @@ export default function Dashboard() {
       <Topbar/>
       <Game/>
       <Result/>
-
+    
 
       {/* win popup */}
 
