@@ -11,7 +11,7 @@ export default function Homepage() {
     winAmt,setWinAmt,
     showWinner, setShowWinner,
     timer, setTimer,
-    availBalance,setAvailBalance,
+    setAvailBalance,
     winners , setWinners,
     betValue ,setBetValue
 
@@ -54,7 +54,7 @@ export default function Homepage() {
       }
       setBetValue(null);
       setWinners([{ winColour: colour , winBigSmall:bigOrsmall , winNum : Number }, ...winners]);
-      setTimer(10);
+      setTimer(30);
     }
   }, [timer]);
 
