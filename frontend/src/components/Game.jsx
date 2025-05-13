@@ -1,13 +1,33 @@
 import { useContext, useState } from "react";
 import { AppContext } from "../context/AppContext";
+import { useEffect } from "react";
+import axios from "axios";
  
 export default function Game() {
   
   const [isBetPopOpen, setIsBetPopOpen] = useState(false)
   const [betInp ,setBetInp] = useState(100)
-  const {selectedColour,setSelectedColour,availBalance,setAvailBalance,timer,betValue,setBetValue} = useContext(AppContext)
+  const {selectedColour,setSelectedColour,availBalance,setAvailBalance,timer,betValue,setBetValue,BACKEND_URL} = useContext(AppContext)
   const minutes = Math.floor(timer/60)
   const seconds = timer%60
+  const [period , setPeriod] = useState(null)
+
+  async function fetchLatestPeriod(){
+      try{
+        const {data} = await axios.get(`${BACKEND_URL}/api/latest/period`)
+        if(data.success){
+          setPeriod(data.latestPeriod)
+          console.log(period);
+        }
+      }catch(err){
+        setPeriod(null)
+      }
+    }
+
+
+  useEffect(()=>{
+    fetchLatestPeriod()
+  },[])
 
   function handelBettingWindow(colour){
     setIsBetPopOpen(true)

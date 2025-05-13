@@ -4,15 +4,13 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const { connectToDb } = require("./config/mongodb.js");
-require("./colourGenerator.js");
-
+require("./gameService.js");
 // import routes
 const userRoute = require("./routes/userRoute.js");
 const transactionRoute = require("./routes/transactionRoute.js");
 const betRoute = require("./routes/betRoute.js");
 
 // import models
-
 const game = require("./models/game.js");
 
 app.use(
@@ -34,16 +32,31 @@ app.get("/", (req, res) => {
 
 app.get("/api/latest/result", async (req, res) => {
   try {
-    const results = await game.find({ status: "closed" })
+    const results = await game
+      .find({ status: "closed" })
       .sort({ createdAt: -1 }) // Most recent first
       .limit(30); // Limit to 30 results
 
-    res.json({success:true , results});
+    res.json({ success: true, results });
   } catch (err) {
     res.status(500).json({ error: "Server error: " + err.message });
   }
 });
-app.get("api/latest/period", async (req, res) => {});
+app.get("/api/latest/period", async (req, res) => {
+  try {
+    const latestPeriod = await game
+      .find({ status: "open" })
+      .sort({ createdAt: -1 })
+      .limit(1)
+      .lean()
+    res.json({ success: true, latestPeriod });
+  } catch {
+    res.status.json({
+      success: false,
+      message: "some error while fetching period",
+    });
+  }
+});
 
 app.use("/api/users", userRoute);
 app.use("/api/transaction", transactionRoute);
