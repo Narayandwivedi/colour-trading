@@ -16,8 +16,8 @@ export default function Game() {
       try{
         const {data} = await axios.get(`${BACKEND_URL}/api/latest/period`)
         if(data.success){
-          setPeriod(data.latestPeriod)
-          console.log(period);
+          setPeriod(data.latestPeriod[0].period)
+          console.log(data.latestPeriod[0].period);
         }
       }catch(err){
         setPeriod(null)
@@ -76,7 +76,7 @@ export default function Game() {
             <i className="fa-solid fa-trophy text-2xl "></i>
             <span>Period</span>
           </p>
-          <p className="text-2xl font-medium">20230830314</p>
+          <p className="text-2xl font-medium">{period}</p>
         </div>
         <div className="sec-2">
           <p className="  text-gray-500 ">Count Down</p>

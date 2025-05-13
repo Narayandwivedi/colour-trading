@@ -49,7 +49,7 @@ app.get("/api/latest/period", async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(1)
       .lean()
-    res.json({ success: true, latestPeriod });
+    res.json({ success: true, latestPeriod});
   } catch {
     res.status.json({
       success: false,
