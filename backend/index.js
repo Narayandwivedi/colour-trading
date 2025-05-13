@@ -35,7 +35,8 @@ app.get("/api/latest/result", async (req, res) => {
     const results = await game
       .find({ status: "closed" })
       .sort({ createdAt: -1 }) // Most recent first
-      .limit(30); // Limit to 30 results
+      .limit(30) // Limit to 30 results
+      .lean();
 
     res.json({ success: true, results });
   } catch (err) {

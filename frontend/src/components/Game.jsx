@@ -31,10 +31,11 @@ export default function Game() {
     },[])
 
   useEffect(() => {
-  if(timer===0){
-    fetchLatestPeriod();
-  }
-}, [timer]);
+  const interval = setInterval(()=>{
+    fetchLatestPeriod()
+  },2000)
+  return ()=>{clearInterval(interval)}
+}, []);
 
   function handelBettingWindow(colour){
     setIsBetPopOpen(true)

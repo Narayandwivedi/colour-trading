@@ -1,36 +1,64 @@
-const game = require("./models/game")
+const game = require("./models/game");
+const cron = require('node-cron');
 
+// Constants
+const COLOURS = ["red", "green"];
 
-async function getPeriod() {
-const count = await game.countDocuments();
-const now = new Date();
-const year = now.getFullYear(); // 2025
-const month = String(now.getMonth() + 1).padStart(2, "0"); // 01-12
-const day = String(now.getDate()).padStart(2, "0"); // 01-31
-const hour = now.getHours(); // 0-23 (no padStart)
-const customFormat = `${year}${month}${day}${hour}${count+1}`;
-console.log(count+1);
-
-return customFormat;
+// Improved period generator that doesn't rely on count
+async function generatePeriodId() {
+    try {
+        const now = new Date();
+        const timestamp = [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, "0"),
+            String(now.getDate()).padStart(2, "0"),
+            now.getHours(),
+            now.getMinutes(),
+            now.getSeconds(),
+        ].join('');
+        
+        return `${timestamp}`; // Example: G20250513154230123
+    } catch (error) {
+        console.error("Error generating period ID:", error);
+        throw error;
+    }
 }
 
-function colourGenerator() {
-const colours = ["red", "green"];
-const randomColour = colours[Math.floor(Math.random()*colours.length)];
-return randomColour;
+function getRandomColour() {
+    return COLOURS[Math.floor(Math.random() * COLOURS.length)];
 }
 
-setInterval(async () => {
-const period = await getPeriod();
-const newGame = await game.create({
-period,
+async function executeGameRound() {
+    try {
+        const period = await generatePeriodId();
+        const newGame = await game.create({ 
+            period,
+            status: "open" 
+        });
+        console.log(`[${new Date().toISOString()}] Game opened:`, period);
+
+        // Schedule game closing
+        setTimeout(async () => {
+            try {
+                newGame.colour = getRandomColour();
+                newGame.status = "closed";
+                await newGame.save();
+                console.log(`[${new Date().toISOString()}] Game closed:`, period, "Colour:", newGame.colour);
+            } catch (error) {
+                console.error("Error closing game:", error);
+            }
+        },10000);
+        
+    } catch (error) {
+        console.error("Error in game round:", error);
+    }
+}
+
+// Schedule game rounds every 10 seconds
+// Cron pattern: seconds(0-59) minutes(0-59) hours(0-23) day-of-month(1-31) month(1-12) day-of-week(0-7)
+cron.schedule('*/10 * * * * *', executeGameRound, {
+    scheduled: true,
+    timezone: "UTC" // Specify your timezone if needed
 });
-console.log("period : ", newGame);
-const colour = colourGenerator();
-setTimeout(async () => {
-newGame.colour = colour;
-newGame.status = "closed";
-const updatedGame = await newGame.save();
-console.log(updatedGame);
-}, 10000);
-}, 10000);
+
+console.log('Game scheduler started - running every 10 seconds');
