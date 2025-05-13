@@ -17,6 +17,8 @@ export default function Game() {
         const {data} = await axios.get(`${BACKEND_URL}/api/latest/period`)
         if(data.success){
           setPeriod(data.latestPeriod[0].period)
+          console.log(data.latestPeriod);
+          
           console.log(data.latestPeriod[0].period);
         }
       }catch(err){
@@ -24,10 +26,15 @@ export default function Game() {
       }
     }
 
+    useEffect(()=>{
+      fetchLatestPeriod()
+    },[])
 
-  useEffect(()=>{
-    fetchLatestPeriod()
-  },[])
+  useEffect(() => {
+  if(timer===0){
+    fetchLatestPeriod();
+  }
+}, [timer]);
 
   function handelBettingWindow(colour){
     setIsBetPopOpen(true)

@@ -1,15 +1,16 @@
 const game = require("./models/game")
 
-let num = 1; // this reset on server restart so fix it 
 
-function getPeriod() {
+async function getPeriod() {
+const count = await game.countDocuments();
 const now = new Date();
 const year = now.getFullYear(); // 2025
 const month = String(now.getMonth() + 1).padStart(2, "0"); // 01-12
 const day = String(now.getDate()).padStart(2, "0"); // 01-31
 const hour = now.getHours(); // 0-23 (no padStart)
-const customFormat = `${year}${month}${day}${hour}${num}`;
-num++;
+const customFormat = `${year}${month}${day}${hour}${count+1}`;
+console.log(count+1);
+
 return customFormat;
 }
 
@@ -20,7 +21,7 @@ return randomColour;
 }
 
 setInterval(async () => {
-const period = getPeriod();
+const period = await getPeriod();
 const newGame = await game.create({
 period,
 });
