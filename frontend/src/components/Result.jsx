@@ -3,10 +3,9 @@ import { AppContext } from "../context/AppContext";
 import axios from "axios";
 export default function Result() {
   const [results, setResults] = useState([]);
-  const BACKEND_URL = `https://colour-trading-server.vercel.app`;
-  const { winners } = useContext(AppContext);
+  const { BACKEND_URL } = useContext(AppContext);
 
-  const fetchResults = async () => {
+  const fetch_30_Results = async () => {
     try {
       const { data } = await axios.get(`${BACKEND_URL}/api/latest/result`);
       setResults(data.results);
@@ -15,18 +14,28 @@ export default function Result() {
     }
   };
 
+  const fetch_1_result = async()=>{
+    try {
+      const { data } = await axios.get(`${BACKEND_URL}/api/latest/oneresult`);
+      setResults(data.results);
+    } catch (err) {
+      console.log("some error while fetching result data", err.message);
+    }
+  };
+  }
+
   useEffect(() => {
-    fetchResults();
+    fetch_30_Results();
     console.log(results);
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(fetchResults, 2000);
+    const interval = setInterval(fetch_30_Results, 2000);
     console.log(results);
     return ()=>{clearInterval(interval)}
   }, []);
   return (
-    <div className="result-container">
+    <div className="result-container mb-6">
       <p className="flex gap-4 text-gray-500 justify-center mb-3">
         <i className="fa-solid fa-trophy text-xl "></i>
         <span>Period</span>
@@ -77,4 +86,4 @@ export default function Result() {
       </div>
     </div>
   );
-}
+

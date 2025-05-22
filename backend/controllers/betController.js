@@ -32,7 +32,6 @@ const handlePlaceBet = async (req, res) => {
         return res.json({success:false , message:"bet amount exceed"})
     }
       
-
     // validate bet colour
 
     if (betColour !== "red" && betColour !== "green") {
@@ -60,10 +59,12 @@ const handlePlaceBet = async (req, res) => {
         if (!checkGame) {
             throw new Error("game period not found");
         }
+        console.log( checkGame.period,checkGame.status);
+        
 
-        if (checkGame.status === "closed") {
-            throw new Error("bet is closed");
-        }
+        // if (checkGame.status === "closed") {
+        //     throw new Error("bet is closed");
+        // }
 
         // Create bet
         const newBet = await bet.create([{
@@ -82,7 +83,7 @@ const handlePlaceBet = async (req, res) => {
         return res.json({ success: true, message: "bet placed successfully" });
     } catch (error) {
         await session.abortTransaction();
-        return res.json({ success: false, message: error.message || "transaction failed" });
+        return res.json({ success: false, message: error.message });
     }finally{
         session.endSession();
     }

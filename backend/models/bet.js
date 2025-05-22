@@ -25,7 +25,6 @@ const betSchema = new mongoose.Schema({
         enum:["pending","win","lost"],
         default:"pending"
     }
-
 },{timestamps:true})
 
 const bet = mongoose.model("bet",betSchema);

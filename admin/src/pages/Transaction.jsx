@@ -7,7 +7,7 @@ const Transaction = () => {
   const [amountInputs, setAmountInputs] = useState({}); // store per-transaction amount
   const [loading, setLoading] = useState(true);
   
-  const BACKEND_URL = 'https://colour-trading-server.vercel.app';
+  const BACKEND_URL = 'http://localhost:8080';
 
   const handleApprove = async (userId) => {
     const totalAmount = amountInputs[userId];

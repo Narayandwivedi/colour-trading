@@ -12,31 +12,31 @@ export const AppContextProvider = (props) => {
   const [winners, setWinners] = useState([]);
   const [betValue, setBetValue] = useState(null);
   const [userData , setUserData] = useState(null)
+  const [period , setPeriod] = useState(null)
+  const [periodCreatedAT , setPeriodCreatedAT] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const [user, setUser] = useState(null); // 👈 For auth
-  const BACKEND_URL = `https://colour-trading-server.vercel.app`;
+  const BACKEND_URL = `http://localhost:8080`;
 
   // 🔐 Check if user is logged in
-  const checkLogin = async () => {
-    try {
-      const res = await axios.get(`${BACKEND_URL}/api/users/isloggedin`, {
-        withCredentials: true,
-      });
-
-      if (res.data.isLoggedIn) {
-        setUser(res.data.user);
-        console.log(user);
-        
-      } else {
-        setUser(null);
-        console.log(user);
-        
-      }
-    } catch (err) {
+const checkLogin = async () => {
+  try {
+    const res = await axios.get(`${BACKEND_URL}/api/users/isloggedin`, {
+      withCredentials: true,
+    });
+    if (res.data.isLoggedIn) {
+      setUserData(res.data.user);
+      setAvailBalance(res.data.user.balance)
+      console.log(res.data);
+    } else {
       setUser(null);
-      console.log(user);
     }
-  };
+  } catch (err) {
+    setUser(null);
+  } finally {
+    setLoading(false); // ✅ done checking
+  }
+};
 
   useEffect(() => {
     checkLogin();
@@ -51,10 +51,13 @@ export const AppContextProvider = (props) => {
     winners, setWinners,
     betValue, setBetValue,
     userData , setUserData,
+    period, setPeriod,
+    periodCreatedAT , setPeriodCreatedAT,
+    loading,setLoading,
     BACKEND_URL,
 
     // Auth values
-    user, setUser, checkLogin,
+    checkLogin,
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {toast } from 'react-toastify';
 import axios from "axios"
 import { AppContext } from "../context/AppContext";
@@ -10,10 +10,9 @@ const Login = () => {
   const [email , setEmail] = useState("");
   const [password ,setPassword]= useState("")
   const [inviteCode , setInviteCode] = useState("");
-  const BACKEND_URL = `https://colour-trading-server.vercel.app`
   const navigate = useNavigate();
 
-  const {availBalance, setAvailBalance , userData , setUserData} = useContext(AppContext);
+  const {setAvailBalance , BACKEND_URL, userData , setUserData} = useContext(AppContext);
 
   async function handleLogin(){
     if(!email || !email.trim() || !password || !password.trim()){
@@ -28,9 +27,11 @@ const Login = () => {
       })
       if(data.success){
         setUserData(data.userData)
+        console.log(data);
+        
         setAvailBalance(data.userData.balance)
-        navigate("/")
-        toast.success("user logged in successfully")
+          navigate("/")
+          toast.success("user logged in successfully")
 
       }
      }catch(err){
@@ -66,11 +67,7 @@ const Login = () => {
     if(err.response.data){
       toast.error(err.response.data.message)
     }
-
-  }
-    
-  }
-
+ }}
 
   return (
     <div className="min-h-screen bg-blue-950 flex items-center justify-center p-6">

@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import Topbar from "../components/Topbar"
 import Game from "../components/Game";
 import Result from "../components/Result";
+import Timer from "../components/Timer"
 import { AppContext } from "../context/AppContext";
 
 export default function Homepage() {
@@ -13,24 +14,16 @@ export default function Homepage() {
     timer, setTimer,
     setAvailBalance,
     winners , setWinners,
-    betValue ,setBetValue
+    betValue ,setBetValue,
+    periodCreatedAT
+    
 
   } = useContext(AppContext);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimer((prevTimer) => {
-        return Math.max(prevTimer - 1, 0);
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
+  
   useEffect(() => {
     if (timer === 0) {
-      // for colour
-      const randomNum = Math.floor(Math.random() * 3);
-      const colour = randomNum === 0 ? "red":"green"
+      
       // for big small
       const randomForBigSmall = Math.floor(Math.random()*3)
       const bigOrsmall = randomForBigSmall===0?"small":"big"
@@ -61,8 +54,10 @@ export default function Homepage() {
   return (
     <>
       <Topbar/>
+      <Timer/>  
       <Game/>
       <Result/>
+      
     
 
       {/* win popup */}

@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
-const userModel = require("../models/user")
+const userModel = require("../models/user");
+const user = require("../models/user");
 
 const handelUserSignup = async (req,res)=>{
         
@@ -52,7 +53,7 @@ const handelUserLogin = async (req, res) => {
         return res.status(400).json({ message: "email or password missing" });
       }
   
-      const user = await userModel.findOne({ email });
+      const user = await userModel.findOne({ email }).lean();
       if (!user) {
         return res.status(401).json({ success: false, message: "Invalid email" });
       }
@@ -61,24 +62,28 @@ const handelUserLogin = async (req, res) => {
       if (!isPassMatch) {
         return res.status(401).json({ success: false, message: "Invalid password" });
       }
+
+      const userData = {
+        balance : user.balance
+      }
   
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
   
       res.cookie("token", token, {
         httpOnly:true,           // protect from client side js access
         sameSite:"None",       // protect from CSRF ATTACK
-        secure:true,
+        secure: true,
         maxAge:7*24*60*60*1000 
       });
   
-      return res.status(200).json({ success: true, message: "user logged in successfully",userData:user });
+      return res.status(200).json({ success: true, message: "user logged in successfully",userData});
     } catch (error) {
       console.error("Login Error:", error);
       return res.status(500).json({ success: false, message: "Something went wrong" });
     }
   };
   
-const isloggedin = (req, res) => {
+const isloggedin = async(req, res) => {
   const token = req.cookies.token;
 
   if (!token) {
@@ -87,7 +92,8 @@ const isloggedin = (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return res.status(200).json({ isLoggedIn: true, user: decoded });
+   const userData = await user.findById(decoded.userId).select('-password').lean()
+    return res.status(200).json({ isLoggedIn: true, user: userData});
   } catch (err) {
     return res.status(401).json({ isLoggedIn: false, message: "Invalid or expired token" });
   }

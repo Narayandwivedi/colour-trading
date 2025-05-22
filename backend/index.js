@@ -13,6 +13,9 @@ const betRoute = require("./routes/betRoute.js");
 // import models
 const game = require("./models/game.js");
 
+// import middleware
+const {checkLoggedIN} = require("./middleware/checkLoggedIn.js")
+
 app.use(
   cors({
     origin: [
@@ -26,7 +29,7 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/",checkLoggedIN, (req, res) => {
   res.send("web api is working fine");
 });
 
@@ -36,6 +39,20 @@ app.get("/api/latest/result", async (req, res) => {
       .find({ status: "closed" })
       .sort({ createdAt: -1 }) // Most recent first
       .limit(30) // Limit to 30 results
+      .lean();
+
+    res.json({ success: true, results });
+  } catch (err) {
+    res.status(500).json({ error: "Server error: " + err.message });
+  }
+});
+
+app.get("/api/latest/oneresult", async (req, res) => {
+  try {
+    const results = await game
+      .find({ status: "closed" })
+      .sort({ createdAt: -1 }) // Most recent first
+      .limit(1) // Limit to 30 results
       .lean();
 
     res.json({ success: true, results });
