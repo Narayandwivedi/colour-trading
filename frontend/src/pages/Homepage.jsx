@@ -13,43 +13,30 @@ export default function Homepage() {
     showWinner, setShowWinner,
     timer, setTimer,
     setAvailBalance,
-    winners , setWinners,
     betValue ,setBetValue,
     periodCreatedAT
     
 
   } = useContext(AppContext);
 
-  
-  useEffect(() => {
-    if (timer === 0) {
-      
-      // for big small
-      const randomForBigSmall = Math.floor(Math.random()*3)
-      const bigOrsmall = randomForBigSmall===0?"small":"big"
-
-      // for numbers
-      const randomForNum = Math.floor(Math.random()*9)
-      const Number = randomForNum
-
-      // check winner
-      if (selectedColour && betValue) {
-        if (selectedColour === colour) {
-          let totalWin = betValue * 2;
-          setWinAmt(totalWin);
-          setShowWinner(true);
-          setAvailBalance((prevValue) => {
-            return prevValue + totalWin;
-          });
-        } else {
-          console.log("you lost" );
-        }
-      }
-      setBetValue(null);
-      setWinners([{ winColour: colour , winBigSmall:bigOrsmall , winNum : Number }, ...winners]);
-      setTimer(30);
-    }
-  }, [timer]);
+  // useEffect(() => {
+  //   if (timer === 0) {
+  //     if (selectedColour && betValue) {
+  //       if (selectedColour === colour) {
+  //         let totalWin = betValue * 2;
+  //         setWinAmt(totalWin);
+  //         setShowWinner(true);
+  //         setAvailBalance((prevValue) => {
+  //           return prevValue + totalWin;
+  //         });
+  //       } else {
+  //         console.log("you lost" );
+  //       }
+  //     }
+  //     setBetValue(null);
+  //     setTimer(30);
+  //   }
+  // }, [timer]);
 
   return (
     <>

@@ -3,9 +3,9 @@ import { AppContext } from "../context/AppContext";
 import axios from "axios";
 export default function Result() {
   const [results, setResults] = useState([]);
-  const { BACKEND_URL } = useContext(AppContext);
+  const { BACKEND_URL , timer } = useContext(AppContext);
 
-  const fetch_30_Results = async () => {
+  const fetch_30_results = async () => {
     try {
       const { data } = await axios.get(`${BACKEND_URL}/api/latest/result`);
       setResults(data.results);
@@ -17,22 +17,22 @@ export default function Result() {
   const fetch_1_result = async()=>{
     try {
       const { data } = await axios.get(`${BACKEND_URL}/api/latest/oneresult`);
-      setResults(data.results);
+      console.log(data);
+      
     } catch (err) {
       console.log("some error while fetching result data", err.message);
     }
-  };
   }
 
   useEffect(() => {
-    fetch_30_Results();
-    console.log(results);
+    fetch_30_results();
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(fetch_30_Results, 2000);
-    console.log(results);
-    return ()=>{clearInterval(interval)}
+  
+     const interval = setInterval(fetch_30_results, 2000);
+     return ()=>{clearInterval(interval)}
+  
   }, []);
   return (
     <div className="result-container mb-6">
@@ -86,4 +86,4 @@ export default function Result() {
       </div>
     </div>
   );
-
+}

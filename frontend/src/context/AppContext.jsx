@@ -9,7 +9,6 @@ export const AppContextProvider = (props) => {
   const [showWinner, setShowWinner] = useState(false);
   const [timer, setTimer] = useState(30);
   const [availBalance, setAvailBalance] = useState(0);
-  const [winners, setWinners] = useState([]);
   const [betValue, setBetValue] = useState(null);
   const [userData , setUserData] = useState(null)
   const [period , setPeriod] = useState(null)
@@ -27,12 +26,11 @@ const checkLogin = async () => {
     if (res.data.isLoggedIn) {
       setUserData(res.data.user);
       setAvailBalance(res.data.user.balance)
-      console.log(res.data);
     } else {
-      setUser(null);
+      setUserData(null);
     }
   } catch (err) {
-    setUser(null);
+    setUserData(null);
   } finally {
     setLoading(false); // ✅ done checking
   }
@@ -48,7 +46,6 @@ const checkLogin = async () => {
     showWinner, setShowWinner,
     timer, setTimer,
     availBalance, setAvailBalance,
-    winners, setWinners,
     betValue, setBetValue,
     userData , setUserData,
     period, setPeriod,
