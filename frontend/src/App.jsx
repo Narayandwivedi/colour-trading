@@ -24,7 +24,7 @@ function App() {
   <Routes>
     
     <Route path='/' element={<Homepage/>}/>
-    <Route path='/colourtrading' element={<ProtectedRoute><ColourTrading/></ProtectedRoute>}/>
+    <Route path='/colourtrading' element={<ColourTrading/>}/>
      <Route path='/mine' element={<ProtectedRoute><Mine/></ProtectedRoute>}/>
       <Route path='/aviator' element={<ProtectedRoute><Aviator/></ProtectedRoute>}/>
     <Route path='/addbalance' element={<ProtectedRoute><Addbalance/></ProtectedRoute>}/>
