@@ -11,6 +11,9 @@ import Mine from "./pages/Mine"
 import Aviator from "./pages/Aviator"
 import ColourTrading from "./pages/ColourTrading"
 import { AppContext } from './context/AppContext'
+import Refer from './pages/bottomNavPages/Refer'
+import Wallet from './pages/bottomNavPages/Wallet'
+import Account from './pages/bottomNavPages/Account'
 
 function App() {
 
@@ -25,8 +28,11 @@ function App() {
     
     <Route path='/' element={<Homepage/>}/>
     <Route path='/colourtrading' element={<ColourTrading/>}/>
-     <Route path='/mine' element={<ProtectedRoute><Mine/></ProtectedRoute>}/>
-      <Route path='/aviator' element={<ProtectedRoute><Aviator/></ProtectedRoute>}/>
+    <Route path='/refer' element={<Refer/>}/>
+    <Route path='/wallet' element={<Wallet/>}/>
+    <Route path='/account' element={<Account/>}/>
+    <Route path='/mine' element={<ProtectedRoute><Mine/></ProtectedRoute>}/>
+    <Route path='/aviator' element={<ProtectedRoute><Aviator/></ProtectedRoute>}/>
     <Route path='/addbalance' element={<ProtectedRoute><Addbalance/></ProtectedRoute>}/>
     <Route path='/withdraw' element={<Withdraw/>}/>
     <Route path='/login' element={<Login/>  }/>
