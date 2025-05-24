@@ -19,11 +19,11 @@ function App() {
   if (loading) return <div>Loading...</div>; // ✅ wait for checkLogin to finish
 
   return (
-  <div className='max-w-[480px] mx-auto bg-white min-h-screen rounded-lg shadow'>
+  <div className='max-w-[440px] mx-auto bg-white min-h-screen rounded-lg shadow'>
     <ToastContainer/>
   <Routes>
     
-    <Route path='/' element={<ProtectedRoute><Homepage/></ProtectedRoute>}/>
+    <Route path='/' element={<Homepage/>}/>
     <Route path='/colourtrading' element={<ProtectedRoute><ColourTrading/></ProtectedRoute>}/>
      <Route path='/mine' element={<ProtectedRoute><Mine/></ProtectedRoute>}/>
       <Route path='/aviator' element={<ProtectedRoute><Aviator/></ProtectedRoute>}/>
