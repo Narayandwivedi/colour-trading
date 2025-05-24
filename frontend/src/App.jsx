@@ -7,6 +7,9 @@ import Login from './components/Login'
 import { ToastContainer} from 'react-toastify';
 import ProtectedRoute from './components/ProtectedRoute'
 import Homepage from './pages/Homepage'
+import Mine from "./pages/Mine"
+import Aviator from "./pages/Aviator"
+import ColourTrading from "./pages/ColourTrading"
 import { AppContext } from './context/AppContext'
 
 function App() {
@@ -19,7 +22,11 @@ function App() {
   <div className='max-w-[480px] mx-auto bg-white min-h-screen rounded-lg shadow'>
     <ToastContainer/>
   <Routes>
+    
     <Route path='/' element={<ProtectedRoute><Homepage/></ProtectedRoute>}/>
+    <Route path='/colourtrading' element={<ProtectedRoute><ColourTrading/></ProtectedRoute>}/>
+     <Route path='/mine' element={<ProtectedRoute><Mine/></ProtectedRoute>}/>
+      <Route path='/aviator' element={<ProtectedRoute><Aviator/></ProtectedRoute>}/>
     <Route path='/addbalance' element={<ProtectedRoute><Addbalance/></ProtectedRoute>}/>
     <Route path='/withdraw' element={<Withdraw/>}/>
     <Route path='/login' element={<Login/>  }/>

@@ -44,6 +44,7 @@ export default function Game() {
      console.log(data);
      if(data.success){
       toast.success(data.message)
+      setBetValue(betInp)
      }
      
     setBetValue(betInp);

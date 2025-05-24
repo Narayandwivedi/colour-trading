@@ -6,6 +6,7 @@ export const AppContext = createContext();
 export const AppContextProvider = (props) => {
   const [selectedColour, setSelectedColour] = useState(null);
   const [winAmt, setWinAmt] = useState(0);
+  const [winColour , setWinColour] = useState(null)
   const [showWinner, setShowWinner] = useState(false);
   const [timer, setTimer] = useState(30);
   const [availBalance, setAvailBalance] = useState(0);
@@ -51,6 +52,7 @@ const checkLogin = async () => {
     period, setPeriod,
     periodCreatedAT , setPeriodCreatedAT,
     loading,setLoading,
+    winColour , setWinColour,
     BACKEND_URL,
 
     // Auth values

@@ -83,7 +83,7 @@ app.use("/api/bet", betRoute);
 // server listen
 
 connectToDb().then(() => {
-  app.listen(process.env.PORT, () => {
+  app.listen(8080, () => {
     console.log("server actiavte ho gya hai");
   });
 });

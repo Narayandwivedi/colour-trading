@@ -4,7 +4,7 @@ const User = require("./models/user");
 const cron = require("node-cron");
 
 // Constants
-const COLOURS = ["red", "green"];
+const Colours = ["red","green"]
 let num = 1;
 
 async function generatePeriodId() {
@@ -18,41 +18,17 @@ async function generatePeriodId() {
   ].join("");
 }
 
-async function getRandomColour(period) {
-  try {
-    // Use aggregation to get totals in a single query
-    const result = await bet.aggregate([
-      { $match: { period } },
-      {
-        $group: {
-          _id: "$betColour",
-          totalAmount: { $sum: "$betAmount" }
-        }
-      }
-    ]);
 
-    // Convert to map for easier access
-    const totals = result.reduce((acc, { _id, totalAmount }) => {
-      acc[_id] = totalAmount;
-      return acc;
-    }, {});
+// generate random colour based on bets
 
-    // Default to 0 if no bets for a color
-    const betOnRed = totals.red || 0;
-    const betOnGreen = totals.green || 0;
-
-    // Your logic: select opposite of the color with more bets
-    return betOnGreen > betOnRed ? "red" : "green";
-  } catch (error) {
-    console.error("Error determining color:", error);
-    // Fallback to random if there's an error
-    return COLOURS[Math.floor(Math.random() * COLOURS.length)];
-  }
+   function getRandomColour() {
+    const colour = Colours[Math.floor(Math.random()*Colours.length)]
+    return colour
 }
 
 async function closeGame(game) {
   try {
-    game.colour = await getRandomColour(game.period);
+    game.colour = getRandomColour();
     game.status = "closed";
     await game.save();
 

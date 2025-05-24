@@ -3,30 +3,44 @@ import { AppContext } from "../context/AppContext";
 import axios from "axios";
 export default function Result() {
   const [results, setResults] = useState([]);
-  const { BACKEND_URL , timer } = useContext(AppContext);
+  const { BACKEND_URL , winColour , setWinColour } = useContext(AppContext);
 
   const fetch_30_results = async () => {
     try {
       const { data } = await axios.get(`${BACKEND_URL}/api/latest/result`);
       setResults(data.results);
+      // if(data.results[0].period != winColour.period){
+      //   console.log("hello");
+      //    setWinColour({colour:data.results[0].colour , period: data.results[0].period})
+        
+      // }     
+     
+       
+      
     } catch (err) {
       console.log("some error while fetching result data", err.message);
     }
   };
 
-  const fetch_1_result = async()=>{
-    try {
-      const { data } = await axios.get(`${BACKEND_URL}/api/latest/oneresult`);
-      console.log(data);
+  console.log(winColour);
+  
+
+// implement later fecth only 1 result and push on top of array and remove last --> reduce db load
+
+  // const fetch_1_result = async()=>{
+  //   try {
+  //     const { data } = await axios.get(`${BACKEND_URL}/api/latest/oneresult`);
+  //     console.log(data);
       
-    } catch (err) {
-      console.log("some error while fetching result data", err.message);
-    }
-  }
+  //   } catch (err) {
+  //     console.log("some error while fetching result data", err.message);
+  //   }
+  // }
 
   useEffect(() => {
     fetch_30_results();
   }, []);
+
 
   useEffect(() => {
   
@@ -34,6 +48,7 @@ export default function Result() {
      return ()=>{clearInterval(interval)}
   
   }, []);
+
   return (
     <div className="result-container mb-6">
       <p className="flex gap-4 text-gray-500 justify-center mb-3">
