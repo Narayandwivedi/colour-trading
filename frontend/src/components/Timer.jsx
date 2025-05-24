@@ -77,7 +77,7 @@ export default function Game() {
   return (
     <div className="Game-container mt-8 p-4 text-gray-700 mb-8 bg-gradient-to-br from-gray-50 to-gray-200 rounded-lg shadow-md">
       {/* Game time options */}
-      <div className="game-options flex justify-center gap-7 px-4 mb-6">
+      <div className="game-options flex justify-between px-4 mb-6">
         {["30sec", "1min", "3min", "5min"].map((label) => (
           <div
             key={label}
