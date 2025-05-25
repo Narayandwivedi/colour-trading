@@ -8,7 +8,7 @@ function Watch({ selected }) {
     <div
       className={`relative h-[44px] w-[44px] rounded-full transition-all duration-300 
         ${selected
-          ? "bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-indigo-500/40"
+          ? "bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-indigo-500/40 border"
           : "bg-gradient-to-b from-gray-200 to-gray-400 shadow-inner"
         }`}
     >

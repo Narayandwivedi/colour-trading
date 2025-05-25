@@ -1,46 +1,53 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
+
 export default function Result() {
   const [results, setResults] = useState([]);
-  const { BACKEND_URL , winColour , gameType , timer } = useContext(AppContext);
+  const [latestPeriod, setLatestPeriod] = useState(null); // Local tracking
+  const intervalRef = useRef(null);
+
+  const { BACKEND_URL, gameType, timer } = useContext(AppContext);
 
   const fetch_30_results = async () => {
     try {
       const { data } = await axios.get(`${BACKEND_URL}/api/latest/result/${gameType}`);
-      setResults(data.results);  
-      
+      const latest = data.results[0];
+
+      // Only update when new period is detected
+      if (latest && latest.period !== latestPeriod) {
+        setResults(data.results);
+        setLatestPeriod(latest.period);
+
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      }
     } catch (err) {
-      console.log("some error while fetching result data", err.message);
+      console.log("Error fetching results:", err.message);
     }
   };
 
-  console.log(winColour);
-  
-
-// implement later fecth only 1 result and push on top of array and remove last --> reduce db load
-
-  // const fetch_1_result = async()=>{
-  //   try {
-  //     const { data } = await axios.get(`${BACKEND_URL}/api/latest/oneresult`);
-  //     console.log(data);
-      
-  //   } catch (err) {
-  //     console.log("some error while fetching result data", err.message);
-  //   }
-  // }
-
+  // Initial fetch when gameType changes
   useEffect(() => {
     fetch_30_results();
   }, [gameType]);
 
-
+  // Polling logic when timer is below threshold
   useEffect(() => {
-  
-     const interval = setInterval(fetch_30_results, 2000);
-     return ()=>{clearInterval(interval)}
-  
-  }, [gameType]);
+    if (timer <= 2 && !intervalRef.current) {
+      console.log("start polling for result");
+      
+      intervalRef.current = setInterval(fetch_30_results, 500); // Fast polling
+    }
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [timer]);
 
   return (
     <div className="result-container mb-6">
@@ -78,13 +85,12 @@ export default function Result() {
                   big
                 </td>
                 <td className="border border-gray-300 text-center py-2 text-gray-700">
-                  4{" "}
+                  4
                 </td>
                 <td>
                   <div
-                    className={`w-4 h-4 ${
-                      item.colour === "red" ? "bg-red-500" : "bg-green-500"
-                    } rounded-full mx-auto`}
+                    className={`w-4 h-4 ${item.colour === "red" ? "bg-red-500" : "bg-green-500"
+                      } rounded-full mx-auto`}
                   ></div>
                 </td>
               </tr>

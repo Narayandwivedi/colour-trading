@@ -47,7 +47,7 @@ async function generatePeriodId(gameType) {
     String(now.getDate()).padStart(2, "0"),
     String(now.getHours()).padStart(2, "0"),
     GAME_TYPES[gameType].typeCode,
-    String(counter).padStart(3, "0")
+    String(counter)
   ].join("");
 }
 
