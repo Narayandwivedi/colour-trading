@@ -3,19 +3,12 @@ import { AppContext } from "../context/AppContext";
 import axios from "axios";
 export default function Result() {
   const [results, setResults] = useState([]);
-  const { BACKEND_URL , winColour , setWinColour } = useContext(AppContext);
+  const { BACKEND_URL , winColour , gameType , timer } = useContext(AppContext);
 
   const fetch_30_results = async () => {
     try {
-      const { data } = await axios.get(`${BACKEND_URL}/api/latest/result`);
-      setResults(data.results);
-      // if(data.results[0].period != winColour.period){
-      //   console.log("hello");
-      //    setWinColour({colour:data.results[0].colour , period: data.results[0].period})
-        
-      // }     
-     
-       
+      const { data } = await axios.get(`${BACKEND_URL}/api/latest/result/${gameType}`);
+      setResults(data.results);  
       
     } catch (err) {
       console.log("some error while fetching result data", err.message);
@@ -39,7 +32,7 @@ export default function Result() {
 
   useEffect(() => {
     fetch_30_results();
-  }, []);
+  }, [gameType]);
 
 
   useEffect(() => {
@@ -47,7 +40,7 @@ export default function Result() {
      const interval = setInterval(fetch_30_results, 2000);
      return ()=>{clearInterval(interval)}
   
-  }, []);
+  }, [gameType]);
 
   return (
     <div className="result-container mb-6">

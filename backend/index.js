@@ -33,12 +33,18 @@ app.get("/",checkLoggedIN, (req, res) => {
   res.send("web api is working fine");
 });
 
-app.get("/api/latest/result", async (req, res) => {
+// Fetch last 30 closed results for a specific gameType
+app.get("/api/latest/result/:gameType", async (req, res) => {
+  const { gameType } = req.params;
+
+  if (!["30sec", "1min", "3min"].includes(gameType)) {
+    return res.status(400).json({ success: false, message: "Invalid game type" });
+  }
   try {
     const results = await game
-      .find({ status: "closed" })
-      .sort({ createdAt: -1 }) // Most recent first
-      .limit(30) // Limit to 30 results
+      .find({ status: "closed", gameType })
+      .sort({ createdAt: -1 })
+      .limit(30)
       .lean();
 
     res.json({ success: true, results });
@@ -47,34 +53,50 @@ app.get("/api/latest/result", async (req, res) => {
   }
 });
 
-app.get("/api/latest/oneresult", async (req, res) => {
+// Fetch last 1 closed result for a specific gameType
+app.get("/api/latest/oneresult/:gameType", async (req, res) => {
+  const { gameType } = req.params;
+
+  if (!["30sec", "1min", "3min"].includes(gameType)) {
+    return res.status(400).json({ success: false, message: "Invalid game type" });
+  }
+
   try {
-    const results = await game
-      .find({ status: "closed" })
-      .sort({ createdAt: -1 }) // Most recent first
-      .limit(1) // Limit to 30 results
+    const result = await game
+      .findOne({ status: "closed", gameType })
+      .sort({ createdAt: -1 })
       .lean();
 
-    res.json({ success: true, results });
+    res.json({ success: true, result });
   } catch (err) {
     res.status(500).json({ error: "Server error: " + err.message });
   }
 });
-app.get("/api/latest/period", async (req, res) => {
+
+
+// Fetch currently open period for a specific gameType
+app.get("/api/latest/period/:gameType", async (req, res) => {
+  const { gameType } = req.params;
+
+  if (!["30sec", "1min", "3min"].includes(gameType)) {
+    return res.status(400).json({ success: false, message: "Invalid game type" });
+  }
+
   try {
     const latestPeriod = await game
-      .find({ status: "open" })
+      .findOne({ status: "open", gameType })
       .sort({ createdAt: -1 })
-      .limit(1)
-      .lean()
-    res.json({ success: true, latestPeriod});
-  } catch {
-    res.status.json({
+      .lean();
+
+    res.json({ success: true, latestPeriod });
+  } catch (err) {
+    res.status(500).json({
       success: false,
-      message: "some error while fetching period",
+      message: "Some error while fetching period",
     });
   }
 });
+
 
 app.use("/api/users", userRoute);
 app.use("/api/transaction", transactionRoute);

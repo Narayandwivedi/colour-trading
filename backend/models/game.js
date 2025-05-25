@@ -1,24 +1,29 @@
 const mongoose = require("mongoose");
 
 const gameSchema = new mongoose.Schema({
+  period: {
+    type: Number,
+    required: true
+  },
+  gameType: {
+    type: String,
+    enum: ["30sec", "1min", "3min"],
+    required: true
+  },
+  colour: {
+    type: String,
+    enum: ["red", "green"]
+  },
+  status: {
+    type: String,
+    enum: ["open", "closed"],
+    default: "open"
+  }
+}, { timestamps: true });
 
-    period:{
-        type:Number,
-    },
+// Optional: index for fast query by gameType
+// gameSchema.index({ gameType: 1, createdAt: -1 });
 
-    colour: {
-        type:String,
-        enum:["red" ,"green"],
-    },
+const game = mongoose.model("game", gameSchema);
 
-    status :{
-        type:String,
-        enum :["open" ,"closed"],
-        default:"open"
-    }
-
-},{timestamps:true})
-
-const game = mongoose.model("game",gameSchema);
-
-module.exports = game
+module.exports = game;

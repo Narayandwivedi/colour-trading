@@ -14,6 +14,7 @@ export const AppContextProvider = (props) => {
   const [userData , setUserData] = useState(null)
   const [period , setPeriod] = useState(null)
   const [periodCreatedAT , setPeriodCreatedAT] = useState(null)
+  const [gameType , setGameType] = useState('30sec')
   const [loading, setLoading] = useState(true)
 
   const BACKEND_URL = `http://localhost:8080`;
@@ -53,6 +54,7 @@ const checkLogin = async () => {
     periodCreatedAT , setPeriodCreatedAT,
     loading,setLoading,
     winColour , setWinColour,
+    gameType , setGameType,
     BACKEND_URL,
 
     // Auth values
