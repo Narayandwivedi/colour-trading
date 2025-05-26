@@ -107,40 +107,24 @@ export default function Game() {
         </button>
       </div>
 
-      {/* numbers */}
+    {/* numbers */}
+<div className="mt-8 grid grid-cols-5 gap-4">
+  {[...Array(10).keys()].map((num) => (
+    <button
+      key={num}
+      className={`w-12 h-12 rounded-full text-white text-xl font-semibold shadow-md transform transition duration-200 hover:scale-110 ${
+        num === 0
+          ? "bg-gradient-to-tr from-red-500 via-pink-500 to-violet-600"
+          : num % 2 === 0
+          ? "bg-gradient-to-br from-green-400 to-emerald-600"
+          : "bg-gradient-to-br from-red-400 to-pink-500"
+      }`}
+    >
+      {num}
+    </button>
+  ))}
+</div>
 
-      <div className="mt-8 grid grid-cols-5 gap-3">
-        <button className="bg-gradient-to-r from-red-500 to-violet-500 w-[40px] h-[40px] text-white text-xl rounded-full">
-          0
-        </button>
-        <button className="bg-gradient-to-r from-green-500 to-red-500 w-[40px] h-[40px] text-white text-xl rounded-full">
-          1
-        </button>
-        <button className="bg-gradient-to-r from-red-500 to-green-500 w-[40px] h-[40px] text-white text-xl rounded-full">
-          2
-        </button>
-        <button className="bg-gradient-to-r from-green-500 to-red-500 w-[40px] h-[40px] text-white text-xl rounded-full">
-          3
-        </button>
-        <button className="bg-gradient-to-r from-red-500 to-green-500 w-[40px] h-[40px] text-white text-xl rounded-full">
-          4
-        </button>
-        <button className="bg-gradient-to-r from-green-500 to-red-500 w-[40px] h-[40px] text-white text-xl rounded-full">
-          5
-        </button>
-        <button className="bg-gradient-to-r from-red-500 to-violet-500 w-[40px] h-[40px] text-white text-xl rounded-full">
-          6
-        </button>
-        <button className="bg-gradient-to-r from-green-500 to-red-500 w-[40px] h-[40px] text-white text-xl rounded-full">
-          7
-        </button>
-        <button className="bg-gradient-to-r from-red-500 to-green-500 w-[40px] h-[40px] text-white text-xl rounded-full">
-          8
-        </button>
-        <button className="bg-gradient-to-r from-green-500 to-red-500 w-[40px] h-[40px] text-white text-xl rounded-full">
-          9
-        </button>
-      </div>
 
       {/* betting popup window on colour */}
       {isBetPopOpen && (
