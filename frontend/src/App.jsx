@@ -31,9 +31,9 @@ function App() {
     <Route path='/refer' element={<Refer/>}/>
     <Route path='/wallet' element={<Wallet/>}/>
     <Route path='/account' element={<Account/>}/>
-    <Route path='/mine' element={<ProtectedRoute><Mine/></ProtectedRoute>}/>
-    <Route path='/aviator' element={<ProtectedRoute><Aviator/></ProtectedRoute>}/>
-    <Route path='/addbalance' element={<ProtectedRoute><Addbalance/></ProtectedRoute>}/>
+    <Route path='/mine' element={<Mine/>}/>
+    <Route path='/aviator' element={<Aviator/>}/>
+    <Route path='/addbalance' element={<Addbalance/>}/>
     <Route path='/withdraw' element={<Withdraw/>}/>
     <Route path='/login' element={<Login/>  }/>
   </Routes>
