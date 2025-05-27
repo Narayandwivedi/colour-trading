@@ -12,7 +12,7 @@ const Login = () => {
   const [inviteCode , setInviteCode] = useState("");
   const navigate = useNavigate();
 
-  const {setAvailBalance , BACKEND_URL, setUserData} = useContext(AppContext);
+  const {setBalance , BACKEND_URL, setUserData} = useContext(AppContext);
 
   async function handleLogin(){
     if(!email || !email.trim() || !password || !password.trim()){
@@ -29,7 +29,7 @@ const Login = () => {
         setUserData(data.userData)
         console.log(data);
         
-        setAvailBalance(data.userData.balance)
+        setBalance(data.userData.balance)
           navigate("/")
           toast.success("user logged in successfully")
 

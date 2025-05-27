@@ -1,43 +1,38 @@
 import React, { useContext, useState } from 'react';
 import UPIQRCode from '../components/UPIQRCODE';
 import { AppContext } from '../context/AppContext';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const PaymentPage = () => {
   const [utr, setUtr] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  // const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
-  const {finalDepositAmt , setFinalDepositAmt} = useContext(AppContext)
+  const {finalDepositAmt , setFinalDepositAmt ,userData , BACKEND_URL , setSelectedAmount} = useContext(AppContext)
 
   async function handleAddTransaction() {
     if (!userData) {
       return toast.error("Please login to continue");
+      }
+      if(!utr || utr.length<10){
+        return toast.error("invalid utr")
     }
-
-    const amount = isCustomAmount ? parseInt(customAmount) : selectedAmount;
-
-    if (amount < 100) {
-      return toast.error("Minimum deposit amount is ₹100");
-    }
-
-    if (!UTR) {
-      return toast.error("Please enter UTR number");
-    }
-
     try {
       const { data } = await axios.post(`${BACKEND_URL}/api/transaction`, {
         userId: userData._id,
-        UTR: UTR,
-        amount: amount
+        UTR: utr,
+        
       });
       
       if (data.success) {
         toast.success(data.message);
-        setUTR('');
+        setUtr('');
         setSelectedAmount(null);
         setCustomAmount('');
-        setIsCustomAmount(false);
       }
     } catch (err) {
+      console.log(err.message);
+      
       toast.error(err.response?.data?.message || "Error processing deposit");
     }
   }
@@ -53,7 +48,7 @@ const PaymentPage = () => {
           <UPIQRCode amount={finalDepositAmt} />
         </div>
 
-        <form >
+        <form onSubmit={(e) => { e.preventDefault(); handleAddTransaction(); }} >
           <label className="block text-left mb-1 text-gray-700 font-medium">
             Enter UTR / Transaction ID
           </label>
@@ -73,12 +68,7 @@ const PaymentPage = () => {
             Submit UTR
           </button>
         </form>
-
-        {submitted && (
-          <p className="mt-4 text-green-600 font-medium">
-            ✅ UTR submitted successfully!
-          </p>
-        )}
+        
       </div>
     </div>
   );

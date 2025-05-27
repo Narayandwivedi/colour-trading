@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 const AddBalance = () => {
-  const { userData, BACKEND_URL ,  setFinalDepositAmt } = useContext(AppContext);
+  const { userData, BACKEND_URL , finalDepositAmt , setFinalDepositAmt } = useContext(AppContext);
   const [UTR, setUTR] = useState('');
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [isCustomAmount, setIsCustomAmount] = useState(true);

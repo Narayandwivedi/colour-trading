@@ -4,9 +4,7 @@ import axios from "axios";
 export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
-  const [selectedColour, setSelectedColour] = useState(null);
-  const [winAmt, setWinAmt] = useState(0);
-  const [winColour , setWinColour] = useState(null)
+  const [selectedBetColour, setSelectedBetColour] = useState(null);
   const [showWinner, setShowWinner] = useState(false);
   const [timer, setTimer] = useState(30);
   const [balance, setBalance] = useState(0);
@@ -29,7 +27,7 @@ const checkLogin = async () => {
     });
     if (res.data.isLoggedIn) {
       setUserData(res.data.user);
-      setAvailBalance(res.data.user.balance)
+      setBalance(res.data.user.balance)
     } else {
       setUserData(null);
     }
@@ -45,8 +43,7 @@ const checkLogin = async () => {
   }, []);
 
   const value = {
-    selectedColour, setSelectedColour,
-    winAmt, setWinAmt,
+    selectedBetColour, setSelectedBetColour,
     showWinner, setShowWinner,
     timer, setTimer,
     betValue, setBetValue,
@@ -54,7 +51,6 @@ const checkLogin = async () => {
     period, setPeriod,
     periodCreatedAT , setPeriodCreatedAT,
     loading,setLoading,
-    winColour , setWinColour,
     gameType , setGameType,
     balance, setBalance,
     withdrawableBalance,setWithdrawableBalance,
