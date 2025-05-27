@@ -6,9 +6,8 @@ import axios from 'axios';
 
 const PaymentPage = () => {
   const [utr, setUtr] = useState('');
-  // const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
-  const {finalDepositAmt , setFinalDepositAmt ,userData , BACKEND_URL , setSelectedAmount} = useContext(AppContext)
+  const {finalDepositAmt , setFinalDepositAmt ,userData , BACKEND_URL} = useContext(AppContext)
 
   async function handleAddTransaction() {
     if (!userData) {
@@ -22,13 +21,12 @@ const PaymentPage = () => {
         userId: userData._id,
         UTR: utr,
         
-      });
-      
+      });  
       if (data.success) {
+        console.log(finalDepositAmt);
         toast.success(data.message);
         setUtr('');
-        setSelectedAmount(null);
-        setCustomAmount('');
+        setFinalDepositAmt(null)
       }
     } catch (err) {
       console.log(err.message);
