@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import UPIQRCode from '../components/UPIQRCODE';
+import { AppContext } from '../context/AppContext';
 
 const PaymentPage = () => {
   const [utr, setUtr] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const {finalDepositAmt , setFinalDepositAmt} = useContext(AppContext)
 
   async function handleAddTransaction() {
     if (!userData) {
@@ -48,7 +50,7 @@ const PaymentPage = () => {
         <p className="text-gray-600 mb-6">Scan the QR code below to pay</p>
 
         <div className="flex justify-center mb-6">
-          <UPIQRCode amount="100" />
+          <UPIQRCode amount={finalDepositAmt} />
         </div>
 
         <form >
@@ -59,7 +61,7 @@ const PaymentPage = () => {
             type="text"
             value={utr}
             onChange={(e) => setUtr(e.target.value)}
-            placeholder="e.g. 1234567890ABC"
+            placeholder="enter utr"
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {error && <p className="text-red-500 text-sm mt-1">{error}</p>}

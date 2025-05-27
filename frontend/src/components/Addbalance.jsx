@@ -5,11 +5,12 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 const AddBalance = () => {
-  const { userData, BACKEND_URL } = useContext(AppContext);
+  const { userData, BACKEND_URL ,  setFinalDepositAmt } = useContext(AppContext);
   const [UTR, setUTR] = useState('');
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [isCustomAmount, setIsCustomAmount] = useState(true);
   const [customAmount, setCustomAmount] = useState('');
+  
   
   const navigate = useNavigate();
 
@@ -18,6 +19,9 @@ const AddBalance = () => {
 
   const handlePay = () => {
     const finalAmount = isCustomAmount ? parseInt(customAmount) : selectedAmount;
+    if(finalAmount){
+      setFinalDepositAmt(finalAmount)
+    }
     if (!finalAmount || finalAmount < 100) {
       toast.error('Please enter a valid amount (minimum ₹100)');
       return;

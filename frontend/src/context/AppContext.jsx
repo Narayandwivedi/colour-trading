@@ -16,6 +16,7 @@ export const AppContextProvider = (props) => {
   const [period , setPeriod] = useState(null)
   const [periodCreatedAT , setPeriodCreatedAT] = useState(null)
   const [gameType , setGameType] = useState('30sec')
+  const [finalDepositAmt , setFinalDepositAmt] = useState(100)
   const [loading, setLoading] = useState(true)
 
   const BACKEND_URL = `http://localhost:8080`;
@@ -57,6 +58,8 @@ const checkLogin = async () => {
     gameType , setGameType,
     balance, setBalance,
     withdrawableBalance,setWithdrawableBalance,
+    finalDepositAmt , setFinalDepositAmt,
+    
     BACKEND_URL,
 
     // Auth values
