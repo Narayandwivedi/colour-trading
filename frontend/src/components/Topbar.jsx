@@ -15,7 +15,7 @@ export default function Topbar() {
 
           {/* Options */}
           <div className="flex gap-3">
-            <Link to={"/addbalance"}>
+            <Link to={"/deposit"}>
               <button className="bg-green-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition">
                 Recharge
               </button>

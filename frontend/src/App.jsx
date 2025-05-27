@@ -14,6 +14,7 @@ import { AppContext } from './context/AppContext'
 import Refer from './pages/bottomNavPages/Refer'
 import Wallet from './pages/bottomNavPages/Wallet'
 import Account from './pages/bottomNavPages/Account'
+import PaymentPage from './pages/PaymentPage'
 
 function App() {
 
@@ -34,6 +35,8 @@ function App() {
     <Route path='/mine' element={<Mine/>}/>
     <Route path='/aviator' element={<Aviator/>}/>
     <Route path='/deposit' element={<Addbalance/>}/>
+    <Route path='/payment' element={<PaymentPage/>}/>
+
     <Route path='/withdraw' element={<Withdraw/>}/>
     <Route path='/login' element={<Login/>  }/>
   </Routes>

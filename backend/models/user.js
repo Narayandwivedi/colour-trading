@@ -29,8 +29,7 @@ referalCode:{
 },
 referedBy:{
     type:Number,
-    unique:true
-}
+    }
 
 })
 
