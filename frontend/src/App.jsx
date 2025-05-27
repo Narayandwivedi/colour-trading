@@ -33,7 +33,7 @@ function App() {
     <Route path='/account' element={<Account/>}/>
     <Route path='/mine' element={<Mine/>}/>
     <Route path='/aviator' element={<Aviator/>}/>
-    <Route path='/addbalance' element={<Addbalance/>}/>
+    <Route path='/deposit' element={<Addbalance/>}/>
     <Route path='/withdraw' element={<Withdraw/>}/>
     <Route path='/login' element={<Login/>  }/>
   </Routes>

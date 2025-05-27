@@ -79,9 +79,8 @@ async function processGame(gameInstance, gameType) {
             filter: { _id: bet.userId },
             update: {
               $inc: {
-                balance: bet.betColour === gameInstance.colour
-                  ? bet.betAmount * 2
-                  : 0
+                balance: bet.betColour === gameInstance.colour? bet.betAmount * 2: 0,
+                withdrawableBalance: bet.betColour === gameInstance.colour? bet.betAmount * 2: 0
               }
             }
           }

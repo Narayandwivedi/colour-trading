@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 
 export default function Topbar() {
-  const { availBalance } = useContext(AppContext);
+  const { balance } = useContext(AppContext);
   const [isUserPopupOpen, setIsUserPopupOpen] = useState(false);
 
   return (
@@ -11,7 +11,7 @@ export default function Topbar() {
       <div className="wrapper flex justify-between items-center">
         {/* Left */}
         <div className="left flex flex-col gap-3">
-          <p className="text-lg font-semibold">Available Balance: ₹{availBalance}</p>
+          <p className="text-lg font-semibold">Available Balance: ₹{balance}</p>
 
           {/* Options */}
           <div className="flex gap-3">

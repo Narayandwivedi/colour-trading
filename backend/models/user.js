@@ -18,6 +18,18 @@ password:{
 balance:{
     type:Number,
     default:0
+},
+withdrawableBalance:{
+    type:Number,
+    default:0
+},
+referalCode:{
+    type:Number,
+    unique:true
+},
+referedBy:{
+    type:Number,
+    unique:true
 }
 
 })

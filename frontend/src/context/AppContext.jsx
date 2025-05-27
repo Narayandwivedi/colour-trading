@@ -9,7 +9,8 @@ export const AppContextProvider = (props) => {
   const [winColour , setWinColour] = useState(null)
   const [showWinner, setShowWinner] = useState(false);
   const [timer, setTimer] = useState(30);
-  const [availBalance, setAvailBalance] = useState(0);
+  const [balance, setBalance] = useState(0);
+  const [withdrawableBalance , setWithdrawableBalance] = useState(0);
   const [betValue, setBetValue] = useState(null);
   const [userData , setUserData] = useState(null)
   const [period , setPeriod] = useState(null)
@@ -47,7 +48,6 @@ const checkLogin = async () => {
     winAmt, setWinAmt,
     showWinner, setShowWinner,
     timer, setTimer,
-    availBalance, setAvailBalance,
     betValue, setBetValue,
     userData , setUserData,
     period, setPeriod,
@@ -55,6 +55,8 @@ const checkLogin = async () => {
     loading,setLoading,
     winColour , setWinColour,
     gameType , setGameType,
+    balance, setBalance,
+    withdrawableBalance,setWithdrawableBalance,
     BACKEND_URL,
 
     // Auth values
