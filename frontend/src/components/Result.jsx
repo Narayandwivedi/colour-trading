@@ -5,22 +5,23 @@ import axios from "axios";
 export default function Result() {
   const [results, setResults] = useState([]);
   const [winAmount, setWinAmount] = useState(null);
+  const [showLoser , setShowLoser] = useState(false)
 
   const [latestPeriod, setLatestPeriod] = useState(null); // Local tracking
   const intervalRef = useRef(null);
 
 
   const {
-     BACKEND_URL, 
-     gameType, timer, 
-     selectedBetColour, 
-     setSelectedBetColour, 
-     betValue, 
-     showWinner, 
-     setShowWinner, 
-     setBetValue,
-     setBalance
-     } = useContext(AppContext);
+    BACKEND_URL,
+    gameType, timer,
+    selectedBetColour,
+    setSelectedBetColour,
+    betValue,
+    showWinner,
+    setShowWinner,
+    setBetValue,
+    setBalance
+  } = useContext(AppContext);
 
   const fetch_30_results = async () => {
     try {
@@ -30,21 +31,18 @@ export default function Result() {
       // Only update when new period is detected
       if (latest && latest.period !== latestPeriod) {
         setResults(data.results);
-        if (selectedBetColour || betValue) {
-          console.log(selectedBetColour, betValue);
+        if (selectedBetColour && betValue) {
           if (selectedBetColour === data.results[0].colour) {
             setWinAmount(betValue * 2);
-            setBalance((prevBalance)=>prevBalance+(betValue*2))
+            setBalance((prevBalance) => prevBalance + (betValue * 2))
             setShowWinner(true)
           }
           else {
-            console.log("you lost");
+           setShowLoser(true)
           }
           setBetValue(null)
           setSelectedBetColour(null)
         }
-
-        // setWinColour(data.results[0].)
         setLatestPeriod(latest.period);
 
         if (intervalRef.current) {
@@ -130,36 +128,64 @@ export default function Result() {
       {/* win popup */}
 
       {showWinner && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="w-96 bg-gradient-to-b from-orange-400 to-orange-200 p-6 rounded-lg shadow-lg">
-            {/* Header */}
-            <div className="relative flex items-center justify-center mb-4">
-              <h2 className="text-2xl font-bold text-center text-white">
-                Congratulation
-              </h2>
-              <button
-                className="absolute top-0 right-0 text-white text-2xl"
-                onClick={() => setShowWinner(!showWinner)}
-              >
-                <i className="fa-regular fa-circle-xmark"></i>
-              </button>
-            </div>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="relative w-96 bg-gradient-to-b from-yellow-400 to-orange-300 p-6 rounded-2xl shadow-2xl animate-bounce-in">
+            {/* Close Button */}
+            <button
+              className="absolute top-3 right-3 text-white text-2xl hover:scale-110 transition"
+              onClick={() => setShowWinner(false)}
+            >
+              <i className="fa-regular fa-circle-xmark"></i>
+            </button>
 
-            {/* Badge or Icon */}
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-yellow-300 rounded-full flex items-center justify-center shadow-lg">
-                <i class="fa-solid fa-trophy text-2xl"></i>
+            {/* Trophy & Glow */}
+            <div className="flex flex-col items-center justify-center">
+              <div className="relative w-20 h-20 mb-4">
+                <div className="absolute w-full h-full rounded-full bg-yellow-400 blur-lg opacity-50 animate-ping"></div>
+                <div className="w-20 h-20 bg-yellow-300 rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
+                  <i className="fa-solid fa-trophy text-3xl text-white"></i>
+                </div>
               </div>
-            </div>
 
-            {/* Winning Amount */}
-            <p className="text-center text-3xl font-bold text-green-600 mb-2">
-              {winAmount}
-            </p>
-            <p className="text-center text-gray-700 font-medium">Well Done!</p>
+              {/* Text */}
+              <h2 className="text-3xl font-extrabold text-white mb-2 drop-shadow-lg">Congratulations!</h2>
+              <p className="text-lg text-white font-medium mb-4">You've won</p>
+
+              {/* Winning Amount */}
+              <div className="bg-white text-green-600 text-4xl font-extrabold py-2 px-6 rounded-xl shadow-md border-2 border-green-500">
+                ₹{winAmount}
+              </div>
+
+              {/* Celebration */}
+              <p className="mt-4 text-white font-medium text-sm opacity-90">Keep it up and win more!</p>
+            </div>
           </div>
         </div>
       )}
+
+      {/* lose popup */}
+    {
+      showLoser&&(
+         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="bg-white/90 backdrop-blur-xl p-6 rounded-3xl shadow-2xl w-full max-w-sm mx-4 animate-popup">
+          <div className="text-center">
+            <div className="text-6xl mb-3">😞</div>
+            <h2 className="text-2xl font-bold text-red-600 mb-2">
+              You Lost
+            </h2>
+            <p className="text-gray-700 mb-4">Better luck next time!</p>
+            <button
+              onClick={()=>{setShowLoser(false)}}
+              className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full font-semibold shadow transition-all"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+      )
+    } 
+
     </div>
   );
 }

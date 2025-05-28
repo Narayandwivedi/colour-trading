@@ -78,7 +78,7 @@ const handelUserLogin = async (req, res) => {
   
       return res.status(200).json({ success: true, message: "user logged in successfully",userData});
     } catch (error) {
-      console.error("Login Error:", error);
+      console.error("Login Error:", error.message);
       return res.status(500).json({ success: false, message: "Something went wrong" });
     }
   };

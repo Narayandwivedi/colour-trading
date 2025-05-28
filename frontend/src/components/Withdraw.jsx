@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { AppContext } from '../context/AppContext'
 
 const Withdraw = () => {
-    const { withdrawableBalance, setWithdrawableBalance } = useContext(AppContext)
+    const { withdrawableBalance, setWithdrawableBalance , balance } = useContext(AppContext)
 
     return (
         <div className='min-h-screen bg-gray-50 pt-5 pb-10 px-4'>
@@ -23,7 +23,7 @@ const Withdraw = () => {
                             </div>
                             <div>
                                 <p className='text-sm opacity-90'>Total Balance</p>
-                                <h2 className='text-xl font-bold'>₹0</h2>
+                                <h2 className='text-xl font-bold'>{balance}</h2>
                             </div>
                         </div>
                         <i className="fa-solid fa-ellipsis-vertical opacity-70"></i>

@@ -27,7 +27,7 @@ function App() {
     <ToastContainer/>
   <Routes>
     
-    <Route path='/' element={<Homepage/>}/>
+    <Route path='/' element={<ProtectedRoute><Homepage/></ProtectedRoute>}/>
     <Route path='/colourtrading' element={<ColourTrading/>}/>
     <Route path='/refer' element={<Refer/>}/>
     <Route path='/wallet' element={<Wallet/>}/>

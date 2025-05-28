@@ -26,8 +26,12 @@ const checkLogin = async () => {
       withCredentials: true,
     });
     if (res.data.isLoggedIn) {
+      console.log(res.data.user);
+      
       setUserData(res.data.user);
       setBalance(res.data.user.balance)
+      setWithdrawableBalance(res.data.user.withdrawableBalance
+)
     } else {
       setUserData(null);
     }

@@ -28,7 +28,8 @@ export default {
       boxShadow: {
         'bomb': 'inset 5px 5px 15px rgba(0,0,0,0.5), 2px 2px 8px rgba(0,0,0,0.8)',
         'bomb-glow': '0 0 10px 2px rgba(255,100,0,0.5)'
-      }
+      },
+      
     },
   },
   plugins: [],
