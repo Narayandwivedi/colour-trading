@@ -14,6 +14,15 @@ const gameSchema = new mongoose.Schema({
     type: String,
     enum: ["red", "green"]
   },
+  size:{
+    type:String,
+    enum:["big", "small"]
+  },
+  number:{
+    type:Number,
+    min:0,
+    max:9
+  },
   status: {
     type: String,
     enum: ["open", "closed"],

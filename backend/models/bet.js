@@ -12,8 +12,11 @@ const betSchema = new mongoose.Schema({
     },
     betColour:{
         type:"String",
-        enum:["red","green"],
-        required:true
+        enum:["red","green","violet"],
+    },
+    betSize:{
+        type:"string",
+        enum:["big","small"]
     },
     betAmount:{
         type:Number,

@@ -2,14 +2,15 @@ const transactionModel = require("../models/transcationModel.js")
 
 async function createTransaction(req,res) {
     try{
-        const {userId , UTR} = req.body
+        const {userId , UTR , amount} = req.body
         if(!userId || !UTR){
             return res.status(400).json({success:false, message:"invalid transaction"})
         }
 
        const newTransaction =  await transactionModel.create({
             userId,
-            UTR
+            UTR,
+            amount
         })
         if(!newTransaction){
             console.log("some error in transaction");
@@ -36,6 +37,5 @@ async function getAllTransaction(req,res) {
     }
     
 }
-
 
 module.exports = {createTransaction,getAllTransaction};

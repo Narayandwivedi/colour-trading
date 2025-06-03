@@ -14,7 +14,7 @@ const betRoute = require("./routes/betRoute.js");
 const game = require("./models/game.js");
 
 // import middleware
-const {checkLoggedIN} = require("./middleware/checkLoggedIn.js")
+const { checkLoggedIN } = require("./middleware/checkLoggedIn.js");
 
 app.use(
   cors({
@@ -29,7 +29,7 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-app.get("/",checkLoggedIN, (req, res) => {
+app.get("/", checkLoggedIN, (req, res) => {
   res.send("web api is working fine");
 });
 
@@ -38,11 +38,13 @@ app.get("/api/latest/result/:gameType", async (req, res) => {
   const { gameType } = req.params;
 
   if (!["30sec", "1min", "3min"].includes(gameType)) {
-    return res.status(400).json({ success: false, message: "Invalid game type" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid game type" });
   }
   try {
     const results = await game
-      .find({ status: "closed", gameType })
+      .find({gameType , status: "closed" })
       .sort({ createdAt: -1 })
       .limit(30)
       .lean();
@@ -58,7 +60,9 @@ app.get("/api/latest/oneresult/:gameType", async (req, res) => {
   const { gameType } = req.params;
 
   if (!["30sec", "1min", "3min"].includes(gameType)) {
-    return res.status(400).json({ success: false, message: "Invalid game type" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid game type" });
   }
 
   try {
@@ -73,20 +77,22 @@ app.get("/api/latest/oneresult/:gameType", async (req, res) => {
   }
 });
 
-
 // Fetch currently open period for a specific gameType
 app.get("/api/latest/period/:gameType", async (req, res) => {
   const { gameType } = req.params;
 
   if (!["30sec", "1min", "3min"].includes(gameType)) {
-    return res.status(400).json({ success: false, message: "Invalid game type" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid game type" });
   }
 
   try {
     const latestPeriod = await game
       .findOne({ status: "open", gameType })
+      .lean()
       .sort({ createdAt: -1 })
-      .lean();
+      .select("period createdAt -_id");
 
     res.json({ success: true, latestPeriod });
   } catch (err) {
@@ -96,7 +102,6 @@ app.get("/api/latest/period/:gameType", async (req, res) => {
     });
   }
 });
-
 
 app.use("/api/users", userRoute);
 app.use("/api/transaction", transactionRoute);

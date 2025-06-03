@@ -14,6 +14,9 @@ const transactionSchema = new mongoose.Schema({
         type:"string",
         enum:["pending","success","rejected"],
         default:"pending"
+    },
+    amount:{
+        type:Number
     }
 },{
     timestamps:true

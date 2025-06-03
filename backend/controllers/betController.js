@@ -4,89 +4,93 @@ const user = require("../models/user");
 const game = require("../models/game");
 
 const handlePlaceBet = async (req, res) => {
-    const { userId, betAmount, period, betColour } = req.body;
+    const { userId, betAmount, period, betColour, betSize } = req.body;
 
-    // validate req body
-
-    if (!userId || !period || !betAmount) {
+        
+    // Validate required fields
+    if (!userId || !period || !betAmount || (!betColour && !betSize)) {
         return res.json({ success: false, message: "missing field" });
     }
 
-    // validate user id
+    // Disallow both colour and size bets together
+    if (betColour && betSize) {
+        return res.json({ success: false, message: "Bet on both colour and size is not allowed at the same time" });
+    }
 
+    // Validate userId
     if (!mongoose.isValidObjectId(userId)) {
         return res.json({ success: false, message: "invalid userId" });
     }
 
-    // validate bet amount
-
-    if (isNaN(Number(betAmount)) || betAmount < 1) {
+    // Validate betAmount
+    const numericAmount = Number(betAmount);
+    if (isNaN(numericAmount) || numericAmount < 1 || !Number.isInteger(numericAmount)) {
         return res.json({ success: false, message: "invalid bet amount" });
     }
 
-    if (!Number.isInteger(Number(betAmount))) {
-        throw new Error("Bet amount must be a whole number");
-      }
-
-    if (Number(betAmount)>200000){
-        return res.json({success:false , message:"bet amount exceed"})
+    if (numericAmount > 200000) {
+        return res.json({ success: false, message: "bet amount exceed" });
     }
-      
-    // validate bet colour
 
-    if (betColour !== "red" && betColour !== "green") {
+    // Validate betColour if present
+    if (betColour && betColour !== "red" && betColour !== "green") {
         return res.json({ success: false, message: "invalid bet colour" });
+    }
+
+    // Validate betSize if present
+    if (betSize && betSize !== "big" && betSize !== "small") {
+        return res.json({ success: false, message: "invalid bet size" });
     }
 
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-
-        // validate user exist 
-
+        // Validate user
         const getUser = await user.findById(userId).session(session);
-        if (!getUser) {
-            throw new Error("user not found");
-        }
+        if (!getUser) throw new Error("user not found");
 
-        if (betAmount > getUser.balance) {
+        if (numericAmount > getUser.balance) {
             throw new Error("insufficient balance");
         }
-        // check game session exist or valid
 
+        // Validate game
         const checkGame = await game.findOne({ period }).session(session);
-        if (!checkGame) {
-            throw new Error("game period not found");
-        }
-        console.log( checkGame.period,checkGame.status);
+        if (!checkGame) throw new Error("game period not found");
+
+
+        console.log(checkGame.period, `:`, checkGame.status);
         
-
-        // if (checkGame.status === "closed") {
-        //     throw new Error("bet is closed");
-        // }
-
-        // Create bet
-        const newBet = await bet.create([{
+        if(checkGame.status==='closed'){
+            throw new Error('bet is not allowed period closed')
+        }
+        // Create bet object
+        const betData = {
             period,
             userId: getUser._id,
-            betColour,
-            betAmount
-        }], { session });
+            betAmount: numericAmount,
+        };
+
+        if (betColour) betData.betColour = betColour;
+        if (betSize) betData.betSize = betSize;
+
+        // Save bet
+       const newBet = await bet.create([betData], { session });
 
         // Deduct balance
-        getUser.balance -= betAmount;
+        getUser.balance -= numericAmount;
         await getUser.save({ session });
 
         await session.commitTransaction();
-        console.log(`${getUser.fullName} place bet on ${betColour} of amount ${betAmount}`);
         return res.json({ success: true, message: "bet placed successfully" });
+
     } catch (error) {
         await session.abortTransaction();
         return res.json({ success: false, message: error.message });
-    }finally{
+    } finally {
         session.endSession();
     }
 };
+
 
 module.exports = { handlePlaceBet };

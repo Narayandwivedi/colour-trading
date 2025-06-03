@@ -23,12 +23,12 @@ withdrawableBalance:{
     type:Number,
     default:0
 },
-referalCode:{
-    type:Number,
+referralCode:{
+    type:String,
     unique:true
 },
 referedBy:{
-    type:Number,
+    type:String,
     }
 
 })
