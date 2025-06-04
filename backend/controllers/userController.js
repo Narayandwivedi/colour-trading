@@ -4,6 +4,17 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.js");
 const transactionModel = require("../models/transcationModel.js");
 
+
+function generateReferralCode() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let code = '';
+  for (let i = 0; i < 7; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    code += chars[randomIndex];
+  }
+  return code;
+}
+
 const handelUserSignup = async (req, res) => {
   try {
     // checking req body
@@ -32,6 +43,9 @@ const handelUserSignup = async (req, res) => {
         .json({ success: false, message: "user already exist" });
     }
 
+    // generate unique referral code 
+    const referralCode = generateReferralCode()
+
     // hashpassword
     const hashedpassword = await bcrypt.hash(password, 8);
     console.log(fullName, email, password, hashedpassword);
@@ -39,6 +53,7 @@ const handelUserSignup = async (req, res) => {
       fullName,
       email,
       password: hashedpassword,
+      referralCode:referralCode
     });
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
