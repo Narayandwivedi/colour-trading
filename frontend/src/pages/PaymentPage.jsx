@@ -16,11 +16,14 @@ const PaymentPage = () => {
     if (!utr || utr.length < 10) {
       return toast.error("Invalid UTR");
     }
+    console.log(utr , finalDepositAmt , userData);
+    
 
     try {
       const { data } = await axios.post(`${BACKEND_URL}/api/transaction`, {
         userId: userData._id,
         UTR: utr,
+        amount:finalDepositAmt
       });
 
       if (data.success) {

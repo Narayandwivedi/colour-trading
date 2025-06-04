@@ -6,19 +6,33 @@ const Transaction = () => {
   const [allTransaction, setAllTransaction] = useState(null);
   const [amountInputs, setAmountInputs] = useState({});
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState("pending");
 
   const BACKEND_URL = "http://localhost:8080";
+
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    return date.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
 
   const handleApprove = async (userId, transactionId) => {
     const totalAmount = amountInputs[transactionId];
     if (!totalAmount) return toast.error("Please enter amount");
 
     try {
-      const { data } = await axios.put(`${BACKEND_URL}/api/users/updatebalance`, {
-        userId,
-        totalAmount,
-      });
+      const { data } = await axios.put(
+        `${BACKEND_URL}/api/users/updatebalance`,
+        {
+          userId,
+          totalAmount,
+        }
+      );
 
       if (data.success) {
         toast.success(data.message);
@@ -53,10 +67,6 @@ const Transaction = () => {
     fetchAllTransaction();
   }, []);
 
-  const filteredTransactions = allTransaction?.filter(
-    (t) => t.status === filterStatus
-  );
-
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto text-center py-10 text-gray-600">
@@ -66,106 +76,76 @@ const Transaction = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
-      {/* Filter Buttons */}
-      <div className="flex gap-4 mb-4">
-        {["pending", "completed", "rejected"].map((status) => (
-          <button
-            key={status}
-            onClick={() => setFilterStatus(status)}
-            className={`px-4 py-2 rounded-md font-medium capitalize ${
-              filterStatus === status
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-800"
-            }`}
-          >
-            {status}
-          </button>
-        ))}
-      </div>
+    <div className="max-w-6xl mx-auto px-4 py-10">
+      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+        All Transactions
+      </h2>
 
-      {/* Transactions Table */}
-      <div className="overflow-x-auto bg-white rounded-xl shadow-md">
-        <div className="min-w-[768px] grid grid-cols-7 sm:grid-cols-7 gap-4 items-center bg-gray-100 p-4 border-b">
-          <p className="text-sm font-semibold text-gray-700">Created At</p>
-          <p className="text-sm font-semibold text-gray-700">User ID</p>
-          <p className="text-sm font-semibold text-gray-700 text-center">UTR</p>
-          <p className="text-sm font-semibold text-gray-700">Status</p>
-          <p className="text-sm font-semibold text-gray-700">Total Amount</p>
-          <p className="text-sm font-semibold text-gray-700 text-center">Approve</p>
-          <p className="text-sm font-semibold text-gray-700 text-center">Reject</p>
-        </div>
-
-        <div className="divide-y divide-gray-200">
-          {filteredTransactions?.length === 0 ? (
-            <div className="text-center py-6 text-gray-500 col-span-7">
-              No {filterStatus} transactions.
-            </div>
-          ) : (
-            filteredTransactions.map((transaction) => {
-              const formattedDate = new Date(transaction.createdAt).toLocaleString("en-GB", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              });
-
-              return (
-                <div
-                  key={transaction._id}
-                  className="min-w-[768px] grid grid-cols-7 sm:grid-cols-7 gap-4 items-center p-4 hover:bg-gray-50 transition"
+      {allTransaction && allTransaction.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {allTransaction.map((transaction) => (
+            <div
+              key={transaction._id}
+              className="p-5 bg-white rounded-2xl shadow-sm hover:shadow-lg border border-gray-100 transition-all duration-200"
+            >
+              <div className="mb-2 text-sm text-gray-600">
+                {formatDate(transaction.createdAt)}
+              </div>
+              <div className="text-sm"><span className="font-medium text-gray-800">UTR:</span> {transaction.UTR}</div>
+              <div className="text-sm"><span className="font-medium text-gray-800">Amount:</span> ₹{transaction.amount}</div>
+              <div className="text-sm">
+                <span className="font-medium text-gray-800">Status:</span>{" "}
+                <span
+                  className={`capitalize font-semibold ${
+                    transaction.status === "pending"
+                      ? "text-yellow-600"
+                      : transaction.status === "approved"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
                 >
-                  <p className="text-xs text-gray-600">{formattedDate}</p>
-                  <p className="text-gray-800 text-xs break-all">{transaction.userId}</p>
-                  <p className="text-gray-600 text-sm text-center">{transaction.UTR}</p>
+                  {transaction.status}
+                </span>
+              </div>
 
-                  <div className="flex items-center text-xs">
-                    <span
-                      className={`h-2 w-2 rounded-full mr-2 ${
-                        transaction.status === "pending"
-                          ? "bg-yellow-500"
-                          : transaction.status === "completed"
-                          ? "bg-green-500"
-                          : "bg-red-500"
-                      }`}
-                    ></span>
-                    <span className="capitalize">{transaction.status}</span>
-                  </div>
-
+              {transaction.status === "pending" && (
+                <div className="mt-4 space-y-2">
                   <input
+                    type="number"
+                    placeholder="Enter amount"
+                    className="border border-gray-300 p-2 rounded w-full text-sm"
+                    value={amountInputs[transaction._id] || ""}
                     onChange={(e) =>
                       setAmountInputs((prev) => ({
                         ...prev,
                         [transaction._id]: e.target.value,
                       }))
                     }
-                    value={amountInputs[transaction._id] || ""}
-                    className="border border-gray-300 w-full max-w-[100px] rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    placeholder="₹0.00"
-                    type="number"
                   />
-
-                  <button
-                    onClick={() => handleApprove(transaction.userId, transaction._id)}
-                    className="bg-green-600 hover:bg-green-700 text-white py-1.5 px-3 rounded-md text-sm font-medium transition"
-                  >
-                    Approve
-                  </button>
-
-                  <button
-                    onClick={handleReject}
-                    className="bg-red-600 hover:bg-red-700 text-white py-1.5 px-3 rounded-md text-sm font-medium transition"
-                  >
-                    Reject
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() =>
+                        handleApprove(transaction.userId, transaction._id)
+                      }
+                      className="bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={handleReject}
+                      className="bg-red-500 text-white text-sm px-4 py-2 rounded hover:bg-red-600"
+                    >
+                      Reject
+                    </button>
+                  </div>
                 </div>
-              );
-            })
-          )}
+              )}
+            </div>
+          ))}
         </div>
-      </div>
+      ) : (
+        <p className="text-center text-gray-600">No transactions found.</p>
+      )}
     </div>
   );
 };

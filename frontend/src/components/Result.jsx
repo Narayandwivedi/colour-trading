@@ -20,17 +20,22 @@ export default function Result() {
     showWinner,
     setShowWinner,
     setBetValue,
-    setBalance
+    setBalance,
   } = useContext(AppContext);
 
   const fetch_30_results = async () => {
     try {
       const { data } = await axios.get(`${BACKEND_URL}/api/latest/result/${gameType}`);
+      console.log(data);
+      
       const latest = data.results[0];
 
       // Only update when new period is detected
       if (latest && latest.period !== latestPeriod) {
         setResults(data.results);
+
+        //check winner logic 
+
         if (selectedBetColour && betValue) {
           if (selectedBetColour === data.results[0].colour) {
             setWinAmount(betValue * 2);
@@ -108,10 +113,10 @@ export default function Result() {
                   {item.period}
                 </td>
                 <td className="border border-gray-300 text-center py-2 text-gray-700">
-                  big
+                  {item.size}
                 </td>
                 <td className="border border-gray-300 text-center py-2 text-gray-700">
-                  4
+                  {item.number}
                 </td>
                 <td>
                   <div

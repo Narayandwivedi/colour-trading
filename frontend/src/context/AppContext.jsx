@@ -5,6 +5,8 @@ export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
   const [selectedBetColour, setSelectedBetColour] = useState(null);
+  const [selectedBetSize , setSelectedBetSize] = useState(null);
+  const [betPlaced , setBetPlaced] = useState(null)
   const [showWinner, setShowWinner] = useState(false);
   const [timer, setTimer] = useState(30);
   const [balance, setBalance] = useState(0);
@@ -17,7 +19,7 @@ export const AppContextProvider = (props) => {
   const [finalDepositAmt , setFinalDepositAmt] = useState(100)
   const [loading, setLoading] = useState(true)
 
-  const BACKEND_URL = `http://localhost:8080`;
+  const BACKEND_URL = `http://168.231.120.131:8080`;
 
   // 🔐 Check if user is logged in
 const checkLogin = async () => {
@@ -26,8 +28,7 @@ const checkLogin = async () => {
       withCredentials: true,
     });
     if (res.data.isLoggedIn) {
-      console.log(res.data.user);
-      
+
       setUserData(res.data.user);
       setBalance(res.data.user.balance)
       setWithdrawableBalance(res.data.user.withdrawableBalance
@@ -59,6 +60,8 @@ const checkLogin = async () => {
     balance, setBalance,
     withdrawableBalance,setWithdrawableBalance,
     finalDepositAmt , setFinalDepositAmt,
+    selectedBetSize,setSelectedBetSize,
+    betPlaced , setBetPlaced,
     
     BACKEND_URL,
 

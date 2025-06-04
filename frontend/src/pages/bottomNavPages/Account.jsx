@@ -1,16 +1,60 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import BottomNav from '../../components/BottomNav';
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
+import BottomNav from "../../components/BottomNav";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Account = () => {
-  const userId = "USER123456"; // Replace with actual user ID from auth state
+  const { userData, setUserData, BACKEND_URL } = useContext(AppContext);
+  const navigate = useNavigate();
+
+  const userId = "USER123456";
+  // Replace with actual user ID from auth state
 
   const menuItems = [
-    { label: "Bet History", icon: "fa-solid fa-clock-rotate-left", link: "/bethistory" },
-    { label: "Withdraw History", icon: "fa-solid fa-arrow-up-right-dots", link: "/withdrawhistory" },
-    { label: "Deposit History", icon: "fa-solid fa-arrow-down", link: "/deposithistory" },
-    { label: "Customer Support", icon: "fa-solid fa-headset", link: "/support" },
+    {
+      label: "Bet History",
+      icon: "fa-solid fa-clock-rotate-left",
+      link: "/bethistory",
+    },
+    {
+      label: "Withdraw History",
+      icon: "fa-solid fa-arrow-up-right-dots",
+      link: "/withdrawhistory",
+    },
+    {
+      label: "Deposit History",
+      icon: "fa-solid fa-arrow-down",
+      link: "/deposithistory",
+    },
+    {
+      label: "Customer Support",
+      icon: "fa-solid fa-headset",
+      link: "/support",
+    },
   ];
+
+  async function handleLogout() {
+    if (!userData) {
+      return toast.error("some error while logout");
+    }
+    try {
+      const { data } = await axios.post(
+        `${BACKEND_URL}/api/users/logout`,
+        {},
+        { withCredentials: true }
+      );
+      if (data.success) {
+        setUserData(null);
+        navigate("/login");
+        toast.success(data.message);
+      }
+    } catch (err) {
+      toast.error("some error while login");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pb-24 max-w-[440px] mx-auto relative">
@@ -18,7 +62,7 @@ const Account = () => {
       <div className="text-center pt-6 px-4">
         <h1 className="text-3xl font-bold text-gray-800">Account</h1>
         <p className="text-sm text-gray-500 mt-1">
-          ID: <span className="font-semibold">{userId}</span>
+          <span className="font-semibold">{userData?.fullName}</span>
         </p>
       </div>
 
@@ -53,6 +97,14 @@ const Account = () => {
             <i className="fa-solid fa-chevron-right text-gray-400 text-sm"></i>
           </Link>
         ))}
+      </div>
+      <div className="mt-8 px-4">
+        <button
+          onClick={handleLogout}
+          className="w-full bg-gray-800 text-white py-3 rounded-xl shadow-md hover:bg-gray-900 transition text-lg font-semibold"
+        >
+          Logout
+        </button>
       </div>
 
       {/* Bottom Navigation */}

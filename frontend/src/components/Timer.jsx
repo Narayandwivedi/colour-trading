@@ -75,7 +75,6 @@ export default function Game() {
 
       if (data.success) {
         const newPeriod = data.latestPeriod.period;
-
         if (newPeriod !== prevPeriod) {
           clearInterval(fetchInterval.current); // Stop polling
           setPeriod(newPeriod);
@@ -94,14 +93,13 @@ export default function Game() {
 
       fetchInterval.current = setInterval(() => {
         fetchLatestPeriodAndCheckChange(period);
-      }, 600); // Poll every 800ms (adjust if needed)
+      }, 800); // Poll every 800ms (adjust if needed)
     }
 
     if (timer === 0) {
       // Fail-safe to stop polling if it continues too long
       setTimeout(() => clearInterval(fetchInterval.current), 5000);
     }
-
     return () => {
       // Clear if unmounted or gameType changed
       clearInterval(fetchInterval.current);

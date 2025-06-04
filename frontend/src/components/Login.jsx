@@ -27,8 +27,6 @@ const Login = () => {
       })
       if(data.success){
         setUserData(data.userData)
-        console.log(data);
-        
         setBalance(data.userData.balance)
           navigate("/")
           toast.success("user logged in successfully")
