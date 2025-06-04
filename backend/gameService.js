@@ -32,9 +32,9 @@ const gameStates = {
 
 // Counters
 const periodCounters = {
-  "30sec": 200,
-  "1min": 200,
-  "3min": 200,
+  "30sec": 1,
+  "1min": 1,
+  "3min": 1,
 };
 
 // Generate period ID
@@ -89,22 +89,25 @@ async function getRandomOutcome(period) {
     // Randomize if equal or no bets
     const finalColour =
       betOnGreen === betOnRed
-        ? Math.random() < 0.5 ? "red" : "green"
+        ? Math.random() < 0.5
+          ? "red"
+          : "green"
         : betOnGreen > betOnRed
         ? "red"
         : "green";
 
     const finalSize =
       betOnBig === betOnSmall
-        ? Math.random() < 0.5 ? "big" : "small"
+        ? Math.random() < 0.5
+          ? "big"
+          : "small"
         : betOnBig > betOnSmall
         ? "small"
         : "big";
 
-      const randomNum = Math.floor(Math.random() * 10);  // generates integer from 0 to 9
+    const randomNum = Math.floor(Math.random() * 10); // generates integer from 0 to 9
 
-
-    return { colour: finalColour, size: finalSize , number:randomNum };
+    return { colour: finalColour, size: finalSize, number: randomNum };
   } catch (error) {
     console.error("Error determining outcomes:", error);
     return {
@@ -114,18 +117,19 @@ async function getRandomOutcome(period) {
   }
 }
 
-
 // Process game results
 async function processGame(gameInstance, gameType) {
   try {
-    const { colour, size , number } = await getRandomOutcome(gameInstance.period);
+    const { colour, size, number } = await getRandomOutcome(
+      gameInstance.period
+    );
 
     gameInstance.colour = colour;
     gameInstance.size = size;
     gameInstance.number = number;
     gameInstance.status = "closed";
     console.log(gameInstance);
-    
+
     await gameInstance.save();
 
     const bets = await bet.find({ period: gameInstance.period }).lean();
