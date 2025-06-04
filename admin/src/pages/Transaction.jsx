@@ -7,7 +7,8 @@ const Transaction = () => {
   const [amountInputs, setAmountInputs] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = "http://localhost:8080";
+  // const BACKEND_URL = "http://localhost:8080";
+   const BACKEND_URL = `http://168.231.120.131:8080`;
 
   const formatDate = (isoString) => {
     const date = new Date(isoString);

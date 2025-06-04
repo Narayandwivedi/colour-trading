@@ -92,10 +92,7 @@ const handelUserLogin = async (req, res) => {
         .status(401)
         .json({ success: false, message: "Invalid password" });
     }
-
-    const userData = {
-      balance: user.balance,
-    };
+    delete user.password;
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -111,7 +108,7 @@ const handelUserLogin = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "user logged in successfully",
-      userData,
+      userData:user
     });
   } catch (error) {
     console.error("Login Error:", error.message);

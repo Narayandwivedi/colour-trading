@@ -20,6 +20,8 @@ export const AppContextProvider = (props) => {
   const [loading, setLoading] = useState(true)
 
   const BACKEND_URL = `http://168.231.120.131:8080`;
+  // const BACKEND_URL = `http://localhost:8080`;
+  
 
   // 🔐 Check if user is logged in
 const checkLogin = async () => {
