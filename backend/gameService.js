@@ -194,13 +194,19 @@ async function processGame(gameInstance, gameType) {
     );
   } catch (error) {
     console.error(`Game processing error (${gameType}):`, error);
-  } finally {
-    gameStates[gameType].isRunning = false;
-    if (gameStates[gameType].pendingExecution) {
-      gameStates[gameType].pendingExecution = false;
-      executeGameRound(gameType);
-    }
+  }finally {
+  gameStates[gameType].isRunning = false;
+
+  if (gameStates[gameType].pendingExecution) {
+    gameStates[gameType].pendingExecution = false;
   }
+
+  // Delay starting the next round by 2 seconds
+  setTimeout(() => {
+    executeGameRound(gameType);
+  }, 2000);
+}
+
 }
 
 // Execute game round
