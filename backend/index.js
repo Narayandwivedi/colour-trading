@@ -22,6 +22,7 @@ app.use(
       "https://colour-trading.vercel.app",
       "http://localhost:5173",
       "http://localhost:5174",
+      "http://168.231.120.131"
     ],
     credentials: true,
   })
