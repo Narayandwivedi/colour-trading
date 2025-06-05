@@ -76,36 +76,46 @@ export default function Game() {
       if (data.success) {
         const newPeriod = data.latestPeriod.period;
         if (newPeriod !== prevPeriod) {
-          clearInterval(fetchInterval.current); // Stop polling
           setPeriod(newPeriod);
           setPeriodCreatedAT(new Date(data.latestPeriod.createdAt));
+          return true; // New period found
         }
       }
+      return false; // No new period yet
     } catch (err) {
       console.error("Error fetching latest period:", err);
+      return false;
     }
   }
 
-  // ⏳ Start polling when timer ≤ 4
+  // ⏳ Start polling when timer ≤ 1 and continue until new period is found
   useEffect(() => {
-    if (timer <= 1 && !fetchInterval.current) {
-      console.log("⏳ Started polling for new period...");
+    let isMounted = true;
 
-      fetchInterval.current = setInterval(() => {
-        fetchLatestPeriodAndCheckChange(period);
-      }, 800); // Poll every 800ms (adjust if needed)
-    }
+    const startPolling = async () => {
+      if (timer <= 1 && !fetchInterval.current) {
+        console.log("⏳ Started polling for new period...");
 
-    if (timer === 0) {
-      // Fail-safe to stop polling if it continues too long
-      setTimeout(() => clearInterval(fetchInterval.current), 5000);
-    }
-    return () => {
-      // Clear if unmounted or gameType changed
-      clearInterval(fetchInterval.current);
-      fetchInterval.current = null;
+        fetchInterval.current = setInterval(async () => {
+          const foundNewPeriod = await fetchLatestPeriodAndCheckChange(period);
+          if (foundNewPeriod && isMounted) {
+            clearInterval(fetchInterval.current);
+            fetchInterval.current = null;
+          }
+        }, 800); // Poll every 800ms
+      }
     };
-  }, [timer]);
+
+    startPolling();
+
+    return () => {
+      isMounted = false;
+      if (fetchInterval.current) {
+        clearInterval(fetchInterval.current);
+        fetchInterval.current = null;
+      }
+    };
+  }, [timer, period]);
 
   // 📌 Initial fetch on gameType change
   useEffect(() => {

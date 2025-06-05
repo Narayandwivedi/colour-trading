@@ -32,6 +32,7 @@ const Transaction = () => {
         {
           userId,
           totalAmount,
+          transactionId
         }
       );
 
@@ -91,6 +92,9 @@ const Transaction = () => {
             >
               <div className="mb-2 text-sm text-gray-600">
                 {formatDate(transaction.createdAt)}
+              </div>
+              <div>
+                {transaction.userId}
               </div>
               <div className="text-sm"><span className="font-medium text-gray-800">UTR:</span> {transaction.UTR}</div>
               <div className="text-sm"><span className="font-medium text-gray-800">Amount:</span> ₹{transaction.amount}</div>
