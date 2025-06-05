@@ -1,21 +1,19 @@
-import { useContext, useEffect, useRef, useState, useCallback } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
 
 export default function Result() {
   const [results, setResults] = useState([]);
   const [winAmount, setWinAmount] = useState(null);
-  const [showLoser, setShowLoser] = useState(false);
-  const [latestPeriod, setLatestPeriod] = useState(null);
-  const [isPolling, setIsPolling] = useState(false);
-  
+  const [showLoser , setShowLoser] = useState(false)
+
+  const [latestPeriod, setLatestPeriod] = useState(null); // Local tracking
   const intervalRef = useRef(null);
-  const abortControllerRef = useRef(null);
+
 
   const {
     BACKEND_URL,
-    gameType,
-    timer,
+    gameType, timer,
     selectedBetColour,
     setSelectedBetColour,
     betValue,
@@ -25,21 +23,9 @@ export default function Result() {
     setBalance,
   } = useContext(AppContext);
 
-  // Memoized fetch function to prevent recreating on every render
-  const fetch_30_results = useCallback(async () => {
-    // Cancel previous request if still pending
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    abortControllerRef.current = new AbortController();
-
+  const fetch_30_results = async () => {
     try {
-      const { data } = await axios.get(
-        `${BACKEND_URL}/api/latest/result/${gameType}`,
-        { signal: abortControllerRef.current.signal }
-      );
-      
+      const { data } = await axios.get(`${BACKEND_URL}/api/latest/result/${gameType}`);
       console.log(data);
       
       const latest = data.results[0];
@@ -48,71 +34,51 @@ export default function Result() {
       if (latest && latest.period !== latestPeriod) {
         setResults(data.results);
 
-        // Check winner logic 
+        //check winner logic 
+
         if (selectedBetColour && betValue) {
           if (selectedBetColour === data.results[0].colour) {
             setWinAmount(betValue * 2);
-            setBalance((prevBalance) => prevBalance + (betValue * 2));
-            setShowWinner(true);
-          } else {
-            setShowLoser(true);
+            setBalance((prevBalance) => prevBalance + (betValue * 2))
+            setShowWinner(true)
           }
-          setBetValue(null);
-          setSelectedBetColour(null);
+          else {
+           setShowLoser(true)
+          }
+          setBetValue(null)
+          setSelectedBetColour(null)
         }
-        
         setLatestPeriod(latest.period);
 
-        // Stop polling once we get new result
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
           intervalRef.current = null;
-          setIsPolling(false);
         }
       }
     } catch (err) {
-      if (err.name !== 'AbortError') {
-        console.log("Error fetching results:", err.message);
-      }
+      console.log("Error fetching results:", err.message);
     }
-  }, [BACKEND_URL, gameType, latestPeriod, selectedBetColour, betValue, setBalance, setShowWinner, setBetValue, setSelectedBetColour]);
+  };
 
   // Initial fetch when gameType changes
   useEffect(() => {
     fetch_30_results();
-  }, [gameType]); // Remove fetch_30_results from dependencies to prevent unnecessary calls
+  }, [gameType]);
 
   // Polling logic when timer is below threshold
   useEffect(() => {
-    if (timer <= 1 && !isPolling) {
+    if (timer <= 1 && !intervalRef.current) {
       console.log("start polling for result");
-      setIsPolling(true);
-      
-      intervalRef.current = setInterval(() => {
-        fetch_30_results();
-      }, 1000); // Reduced frequency from 800ms to 1000ms
-    }
 
-    // Clean up when timer goes above threshold
-    if (timer > 1 && isPolling) {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-        setIsPolling(false);
-      }
+      intervalRef.current = setInterval(fetch_30_results, 800); // Fast polling
     }
-
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
-        setIsPolling(false);
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
       }
     };
-  }, [timer, isPolling, fetch_30_results]);
+  }, [timer]);
 
   return (
     <div className="result-container mb-6">
@@ -142,7 +108,7 @@ export default function Result() {
           </thead>
           <tbody>
             {results.map((item, index) => (
-              <tr key={item.period || index} className="odd:bg-white even:bg-gray-50">
+              <tr key={index} className="odd:bg-white even:bg-gray-50">
                 <td className="border text-[14px] border-gray-300 px-1 text-center py-2 text-gray-700">
                   {item.period}
                 </td>
@@ -154,7 +120,8 @@ export default function Result() {
                 </td>
                 <td>
                   <div
-                    className={`w-4 h-4 ${item.colour === "red" ? "bg-red-500" : "bg-green-500"} rounded-full mx-auto`}
+                    className={`w-4 h-4 ${item.colour === "red" ? "bg-red-500" : "bg-green-500"
+                      } rounded-full mx-auto`}
                   ></div>
                 </td>
               </tr>
@@ -163,10 +130,12 @@ export default function Result() {
         </table>
       </div>
 
-      {/* Win popup */}
+      {/* win popup */}
+
       {showWinner && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
           <div className="relative w-96 bg-gradient-to-b from-yellow-400 to-orange-300 p-6 rounded-2xl shadow-2xl animate-bounce-in">
+            {/* Close Button */}
             <button
               className="absolute top-3 right-3 text-white text-2xl hover:scale-110 transition"
               onClick={() => setShowWinner(false)}
@@ -174,6 +143,7 @@ export default function Result() {
               <i className="fa-regular fa-circle-xmark"></i>
             </button>
 
+            {/* Trophy & Glow */}
             <div className="flex flex-col items-center justify-center">
               <div className="relative w-20 h-20 mb-4">
                 <div className="absolute w-full h-full rounded-full bg-yellow-400 blur-lg opacity-50 animate-ping"></div>
@@ -182,37 +152,45 @@ export default function Result() {
                 </div>
               </div>
 
+              {/* Text */}
               <h2 className="text-3xl font-extrabold text-white mb-2 drop-shadow-lg">Congratulations!</h2>
               <p className="text-lg text-white font-medium mb-4">You've won</p>
 
+              {/* Winning Amount */}
               <div className="bg-white text-green-600 text-4xl font-extrabold py-2 px-6 rounded-xl shadow-md border-2 border-green-500">
                 ₹{winAmount}
               </div>
 
+              {/* Celebration */}
               <p className="mt-4 text-white font-medium text-sm opacity-90">Keep it up and win more!</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Lose popup */}
-      {showLoser && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white/90 backdrop-blur-xl p-6 rounded-3xl shadow-2xl w-full max-w-sm mx-4 animate-popup">
-            <div className="text-center">
-              <div className="text-6xl mb-3">😞</div>
-              <h2 className="text-2xl font-bold text-red-600 mb-2">You Lost</h2>
-              <p className="text-gray-700 mb-4">Better luck next time!</p>
-              <button
-                onClick={() => setShowLoser(false)}
-                className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full font-semibold shadow transition-all"
-              >
-                Try Again
-              </button>
-            </div>
+      {/* lose popup */}
+    {
+      showLoser&&(
+         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="bg-white/90 backdrop-blur-xl p-6 rounded-3xl shadow-2xl w-full max-w-sm mx-4 animate-popup">
+          <div className="text-center">
+            <div className="text-6xl mb-3">😞</div>
+            <h2 className="text-2xl font-bold text-red-600 mb-2">
+              You Lost
+            </h2>
+            <p className="text-gray-700 mb-4">Better luck next time!</p>
+            <button
+              onClick={()=>{setShowLoser(false)}}
+              className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full font-semibold shadow transition-all"
+            >
+              Try Again
+            </button>
           </div>
         </div>
-      )}
+      </div>
+      )
+    } 
+
     </div>
   );
 }
