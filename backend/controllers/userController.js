@@ -101,7 +101,7 @@ const handelUserLogin = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true, // protect from client side js access
       sameSite: "None", // protect from CSRF ATTACK
-      secure: true,
+      // secure: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
