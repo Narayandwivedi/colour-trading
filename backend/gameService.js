@@ -204,7 +204,7 @@ async function processGame(gameInstance, gameType) {
   // Delay starting the next round by 2 seconds
   setTimeout(() => {
     executeGameRound(gameType);
-  }, 2000);
+  }, 3000);
 }
 
 }
