@@ -52,6 +52,7 @@ async function generatePeriodId(gameType) {
 }
 
 // Generate colour based on bet amount
+
 async function getRandomOutcome(period) {
   try {
     const result = await bet.aggregate([
@@ -203,7 +204,7 @@ async function processGame(gameInstance, gameType) {
   }
 }
 
-// Execute game round with 2-second delay before creating new game
+// Execute game round
 async function executeGameRound(gameType) {
   if (gameStates[gameType].isRunning) {
     gameStates[gameType].pendingExecution = true;
@@ -213,10 +214,6 @@ async function executeGameRound(gameType) {
   gameStates[gameType].isRunning = true;
 
   try {
-    // Add 2-second delay before creating the game
-    console.log(`[${new Date().toISOString()}] Waiting 2 seconds before creating ${gameType} game...`);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
     const period = await generatePeriodId(gameType);
     const newGame = await game.create({ period, gameType });
 
