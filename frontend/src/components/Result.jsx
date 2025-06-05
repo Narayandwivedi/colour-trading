@@ -67,7 +67,7 @@ export default function Result() {
 
   // Polling logic when timer is below threshold
   useEffect(() => {
-    if (timer <= 2 && !intervalRef.current) {
+    if (timer <= 1 && !intervalRef.current) {
       console.log("start polling for result");
 
       intervalRef.current = setInterval(fetch_30_results, 500); // Fast polling

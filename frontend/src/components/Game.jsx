@@ -30,9 +30,11 @@ export default function Game() {
     setBetValue,
     userData,
     period,
-    betPlaced , setBetPlaced,
+    timer,
     BACKEND_URL,
   } = useContext(AppContext);
+  console.log(timer);
+  
 
   function handelBettingWindow(colour) {
     setSelectedBetSize(null)
@@ -93,7 +95,7 @@ export default function Game() {
   }
 
   return (
-    <div className="Game-container mt-8 p-4 text-gray-700 mb-8 bg-gray-100">
+    <div className="Game-container relative mt-8 p-4 text-gray-700 mb-8 bg-gray-100">
       {/* Colour Buttons */}
       <div className="game-selection mt-8 text-white flex gap-4 justify-center">
         {COLOURS.map((colour) => (
@@ -237,6 +239,9 @@ export default function Game() {
         </div>
       )}
 
+      {/* <div className="absolute inset-0 bg-black bg-opacity-70 z-40">
+
+      </div> */}
     </div>
   );
 }
