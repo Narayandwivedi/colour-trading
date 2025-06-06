@@ -18,6 +18,8 @@ import PaymentPage from './pages/PaymentPage'
 import BetHistory from "./pages/BetHistory"
 import DepositHistory from './pages/DepositHistory'
 import WithdrawalHistory from './pages/WithdrawalHistory'
+import AddBank from './pages/AddBank'
+import AddUpi from './pages/AddUpi'
 
 function App() {
 
@@ -46,6 +48,12 @@ function App() {
     <Route path='/bethistory' element={<BetHistory/>}/>
     <Route path='/deposithistory' element={<DepositHistory/>}/>
     <Route path='/withdrawhistory' element={<WithdrawalHistory/>}/>
+    
+    <Route path='/addbank' element={<AddBank/>}/>
+    <Route path='/addupi' element={<AddUpi/>}/>
+    
+
+    
   </Routes>
   </div>
   )

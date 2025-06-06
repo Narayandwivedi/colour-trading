@@ -1,5 +1,6 @@
 import React, { useContext } from 'react'
 import { AppContext } from '../context/AppContext'
+import { Link } from 'react-router-dom'
 
 const Withdraw = () => {
     const { withdrawableBalance, setWithdrawableBalance , balance } = useContext(AppContext)
@@ -52,7 +53,9 @@ const Withdraw = () => {
                 <h2 className='text-lg font-semibold text-gray-800 mb-3'>Payout Methods</h2>
                 <div className='grid grid-cols-2 gap-4'>
                     {/* Bank Account */}
-                    <div className='bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer'>
+                   
+                   <Link to={"/addbank"}>
+                     <div className='bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer'>
                         <div className='flex flex-col items-center'>
                             <div className='bg-blue-100 p-3 rounded-full mb-3 text-blue-600'>
                                 <i className="fa-solid fa-building-columns text-2xl"></i>
@@ -61,9 +64,12 @@ const Withdraw = () => {
                             <p className='text-xs text-gray-400 mt-1'>Add new account</p>
                         </div>
                     </div>
+                   </Link>
 
                     {/* UPI ID */}
-                    <div className='bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer'>
+
+                    <Link to={'/addupi'}>
+                        <div className='bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer'>
                         <div className='flex flex-col items-center'>
                             <div className='bg-purple-100 p-3 rounded-full mb-3 text-purple-600'>
                                 <i className="fa-solid fa-indian-rupee-sign text-2xl"></i>
@@ -72,6 +78,8 @@ const Withdraw = () => {
                             <p className='text-xs text-gray-400 mt-1'>Add new UPI</p>
                         </div>
                     </div>
+                    </Link>
+                    
                 </div>
             </div>
 

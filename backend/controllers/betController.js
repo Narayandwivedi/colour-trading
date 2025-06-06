@@ -111,7 +111,7 @@ const getBetHistory = async (req, res) => {
   }
 
 
-  const allBets = await bet.find({userId})
+  const allBets = await bet.find({userId}).lean().sort({createdAt:-1})
  return res.json({success:true , allBets})
   
   }catch(err){
