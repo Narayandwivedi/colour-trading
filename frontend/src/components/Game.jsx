@@ -33,7 +33,6 @@ export default function Game() {
     timer,
     BACKEND_URL,
   } = useContext(AppContext);
-  console.log(timer);
   
 
   function handelBettingWindow(colour) {

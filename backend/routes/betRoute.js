@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const {handlePlaceBet} = require("../controllers/betController");
+const {handlePlaceBet , getBetHistory} = require("../controllers/betController");
 const { route } = require("./userRoute");
 
 //addbet
 router.post("/",handlePlaceBet)
-// route.length()
+router.post("/history",getBetHistory)
 
 
 module.exports = router

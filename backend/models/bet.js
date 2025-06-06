@@ -18,6 +18,10 @@ const betSchema = new mongoose.Schema({
         type:"string",
         enum:["big","small"]
     },
+    betResult :{
+        type : "string",
+        enum : ["red" , "green" , "big", "small"]
+    },
     betAmount:{
         type:Number,
         min:1,

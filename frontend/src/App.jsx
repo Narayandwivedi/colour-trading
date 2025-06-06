@@ -15,6 +15,9 @@ import Refer from './pages/bottomNavPages/Refer'
 import Wallet from './pages/bottomNavPages/Wallet'
 import Account from './pages/bottomNavPages/Account'
 import PaymentPage from './pages/PaymentPage'
+import BetHistory from "./pages/BetHistory"
+import DepositHistory from './pages/DepositHistory'
+import WithdrawalHistory from './pages/WithdrawalHistory'
 
 function App() {
 
@@ -39,6 +42,10 @@ function App() {
 
     <Route path='/withdraw' element={<Withdraw/>}/>
     <Route path='/login' element={<Login/>  }/>
+    
+    <Route path='/bethistory' element={<BetHistory/>}/>
+    <Route path='/deposithistory' element={<DepositHistory/>}/>
+    <Route path='/withdrawhistory' element={<WithdrawalHistory/>}/>
   </Routes>
   </div>
   )

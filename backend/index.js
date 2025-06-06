@@ -30,9 +30,6 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-app.get("/", checkLoggedIN, (req, res) => {
-  res.send("web api is working fine");
-});
 
 // Fetch last 30 closed results for a specific gameType
 app.get("/api/latest/result/:gameType", async (req, res) => {
@@ -107,6 +104,16 @@ app.get("/api/latest/period/:gameType", async (req, res) => {
 app.use("/api/users", userRoute);
 app.use("/api/transaction", transactionRoute);
 app.use("/api/bet", betRoute);
+
+
+// // Global error handling middleware
+// app.use((err, req, res, next) => {
+//   console.error("Global Error:", err.stack);
+//   res.status(err.status || 500).json({
+//     success: false,
+//     message: err.message || "Internal Server Error",
+//   });
+// });
 
 // server listen
 

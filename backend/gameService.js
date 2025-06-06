@@ -142,6 +142,7 @@ async function processGame(gameInstance, gameType) {
         bet.bulkWrite(
           bets.map((bet) => {
             let isWinner = false;
+            const betResult = bet.betColour ? colour : (bet.betSize ? size : null);
 
             if (bet.betColour && bet.betColour === colour) {
               isWinner = true;
@@ -155,6 +156,8 @@ async function processGame(gameInstance, gameType) {
                 update: {
                   status: isWinner ? "won" : "lost",
                   payout: isWinner ? bet.betAmount * 2 : 0,
+                  betResult 
+
                 },
               },
             };
