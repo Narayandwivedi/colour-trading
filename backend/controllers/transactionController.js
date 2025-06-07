@@ -38,4 +38,12 @@ async function getAllTransaction(req,res) {
     
 }
 
+async function createWithdrawal(req,res) {
+    
+}
+
+async function getAllWithDrawal(req,res) {
+    
+}
+
 module.exports = {createTransaction,getAllTransaction};

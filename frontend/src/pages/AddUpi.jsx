@@ -1,12 +1,48 @@
+import axios from "axios";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
+import { AppContext } from "../context/AppContext";
+import { useContext } from "react";
+import {useNavigate} from 'react-router-dom'
 
 const AddUpi = () => {
   const [upiId, setUpiId] = useState("");
   const [bankingName, setBankingName] = useState("");
+  const {BACKEND_URL , userData} = useContext(AppContext)
 
-  const submitUpiDetails = () => {
-    // Your logic here
-  };
+  const navigate = useNavigate()
+
+  const submitUpiDetails = async () => {
+
+    if(!upiId || !bankingName){
+      return toast.error("missing details")
+    }
+
+   try{
+
+     const {data} = await axios.post(`${BACKEND_URL}/api/users/addupi`,{
+      userId : userData._id,
+      upiId : upiId,
+      accountHolderName: bankingName
+    })
+    if(data.success){
+      toast.success(data.message)
+      navigate("/withdraw")
+    }
+
+   }catch(err){
+      if(err.response.data.message){
+        navigate("/withdraw")
+         toast.error(err.response.data.message)
+      }
+      else{
+        toast.error("some error while adding upi id try again later")
+      }
+   }
+
+
+  }
+ 
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -37,7 +73,7 @@ const AddUpi = () => {
             onChange={(e) => setBankingName(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             type="text"
-            placeholder="Enter banking name"
+            placeholder="Enter Account holder name"
           />
         </div>
 

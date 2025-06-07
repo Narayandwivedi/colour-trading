@@ -19,8 +19,8 @@ export const AppContextProvider = (props) => {
   const [finalDepositAmt , setFinalDepositAmt] = useState(100)
   const [loading, setLoading] = useState(true)
 
-  const BACKEND_URL = `http://168.231.120.131:8080`;
-  // const BACKEND_URL = `http://localhost:8080`;
+  // const BACKEND_URL = `http://168.231.120.131:8080`;
+  const BACKEND_URL = `http://localhost:8080`;
   
 
   
@@ -31,7 +31,8 @@ const checkLogin = async () => {
       withCredentials: true,
     });
     if (res.data.isLoggedIn) {
-
+      console.log(res.data.user);
+      
       setUserData(res.data.user);
       setBalance(res.data.user.balance)
       setWithdrawableBalance(res.data.user.withdrawableBalance

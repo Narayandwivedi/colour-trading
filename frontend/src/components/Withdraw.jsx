@@ -1,9 +1,47 @@
 import React, { useContext } from 'react'
 import { AppContext } from '../context/AppContext'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const Withdraw = () => {
-    const { withdrawableBalance, setWithdrawableBalance , balance } = useContext(AppContext)
+    const { withdrawableBalance, balance, userData } = useContext(AppContext)
+    const navigate = useNavigate()
+
+    if (!userData) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+                <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg text-center">
+                    <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-8 w-8 text-red-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Authentication Required</h2>
+                    <p className="text-gray-600 mb-6">
+                        Please login to access the withdrawal page and manage your funds.
+                    </p>
+                    <div className="flex flex-col space-y-3">
+                        <button
+                            onClick={() => navigate('/login')}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200"
+                        >
+                            Login Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className='min-h-screen bg-gray-50 pt-5 pb-10 px-4'>
@@ -24,7 +62,7 @@ const Withdraw = () => {
                             </div>
                             <div>
                                 <p className='text-sm opacity-90'>Total Balance</p>
-                                <h2 className='text-xl font-bold'>{balance}</h2>
+                                <h2 className='text-xl font-bold'>₹{balance?.toLocaleString() || '0'}</h2>
                             </div>
                         </div>
                         <i className="fa-solid fa-ellipsis-vertical opacity-70"></i>
@@ -40,10 +78,10 @@ const Withdraw = () => {
                             </div>
                             <div>
                                 <p className='text-sm opacity-90'>Withdrawable Balance</p>
-                                <h2 className='text-xl font-bold'>₹{withdrawableBalance}</h2>
+                                <h2 className='text-xl font-bold'>₹{withdrawableBalance?.toLocaleString() || '0'}</h2>
                             </div>
                         </div>
-                        <i className="fa-solid fa-info-circle opacity-70"></i>
+                        <i className="fa-solid fa-info-circle opacity-70" title="This is the amount you can withdraw immediately"></i>
                     </div>
                 </div>
             </div>
@@ -51,35 +89,72 @@ const Withdraw = () => {
             {/* Payout Methods */}
             <div className='mb-6'>
                 <h2 className='text-lg font-semibold text-gray-800 mb-3'>Payout Methods</h2>
-                <div className='grid grid-cols-2 gap-4'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     {/* Bank Account */}
-                   
-                   <Link to={"/addbank"}>
-                     <div className='bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer'>
-                        <div className='flex flex-col items-center'>
-                            <div className='bg-blue-100 p-3 rounded-full mb-3 text-blue-600'>
-                                <i className="fa-solid fa-building-columns text-2xl"></i>
+                    {userData.isBankAdded ? (
+                        <div className='bg-white p-4 rounded-xl shadow-sm border border-blue-200'>
+                            <div className='flex flex-col items-center'>
+                                <div className='bg-blue-100 p-3 rounded-full mb-3 text-blue-600'>
+                                    <i className="fa-solid fa-building-columns text-2xl"></i>
+                                </div>
+                                <p className='text-gray-700 font-medium'>Bank Account</p>
+                                <p className='text-xs text-green-600 mt-1'>
+                                    Added: ••••{userData.accountNumber?.slice(-4)}
+                                </p>
+                                <Link 
+                                    to="/editbank" 
+                                    className='text-xs text-blue-600 mt-2 hover:underline'
+                                >
+                                    Change Account
+                                </Link>
                             </div>
-                            <p className='text-gray-700 font-medium'>Bank Account</p>
-                            <p className='text-xs text-gray-400 mt-1'>Add new account</p>
                         </div>
-                    </div>
-                   </Link>
+                    ) : (
+                        <Link to="/addbank">
+                            <div className='bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer hover:border-blue-200'>
+                                <div className='flex flex-col items-center'>
+                                    <div className='bg-blue-100 p-3 rounded-full mb-3 text-blue-600'>
+                                        <i className="fa-solid fa-building-columns text-2xl"></i>
+                                    </div>
+                                    <p className='text-gray-700 font-medium'>Bank Account</p>
+                                    <p className='text-xs text-gray-400 mt-1'>Add new account</p>
+                                </div>
+                            </div>
+                        </Link>
+                    )}
 
                     {/* UPI ID */}
-
-                    <Link to={'/addupi'}>
-                        <div className='bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer'>
-                        <div className='flex flex-col items-center'>
-                            <div className='bg-purple-100 p-3 rounded-full mb-3 text-purple-600'>
-                                <i className="fa-solid fa-indian-rupee-sign text-2xl"></i>
+                    {userData.isUpiAdded ? (
+                        <div className='bg-white p-4 rounded-xl shadow-sm border border-purple-200'>
+                            <div className='flex flex-col items-center'>
+                                <div className='bg-purple-100 p-3 rounded-full mb-3 text-purple-600'>
+                                    <i className="fa-solid fa-indian-rupee-sign text-2xl"></i>
+                                </div>
+                                <p className='text-gray-700 font-medium'>UPI ID</p>
+                                <p className='text-xs text-green-600 mt-1'>
+                                    Added: {userData.upi}
+                                </p>
+                                <Link 
+                                    to="/editupi" 
+                                    className='text-xs text-blue-600 mt-2 hover:underline'
+                                >
+                                    Change UPI
+                                </Link>
                             </div>
-                            <p className='text-gray-700 font-medium'>UPI ID</p>
-                            <p className='text-xs text-gray-400 mt-1'>Add new UPI</p>
                         </div>
-                    </div>
-                    </Link>
-                    
+                    ) : (
+                        <Link to="/addupi">
+                            <div className='bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer hover:border-purple-200'>
+                                <div className='flex flex-col items-center'>
+                                    <div className='bg-purple-100 p-3 rounded-full mb-3 text-purple-600'>
+                                        <i className="fa-solid fa-indian-rupee-sign text-2xl"></i>
+                                    </div>
+                                    <p className='text-gray-700 font-medium'>UPI ID</p>
+                                    <p className='text-xs text-gray-400 mt-1'>Add new UPI</p>
+                                </div>
+                            </div>
+                        </Link>
+                    )}
                 </div>
             </div>
 
@@ -92,9 +167,14 @@ const Withdraw = () => {
                         type="number"
                         placeholder='e.g. 500'
                         className='w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition'
+                        min="300"
+                        max={withdrawableBalance}
                     />
+                    <p className='text-xs text-gray-400 mt-1'>
+                        Minimum: ₹300 | Maximum: ₹{withdrawableBalance?.toLocaleString() || '0'}
+                    </p>
                 </div>
-                <button className='w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-lg font-medium shadow-md hover:shadow-lg transition-all'>
+                <button className='w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-lg font-medium shadow-md hover:shadow-lg transition-all hover:from-blue-700 hover:to-blue-600'>
                     Withdraw Now
                 </button>
             </div>

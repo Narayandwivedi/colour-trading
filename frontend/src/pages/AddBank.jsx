@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import {toast} from "react-toastify"
+import axios from "axios"
+import { useContext } from "react";
+import {AppContext} from "../context/AppContext"
 
 const AddBank = () => {
   const [account, setAccount] = useState("");
@@ -6,9 +10,35 @@ const AddBank = () => {
   const [bankName, setBankName] = useState("");
   const [accountname, setAccountName] = useState("");
 
+  const {BACKEND_URL , userData} = useContext(AppContext)
+  
+
   const submitBankDetails = async () => {
-    // Your logic here
-  };
+    if(!account || !ifsc || !bankName || !accountname){
+      return toast.error("missing details")
+    }
+    
+    try{
+      const {data} = await axios.post(`${BACKEND_URL}/api/users/addbank`,{
+        userId:userData._id,
+        accountNumber:account,
+        ifscCode : ifsc,
+        bankName,
+        accountHolderName :accountname
+
+      })
+
+      if(data.success){
+        toast.success(data.message)
+      }
+
+    }catch(err){
+      if(err.response.data.message){
+        toast.error(err.response.data.message)}
+        else{
+          toast.error("some error while adding bank account try again")
+        }
+  }}
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
