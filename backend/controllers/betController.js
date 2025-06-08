@@ -6,8 +6,47 @@ const game = require("../models/game");
 const handlePlaceBet = async (req, res) => {
   const { userId, betAmount, period, betColour, betSize } = req.body;
 
-  // [Keep all your existing validation checks...]
-  // (All the input validation remains exactly the same)
+  // Validate required fields
+  if (!userId || !period || !betAmount || (!betColour && !betSize)) {
+    return res.json({ success: false, message: "missing field" });
+  }
+
+  // Disallow both colour and size bets together
+  if (betColour && betSize) {
+    return res.json({
+      success: false,
+      message: "Bet on both colour and size is not allowed at the same time",
+    });
+  }
+
+  // Validate userId
+  if (!mongoose.isValidObjectId(userId)) {
+    return res.json({ success: false, message: "invalid userId" });
+  }
+
+  // Validate betAmount
+  const numericAmount = Number(betAmount);
+  if (
+    isNaN(numericAmount) ||
+    numericAmount < 1 ||
+    !Number.isInteger(numericAmount)
+  ) {
+    return res.json({ success: false, message: "invalid bet amount" });
+  }
+
+  if (numericAmount > 200000) {
+    return res.json({ success: false, message: "bet amount exceed" });
+  }
+
+  // Validate betColour if present
+  if (betColour && betColour !== "red" && betColour !== "green") {
+    return res.json({ success: false, message: "invalid bet colour" });
+  }
+
+  // Validate betSize if present
+  if (betSize && betSize !== "big" && betSize !== "small") {
+    return res.json({ success: false, message: "invalid bet size" });
+  }
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -17,9 +56,7 @@ const handlePlaceBet = async (req, res) => {
     const getUser = await user.findById(userId).session(session);
     if (!getUser) throw new Error("user not found");
 
-    const numericAmount = Number(betAmount);
-
-    // Check sufficient balance (both main and withdrawable)
+    // Check only main balance for betting
     if (numericAmount > getUser.balance) {
       throw new Error("insufficient balance");
     }
@@ -29,7 +66,7 @@ const handlePlaceBet = async (req, res) => {
     if (!checkGame) throw new Error("game period not found");
 
     if (checkGame.status === "closed") {
-      throw new Error("bet is not allowed, period closed");
+      throw new Error("bet is not allowed period closed");
     }
 
     // Create bet object
@@ -44,20 +81,10 @@ const handlePlaceBet = async (req, res) => {
     // Save bet
     const newBet = await bet.create([betData], { session });
 
-    // 🔥 UPDATED BALANCE DEDUCTION LOGIC
-    // Case 1: If withdrawable balance covers the full bet
-    if (getUser.withdrawableBalance >= numericAmount) {
-      getUser.balance -= numericAmount;
-      getUser.withdrawableBalance -= numericAmount;
-    } 
-    // Case 2: If withdrawable balance is less than bet amount
-    else {
-      const remaining = numericAmount - getUser.withdrawableBalance;
-      getUser.balance -= numericAmount;
-      getUser.withdrawableBalance = 0; // Set to zero (not negative)
-    }
+    // SIMPLIFIED BALANCE DEDUCTION - Only from main balance
+    getUser.balance -= numericAmount;
 
-    // Ensure withdrawable never exceeds main balance (safety check)
+    // AUTO-CORRECT: Ensure withdrawable never exceeds main balance
     if (getUser.withdrawableBalance > getUser.balance) {
       getUser.withdrawableBalance = getUser.balance;
     }
