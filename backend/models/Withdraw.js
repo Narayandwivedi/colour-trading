@@ -16,8 +16,14 @@ const withdrawSchema = new mongoose.Schema(
       min: 100,
       required: true,
     },
+    paymentMethod:{
+      type:String,
+       required:true
+    }
   },
   {
     timestamps: true,
   }
 );
+
+module.exports = mongoose.model('Withdraw',withdrawSchema)

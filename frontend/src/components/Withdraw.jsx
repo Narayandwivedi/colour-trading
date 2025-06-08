@@ -1,10 +1,57 @@
 import React, { useContext } from 'react'
 import { AppContext } from '../context/AppContext'
 import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import {toast} from 'react-toastify'
+import axios from 'axios'
+
 
 const Withdraw = () => {
-    const { withdrawableBalance, balance, userData } = useContext(AppContext)
+    const { withdrawableBalance, balance, userData , BACKEND_URL } = useContext(AppContext)
+    const [amount , setAmount] = useState('')
+    const [paymentMethod, setPaymentMethod] = useState('') // 'bank' or 'upi'
     const navigate = useNavigate()
+
+
+    const handleWithdraw = async()=>{
+        const parsedAmount = Number(amount)
+        
+        if(!paymentMethod){
+            return toast.error('Please select a payment method')
+        }
+        
+        if(!userData.isBankAdded && !userData.isUpiAdded){
+            return toast.error('add bank account or UPI to withdraw')
+        }
+        
+        // Check if selected method is actually added by user
+        if(paymentMethod === 'bank' && !userData.isBankAdded){
+            return toast.error('Please add bank account first')
+        }
+        
+        if(paymentMethod === 'upi' && !userData.isUpiAdded){
+            return toast.error('Please add UPI ID first')
+        }
+        
+        if(!amount || parsedAmount<300){
+            return toast.error('invalid withdrawal amount')
+        }
+        
+        const {data} = await axios.post(`${BACKEND_URL}/api/transaction/withdraw`,{
+            userId : userData._id,
+            amount : parsedAmount,
+            paymentMethod: paymentMethod
+        })
+        
+        if(data.success){
+            toast.success('Withdrawal request submitted successfully!')
+            // Reset form
+            setAmount('')
+            setPaymentMethod('')
+        } else {
+            toast.error(data.message || 'Withdrawal failed')
+        }
+    }
 
     if (!userData) {
         return (
@@ -92,7 +139,10 @@ const Withdraw = () => {
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     {/* Bank Account */}
                     {userData.isBankAdded ? (
-                        <div className='bg-white p-4 rounded-xl shadow-sm border border-blue-200'>
+                        <div 
+                            className={`bg-white p-4 rounded-xl shadow-sm border ${paymentMethod === 'bank' ? 'border-blue-500 ring-2 ring-blue-200' : 'border-blue-200'} cursor-pointer transition-all`}
+                            onClick={() => setPaymentMethod('bank')}
+                        >
                             <div className='flex flex-col items-center'>
                                 <div className='bg-blue-100 p-3 rounded-full mb-3 text-blue-600'>
                                     <i className="fa-solid fa-building-columns text-2xl"></i>
@@ -104,6 +154,7 @@ const Withdraw = () => {
                                 <Link 
                                     to="/editbank" 
                                     className='text-xs text-blue-600 mt-2 hover:underline'
+                                    onClick={(e) => e.stopPropagation()}
                                 >
                                     Change Account
                                 </Link>
@@ -125,7 +176,10 @@ const Withdraw = () => {
 
                     {/* UPI ID */}
                     {userData.isUpiAdded ? (
-                        <div className='bg-white p-4 rounded-xl shadow-sm border border-purple-200'>
+                        <div 
+                            className={`bg-white p-4 rounded-xl shadow-sm border ${paymentMethod === 'upi' ? 'border-purple-500 ring-2 ring-purple-200' : 'border-purple-200'} cursor-pointer transition-all`}
+                            onClick={() => setPaymentMethod('upi')}
+                        >
                             <div className='flex flex-col items-center'>
                                 <div className='bg-purple-100 p-3 rounded-full mb-3 text-purple-600'>
                                     <i className="fa-solid fa-indian-rupee-sign text-2xl"></i>
@@ -137,6 +191,7 @@ const Withdraw = () => {
                                 <Link 
                                     to="/editupi" 
                                     className='text-xs text-blue-600 mt-2 hover:underline'
+                                    onClick={(e) => e.stopPropagation()}
                                 >
                                     Change UPI
                                 </Link>
@@ -161,20 +216,62 @@ const Withdraw = () => {
             {/* Withdrawal Form */}
             <div className='bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6'>
                 <h2 className='text-lg font-semibold text-gray-800 mb-4'>Withdrawal Amount</h2>
+                
+                <div className='mb-4'>
+                    <label className='block text-gray-500 text-sm mb-2'>Payment Method</label>
+                    <div className='flex gap-3 mb-4'>
+                        <button
+                            type="button"
+                            className={`flex-1 py-2 px-4 rounded-lg border ${paymentMethod === 'bank' ? 'bg-blue-50 border-blue-500 text-blue-700 font-medium' : 'border-gray-200 text-gray-600'}`}
+                            onClick={() => setPaymentMethod('bank')}
+                            disabled={!userData.isBankAdded}
+                        >
+                            <i className="fa-solid fa-building-columns mr-2"></i>
+                            Bank Transfer
+                            {userData.isBankAdded && paymentMethod === 'bank' && (
+                                <i className="fa-solid fa-check ml-2 text-blue-600"></i>
+                            )}
+                        </button>
+                        <button
+                            type="button"
+                            className={`flex-1 py-2 px-4 rounded-lg border ${paymentMethod === 'upi' ? 'bg-purple-50 border-purple-500 text-purple-700 font-medium' : 'border-gray-200 text-gray-600'}`}
+                            onClick={() => setPaymentMethod('upi')}
+                            disabled={!userData.isUpiAdded}
+                        >
+                            <i className="fa-solid fa-indian-rupee-sign mr-2"></i>
+                            UPI Transfer
+                            {userData.isUpiAdded && paymentMethod === 'upi' && (
+                                <i className="fa-solid fa-check ml-2 text-purple-600"></i>
+                            )}
+                        </button>
+                    </div>
+                    {paymentMethod && (
+                        <p className='text-xs text-green-600 mb-3'>
+                            Selected: {paymentMethod === 'bank' 
+                                ? `Bank Account (••••${userData.accountNumber?.slice(-4)})` 
+                                : `UPI ID (${userData.upi})`}
+                        </p>
+                    )}
+                </div>
+                
                 <div className='mb-4'>
                     <label className='block text-gray-500 text-sm mb-2'>Enter amount (₹)</label>
                     <input
                         type="number"
                         placeholder='e.g. 500'
                         className='w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition'
-                        min="300"
-                        max={withdrawableBalance}
+                        value={amount}
+                        onChange={(e)=>{setAmount(e.target.value)}}
                     />
                     <p className='text-xs text-gray-400 mt-1'>
-                        Minimum: ₹300 | Maximum: ₹{withdrawableBalance?.toLocaleString() || '0'}
+                        Minimum: ₹300 
                     </p>
                 </div>
-                <button className='w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-lg font-medium shadow-md hover:shadow-lg transition-all hover:from-blue-700 hover:to-blue-600'>
+                <button 
+                    onClick={handleWithdraw} 
+                    disabled={!paymentMethod || !amount}
+                    className={`w-full py-3 rounded-lg font-medium shadow-md transition-all ${paymentMethod && amount ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 hover:shadow-lg' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}
+                >
                     Withdraw Now
                 </button>
             </div>
@@ -201,6 +298,10 @@ const Withdraw = () => {
                     <li className='flex items-start gap-2'>
                         <i className="fa-solid fa-circle-check text-green-500 mt-1 text-xs"></i>
                         <span className='text-gray-600'>Deposit balance is not withdrawable</span>
+                    </li>
+                    <li className='flex items-start gap-2'>
+                        <i className="fa-solid fa-circle-check text-green-500 mt-1 text-xs"></i>
+                        <span className='text-gray-600'>Please select either Bank Transfer or UPI Transfer method</span>
                     </li>
                 </ul>
             </div>
