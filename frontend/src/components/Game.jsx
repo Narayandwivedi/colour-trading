@@ -139,108 +139,136 @@ export default function Game() {
       </div>
 
         {/* bet popup */}
-      {isBetPopOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white/90 backdrop-blur-xl p-6 rounded-2xl shadow-2xl w-full max-w-md animate-scaleIn">
-            <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
-              Place your bet on <span className={`capitalize font-extrabold ${
-                selectedBetColour === "green"? "text-green-600":
-                selectedBetColour === "violet" ? "text-violet-600":
-                selectedBetColour === 'red'?"text-red-600":
-                selectedBetSize === 'big'?'text-yellow-600':
-                selectedBetSize === 'small'?'text-blue-600':""
+    
+        {isBetPopOpen && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 border border-white/20">
+              
+              {/* Popup Header */}
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-t-3xl p-6 text-center">
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  🎯 Place Your Bet
+                </h2>
+                <div className={`inline-block px-4 py-2 rounded-full text-white font-bold ${
+                  selectedBetColour === "green" ? "bg-green-500" :
+                  selectedBetColour === "violet" ? "bg-violet-500" :
+                  selectedBetColour === "red" ? "bg-red-500" :
+                  selectedBetSize === "big" ? "bg-yellow-500" :
+                  selectedBetSize === "small" ? "bg-blue-500" : "bg-gray-500"
                 }`}>
-                {selectedBetColour?selectedBetColour:selectedBetSize}
-              </span>
-            </h2>
+                  {selectedBetColour ? selectedBetColour.toUpperCase() : selectedBetSize?.toUpperCase()}
+                </div>
+              </div>
 
+              <div className="p-6">
+                {/* Bet Input Section */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
+                    Bet Amount
+                  </label>
+                  <div className="flex items-center justify-center gap-4 mb-4">
+                    <button
+                      onClick={() => setBetInp(Math.max(10, betInp - 10))}
+                      className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white w-12 h-12 rounded-full text-xl font-bold shadow-lg transform transition-all duration-200 hover:scale-110 active:scale-95"
+                    >
+                      −
+                    </button>
 
-          {/* Bet Input and increment decrement button */}
+                    <input
+                      type="number"
+                      value={betInp}
+                      onChange={(e) => setBetInp(Number(e.target.value))}
+                      className="w-32 p-3 text-center border-2 border-gray-200 rounded-xl text-xl font-bold shadow-inner bg-gray-50 focus:border-purple-500 focus:outline-none transition-colors"
+                    />
 
-            {/* bet amount decrement button */}
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <button
-                onClick={() => setBetInp(betInp - 10)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-lg font-bold shadow"
-              >
-                −
-              </button>
+                    <button
+                      onClick={() => setBetInp(betInp + 10)}
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white w-12 h-12 rounded-full text-xl font-bold shadow-lg transform transition-all duration-200 hover:scale-110 active:scale-95"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
 
-              {/* bet input */}
-              <input
-                type="number"
-                value={betInp}
-                onChange={(e) => setBetInp(Number(e.target.value))}
-                className="w-32 p-2 text-center border border-gray-300 rounded-lg text-lg font-semibold shadow"
-              />
+                {/* Quick Amount Buttons */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
+                    Quick Select
+                  </label>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {[10, 50, 100, 200, 500].map((amount) => (
+                      <button
+                        key={amount}
+                        onClick={() => setBetInp(amount)}
+                        className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all duration-200 transform hover:scale-105 ${
+                          betInp === amount 
+                            ? 'bg-purple-500 text-white border-purple-500 shadow-lg' 
+                            : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'
+                        }`}
+                      >
+                        ₹{amount}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-              {/* bet amount increment button */}
-              <button
-                onClick={() => setBetInp(betInp + 10)}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-lg font-bold shadow"
-              >
-                +
-              </button>
-            </div>
+                {/* Multiplier Buttons */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
+                    Multiply Bet
+                  </label>
+                  <div className="flex justify-center gap-3">
+                    {[2, 3, 5, 10].map((x) => (
+                      <button
+                        key={x}
+                        onClick={() => setBetInp(Math.min(balance, betInp * x))}
+                        className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transform transition-all duration-200 hover:scale-105 active:scale-95"
+                      >
+                        {x}×
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            {/* Quick Amount Buttons */}
-            <div className="flex flex-wrap justify-center gap-3 mb-4">
-              {[10, 50, 100, 200, 500].map((amount) => (
-                <button
-                  key={amount}
-                  onClick={() => setBetInp(amount)}
-                  className="bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1 rounded-full text-sm font-medium border shadow"
-                >
-                  ₹{amount}
-                </button>
-              ))}
-            </div>
+                {/* Balance Info */}
+                <div className="text-center mb-6 p-3 bg-gray-50 rounded-xl">
+                  <div className="text-sm text-gray-600">Available Balance</div>
+                  <div className="text-lg font-bold text-green-600">₹{balance.toLocaleString()}</div>
+                </div>
 
-            {/* Multiplier Buttons */}
-            <div className="flex justify-center gap-4 mb-6">
-              {[2, 3, 5, 10].map((x) => (
-                <button
-                  key={x}
-                  onClick={() => setBetInp(betInp * x)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold shadow"
-                >
-                  {x}x
-                </button>
-              ))}
-            </div>
+                {/* Action Buttons */}
+                <div className="flex gap-4">
+                  <button
+                    onClick={handelPlaceBet}
+                    className={`flex-1 py-4 rounded-xl font-bold text-white shadow-xl transform transition-all duration-200 hover:scale-105 active:scale-95 ${
+                      selectedBetColour === "green" ? "bg-gradient-to-r from-green-500 to-emerald-600" :
+                      selectedBetColour === "violet" ? "bg-gradient-to-r from-purple-500 to-violet-600" :
+                      selectedBetColour === "red" ? "bg-gradient-to-r from-red-500 to-pink-600" :
+                      selectedBetSize === "big" ? "bg-gradient-to-r from-yellow-500 to-orange-600" :
+                      selectedBetSize === "small" ? "bg-gradient-to-r from-blue-500 to-cyan-600" :
+                      "bg-gradient-to-r from-gray-500 to-gray-600"
+                    }`}
+                  >
+                    🎯 Place Bet
+                  </button>
 
-            {/* Action Buttons */}
-            <div className="flex justify-between gap-4">
-
-              {/* place bet */}
-              <button
-                onClick={handelPlaceBet}
-                className={`${
-                  selectedBetColour === "green"? "bg-green-600"
-                  : selectedBetColour === "violet"? "bg-violet-600": 
-                  selectedBetColour==='red'?"bg-red-600 ":
-                  selectedBetSize === 'big'?'bg-yellow-600':
-                  selectedBetSize === 'small'?'bg-blue-600':""
-                  } text-white w-1/2 py-2 rounded-xl font-bold shadow transition-all`}
-              >
-                Place Bet
-              </button>
-
-              {/* cancel bet */}
-              <button
-                onClick={()=>{ setIsBetPopOpen(false);}}
-                className="bg-gray-400 hover:bg-gray-500 text-white w-1/2 py-2 rounded-xl font-semibold shadow transition-all"
-              >
-                Cancel
-              </button>
+                  <button
+                    onClick={() => {
+                      setIsBetPopOpen(false);
+                      setSelectedBetColour(null);
+                      setSelectedBetSize(null);
+                    }}
+                    className="flex-1 py-4 rounded-xl font-bold text-gray-700 bg-gray-200 hover:bg-gray-300 shadow-lg transform transition-all duration-200 hover:scale-105 active:scale-95"
+                  >
+                    ❌ Cancel
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* <div className="absolute inset-0 bg-black bg-opacity-70 z-40">
 
-      </div> */}
     </div>
   );
 }
