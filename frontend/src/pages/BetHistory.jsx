@@ -10,31 +10,29 @@ function BetCard({ Period, Bet, Amount, Result, status }) {
       color: "text-red-500",
       bg: "bg-red-50",
       border: "border-red-200",
-      icon: "🔴"
+      
     };
     if (Bet === "green") return {
       color: "text-green-500", 
       bg: "bg-green-50",
       border: "border-green-200",
-      icon: "🟢"
     };
     if (Bet === "big") return {
       color: "text-orange-500",
       bg: "bg-orange-50", 
       border: "border-orange-200",
-      icon: "📈"
+      
     };
     if (Bet === "small") return {
       color: "text-blue-500",
       bg: "bg-blue-50",
       border: "border-blue-200", 
-      icon: "📉"
+     
     };
     return {
       color: "text-gray-500",
       bg: "bg-gray-50",
       border: "border-gray-200",
-      icon: "⚪"
     };
   };
 
@@ -66,6 +64,7 @@ function BetCard({ Period, Bet, Amount, Result, status }) {
         <div className="flex items-center justify-between">
           <span className="text-gray-600 text-sm font-medium">Bet Selection</span>
           <div className={`flex items-center space-x-2 px-3 py-2 rounded-xl ${betStyle.bg} ${betStyle.border} border`}>
+            <span className="text-lg">{betStyle.icon}</span>
             <span className={`font-bold text-sm uppercase ${betStyle.color}`}>
               {Bet}
             </span>
@@ -138,16 +137,15 @@ const BetHistory = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Enhanced Header */}
-      <div className="px-4 pt-12 pb-10">
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 rounded-3xl mb-6 shadow-lg">
-            <span className="text-white text-3xl">🎯</span>
+      <div className="px-4 pt-8 pb-6">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4">
+            <span className="text-white text-2xl">🎯</span>
           </div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent leading-tight">
-            My Bet History
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Bet History
           </h1>
-          <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full"></div>
-          <p className="text-gray-600 text-base font-medium mt-3">Track your complete betting journey</p>
+          <p className="text-gray-600 text-sm">Your complete betting journey</p>
         </div>
       </div>
 
