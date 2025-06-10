@@ -10,7 +10,8 @@ export default function Homepage() {
       <div className="fixed inset-0 bg-gradient-to-br from-cyan-950 via-teal-900 to-emerald-950 -z-10 w-screen" />
 
       {/* Stunning aqua-themed navbar */}
-      <nav className="bg-gradient-to-r from-teal-700 via-cyan-700 to-emerald-700 shadow-2xl px-4 py-4 max-w-[440px] mx-auto backdrop-blur-sm border-b border-cyan-600/50">
+
+              <nav className="bg-gradient-to-r from-teal-700 via-cyan-700 to-emerald-700 shadow-2xl px-4 py-4 max-w-[440px] mx-auto backdrop-blur-sm border-b border-cyan-600/50">
          {/* Winner Club Logo */}
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -77,7 +78,7 @@ export default function Homepage() {
             </div>
           </div>
       </nav>
-
+ 
       {/* Vibrant ocean-themed banner */}
       <div className="relative w-full max-w-[440px] mx-auto mt-6 px-4">
         <div className="relative bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-4 sm:p-5 shadow-2xl overflow-hidden text-white border border-teal-400/30">
