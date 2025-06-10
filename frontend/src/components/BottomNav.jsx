@@ -15,11 +15,7 @@ const BottomNav = () => {
          <i className="fa-solid fa-share-nodes text-xl"></i>
           <span className="text-xs">Refer&Earn</span>
         </Link>
-        <Link to="/wallet" className="flex flex-col items-center text-gray-600 hover:text-purple-600">
-          <i className="fa-solid fa-wallet text-xl"></i>
-          <span className="text-xs">Wallet</span>
-        </Link>
-
+  
         <Link to="/account" className="flex flex-col items-center text-gray-600 hover:text-rose-600">
           <i className="fa-solid fa-user text-xl"></i>
           <span className="text-xs">Account</span>
