@@ -37,23 +37,18 @@ export default function Result() {
 
         //check winner logic 
         if ((selectedBetColour||selectedBetSize) && betValue) {
-          if (selectedBetColour === data.results[0].colour) {
+          if (selectedBetColour === data.results[0].colour || selectedBetSize === data.results[0].size) {
             setWinAmount(betValue * 2);
             setBalance((prevBalance) => prevBalance + (betValue * 2))
             setShowWinner(true)
-            setBetValue(null)
-            setSelectedBetColour(null)
-            setSelectedBetSize(null)
         
           }
           else {
            setShowLoser(true)
-            setBetValue(null)
-            setSelectedBetColour(null)
-            setSelectedBetSize(null)
           }
           setBetValue(null)
           setSelectedBetColour(null)
+          setSelectedBetSize(null)
         }
         setLatestPeriod(latest.period);
 
@@ -90,20 +85,20 @@ export default function Result() {
   return (
     <div className="result-container mb-6 px-4">
       {/* Header */}
-      <div className="flex items-center justify-center gap-2 mb-4">
-        <div className="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+      <div className="flex items-center justify-center gap-3 mb-5">
+        <div className="w-7 h-7 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-md">
           <i className="fa-solid fa-trophy text-white text-sm"></i>
         </div>
-        <span className="text-gray-700 font-semibold text-lg">Results History</span>
+        <span className="text-gray-800 font-bold text-xl">Results History</span>
       </div>
 
       {/* Gradient divider */}
-      <div className="h-1 bg-gradient-to-r from-teal-400 to-teal-600 rounded-full mb-4"></div>
+      <div className="h-1 bg-gradient-to-r from-teal-400 to-teal-600 rounded-full mb-5 shadow-sm"></div>
 
       {/* Results Grid - Mobile Optimized */}
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-teal-500 to-teal-600 px-2 py-3">
-          <div className="grid gap-1 text-white text-sm font-medium" style={{gridTemplateColumns: '2fr 1fr 1fr 1fr'}}>
+      <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        <div className="bg-gradient-to-r from-teal-500 to-teal-600 px-3 py-4">
+          <div className="grid gap-2 text-white text-sm font-semibold" style={{gridTemplateColumns: '2fr 1fr 1fr 1fr'}}>
             <div className="text-center">Period</div>
             <div className="text-center">Size</div>
             <div className="text-center">Number</div>
@@ -115,14 +110,14 @@ export default function Result() {
           {results.map((item, index) => (
             <div 
               key={index} 
-              className={`grid gap-1 px-2 py-3 border-b border-gray-100 ${
+              className={`grid gap-2 px-3 py-4 border-b border-gray-100 ${
                 index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
               } hover:bg-teal-50 transition-colors duration-200`}
               style={{gridTemplateColumns: '2fr 1fr 1fr 1fr'}}
             >
               {/* Period */}
               <div className="text-center flex justify-center">
-                <div className="bg-gradient-to-r from-blue-400 to-blue-500 text-white text-xs font-bold px-1 py-1 rounded-lg max-w-full overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-2 py-1.5 rounded-lg shadow-sm">
                   <span className="block truncate text-xs leading-tight">
                     {item.period}
                   </span>
@@ -131,10 +126,10 @@ export default function Result() {
 
               {/* Size */}
               <div className="text-center">
-                <span className={`text-xs font-semibold px-1 py-1 rounded-full ${
+                <span className={`text-xs font-bold px-2 py-1.5 rounded-full shadow-sm ${
                   item.size === 'Big' 
-                    ? 'bg-orange-100 text-orange-700' 
-                    : 'bg-purple-100 text-purple-700'
+                    ? 'bg-orange-200 text-orange-800' 
+                    : 'bg-purple-200 text-purple-800'
                 }`}>
                   {item.size}
                 </span>
@@ -142,17 +137,17 @@ export default function Result() {
 
               {/* Number */}
               <div className="text-center">
-                <div className="bg-gray-100 text-gray-800 font-bold text-sm w-7 h-7 rounded-full flex items-center justify-center mx-auto">
+                <div className="bg-gray-200 text-gray-800 font-bold text-sm w-8 h-8 rounded-full flex items-center justify-center mx-auto shadow-sm">
                   {item.number}
                 </div>
               </div>
 
               {/* Color */}
               <div className="flex justify-center items-center">
-                <div className={`w-5 h-5 rounded-full shadow-md border-2 border-white ${
+                <div className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
                   item.colour === "red" 
-                    ? "bg-gradient-to-r from-red-400 to-red-500" 
-                    : "bg-gradient-to-r from-green-400 to-green-500"
+                    ? "bg-gradient-to-r from-red-500 to-red-600" 
+                    : "bg-gradient-to-r from-green-500 to-green-600"
                 }`}>
                 </div>
               </div>
@@ -162,20 +157,20 @@ export default function Result() {
 
         {/* Empty state */}
         {results.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            <div className="text-4xl mb-2">🎯</div>
-            <p>No results available</p>
+          <div className="text-center py-12 text-gray-500">
+            <div className="text-5xl mb-3">🎯</div>
+            <p className="text-lg font-medium">No results available</p>
           </div>
         )}
       </div>
 
-      {/* Win Popup */}
+      {/* Win Popup - No Animation */}
       {showWinner && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50 px-4">
-          <div className="relative w-full max-w-sm bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 p-6 rounded-3xl shadow-2xl animate-bounce">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 px-4">
+          <div className="relative w-full max-w-sm bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 p-8 rounded-3xl shadow-2xl">
             {/* Close Button */}
             <button
-              className="absolute top-3 right-3 text-white text-2xl hover:scale-110 transition transform"
+              className="absolute top-4 right-4 text-white text-2xl hover:scale-110 transition transform"
               onClick={() => setShowWinner(false)}
             >
               <i className="fa-regular fa-circle-xmark drop-shadow-lg"></i>
@@ -183,24 +178,24 @@ export default function Result() {
 
             {/* Trophy & Glow */}
             <div className="flex flex-col items-center justify-center">
-              <div className="relative w-20 h-20 mb-6">
-                <div className="absolute w-full h-full rounded-full bg-yellow-300 blur-xl opacity-70 animate-pulse"></div>
-                <div className="relative w-20 h-20 bg-gradient-to-br from-yellow-200 to-yellow-400 rounded-full flex items-center justify-center shadow-2xl border-4 border-white">
-                  <i className="fa-solid fa-trophy text-3xl text-yellow-700 drop-shadow-md"></i>
+              <div className="relative w-24 h-24 mb-8">
+                <div className="absolute w-full h-full rounded-full bg-yellow-300 blur-xl opacity-70"></div>
+                <div className="relative w-24 h-24 bg-gradient-to-br from-yellow-200 to-yellow-400 rounded-full flex items-center justify-center shadow-2xl border-4 border-white">
+                  <i className="fa-solid fa-trophy text-4xl text-yellow-700 drop-shadow-md"></i>
                 </div>
               </div>
 
               {/* Text */}
-              <h2 className="text-3xl font-extrabold text-white mb-2 drop-shadow-lg">🎉 You Won! 🎉</h2>
-              <p className="text-lg text-white font-medium mb-6 opacity-90">Congratulations!</p>
+              <h2 className="text-3xl font-extrabold text-white mb-3 drop-shadow-lg">🎉 You Won! 🎉</h2>
+              <p className="text-lg text-white font-medium mb-8 opacity-90">Congratulations!</p>
 
               {/* Winning Amount */}
-              <div className="bg-white text-green-600 text-4xl font-extrabold py-3 px-8 rounded-2xl shadow-xl border-2 border-green-400 mb-4">
+              <div className="bg-white text-green-600 text-4xl font-extrabold py-4 px-10 rounded-2xl shadow-xl border-2 border-green-400 mb-6">
                 ₹{winAmount}
               </div>
 
               {/* Celebration */}
-              <p className="text-white font-medium text-sm opacity-90 text-center">
+              <p className="text-white font-semibold text-sm opacity-90 text-center">
                 Amazing! Keep playing to win even more! 🚀
               </p>
             </div>
@@ -208,10 +203,10 @@ export default function Result() {
         </div>
       )}
 
-      {/* Lose Popup */}
+      {/* Lose Popup - No Animation */}
       {showLoser && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 animate-bounce">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
             <div className="text-center">
               <div className="text-6xl mb-4">💔</div>
               <h2 className="text-2xl font-bold text-red-500 mb-3">
