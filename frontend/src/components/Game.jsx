@@ -77,13 +77,6 @@ export default function Game() {
         toast.success(data.message);
         setBalance((prevBalance) => prevBalance - betInp);
         setBetValue(betInp);
-    
-        // if(selectedBetColour){
-        //   setBetPlaced((prev)=>({...prev , colour:selectedBetColour , value:betInp}))
-        // }
-        // else if(selectedBetSize){
-        //   setBetPlaced((prev)=>({...prev , size:selectedBetSize , value:betInp}))
-        // }
         setIsBetPopOpen(false);
         setSelectedBetColour(null)
         setSelectedBetSize(null)
@@ -96,12 +89,12 @@ export default function Game() {
   return (
     <div className="Game-container relative mt-8 p-4 text-gray-700 mb-8 bg-gray-100">
       {/* Colour Buttons */}
-      <div className="game-selection mt-8 text-white flex gap-4 justify-center">
+      <div className="game-selection mt-8 text-white flex gap-2 justify-center">
         {COLOURS.map((colour) => (
           <button
             key={colour.name}
             onClick={() => handelBettingWindow(colour.name)}
-            className={`${colour.bg} px-4 py-2 rounded font-semibold shadow hover:opacity-90 transition`}
+            className={`${colour.bg} px-3 py-2 rounded font-semibold shadow hover:opacity-90 transition`}
           >
             {colour.label}
           </button>
@@ -126,7 +119,7 @@ export default function Game() {
         {[...Array(10).keys()].map((num) => (
           <button
             key={num}
-            className={`w-12 h-12 rounded-full text-white text-xl font-semibold shadow-md transform transition duration-200 hover:scale-110 ${num === 0
+            className={`w-11 h-11 rounded-full text-white text-xl font-semibold shadow-md transform transition duration-200 hover:scale-110 ${num === 0
               ? "bg-gradient-to-tr from-red-500 via-pink-500 to-violet-600"
               : num % 2 === 0
                 ? "bg-gradient-to-br from-green-400 to-emerald-600"

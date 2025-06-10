@@ -39,7 +39,7 @@ export default function ColourTrading() {
   return (
     <>
       <Topbar/>
-      <Timer/>  
+      <Timer/>
       <Game/>
       <Result/>
     </>
