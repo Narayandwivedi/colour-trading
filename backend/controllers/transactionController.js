@@ -25,12 +25,10 @@ async function createTransaction(req, res) {
       console.log("some error in transaction");
       return res.send("some error in transcation please try again later");
     }
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "balance will be added shortly after verifying UTR",
-      });
+    res.status(201).json({
+      success: true,
+      message: "balance will be added shortly after verifying UTR",
+    });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -183,44 +181,76 @@ async function getAllWithDrawal(req, res) {
   }
 }
 
-async function getUserWithdrawal(req, res) {
+async function getWithdrawalHistory(req, res) {
   try {
     const { userId } = req.body;
 
     // Validate request body
     if (!userId) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "User ID is required" 
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
       });
     }
 
     // Validate user ID format
     if (!mongoose.isValidObjectId(userId)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid User ID format" 
+      return res.status(400).json({
+        success: false,
+        message: "Invalid User ID format",
       });
     }
 
     // Find withdrawals and sort by date (newest first)
-    const withdrawals = await withdraw.find({ userId })
+    const withdrawals = await withdraw
+      .find({ userId })
       .lean()
-      .sort({ createdAt: -1 }); 
+      .sort({ createdAt: -1 });
 
-    return res.json({ 
-      success: true, 
+    return res.json({
+      success: true,
       history: withdrawals,
-      count: withdrawals.length 
+      count: withdrawals.length,
     });
-
   } catch (err) {
-    console.error('Error in getUserWithdrawal:', err);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    console.error("Error in getUserWithdrawal:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
     });
+  }
+}
+
+async function getDepositHistory(req, res) {
+  try {
+    const { userId } = req.body;
+
+    // validate req body
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "unauthorized" });
+    }
+
+    // validate id format
+    if (!mongoose.isValidObjectId(userId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "invalid request" });
+    }
+
+    // fetch deposit history
+    const depositHistory = await transactionModel
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .lean();
+      if(depositHistory){
+        return res.json({success:true , depositHistory})
+      }
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: "internal server error" });
   }
 }
 
@@ -229,5 +259,6 @@ module.exports = {
   getAllTransaction,
   createWithdrawal,
   getAllWithDrawal,
-  getUserWithdrawal
+  getWithdrawalHistory,
+  getDepositHistory,
 };
