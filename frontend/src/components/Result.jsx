@@ -10,7 +10,6 @@ export default function Result() {
   const [latestPeriod, setLatestPeriod] = useState(null); // Local tracking
   const intervalRef = useRef(null);
 
-
   const {
     BACKEND_URL,
     gameType, timer,
@@ -89,116 +88,148 @@ export default function Result() {
   }, [timer]);
 
   return (
-    <div className="result-container mb-6">
-      <p className="flex gap-4 text-gray-500 justify-center mb-3">
-        <i className="fa-solid fa-trophy text-xl "></i>
-        <span>Period</span>
-      </p>
-      <hr style={{ border: "1px solid #019688" }} />
-
-      <div className="result-history overflow-x-auto bg-gray-100 p-4 rounded-lg shadow-md">
-        <table className="table-auto w-full border-collapse border border-gray-300 bg-white">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="border border-gray-300 px-2 py-2 text-left font-medium text-gray-600">
-                Period
-              </th>
-              <th className="border border-gray-300 px-2 py-2 text-left font-medium text-gray-600">
-                Big/Small
-              </th>
-              <th className="border border-gray-300 px-2 py-2 text-left font-medium text-gray-600">
-                Number
-              </th>
-              <th className="border border-gray-300 px-2 py-2 text-left font-medium text-gray-600">
-                Result
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {results.map((item, index) => (
-              <tr key={index} className="odd:bg-white even:bg-gray-50">
-                <td className="border text-[14px] border-gray-300 px-1 text-center py-2 text-gray-700">
-                  {item.period}
-                </td>
-                <td className="border border-gray-300 text-center py-2 text-gray-700">
-                  {item.size}
-                </td>
-                <td className="border border-gray-300 text-center py-2 text-gray-700">
-                  {item.number}
-                </td>
-                <td>
-                  <div
-                    className={`w-4 h-4 ${item.colour === "red" ? "bg-red-500" : "bg-green-500"
-                      } rounded-full mx-auto`}
-                  ></div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="result-container mb-6 px-4">
+      {/* Header */}
+      <div className="flex items-center justify-center gap-2 mb-4">
+        <div className="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+          <i className="fa-solid fa-trophy text-white text-sm"></i>
+        </div>
+        <span className="text-gray-700 font-semibold text-lg">Results History</span>
       </div>
 
-      {/* win popup */}
+      {/* Gradient divider */}
+      <div className="h-1 bg-gradient-to-r from-teal-400 to-teal-600 rounded-full mb-4"></div>
 
+      {/* Results Grid - Mobile Optimized */}
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div className="bg-gradient-to-r from-teal-500 to-teal-600 px-2 py-3">
+          <div className="grid gap-1 text-white text-sm font-medium" style={{gridTemplateColumns: '2fr 1fr 1fr 1fr'}}>
+            <div className="text-center">Period</div>
+            <div className="text-center">Size</div>
+            <div className="text-center">Number</div>
+            <div className="text-center">Color</div>
+          </div>
+        </div>
+
+        <div className="max-h-96 overflow-y-auto">
+          {results.map((item, index) => (
+            <div 
+              key={index} 
+              className={`grid gap-1 px-2 py-3 border-b border-gray-100 ${
+                index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+              } hover:bg-teal-50 transition-colors duration-200`}
+              style={{gridTemplateColumns: '2fr 1fr 1fr 1fr'}}
+            >
+              {/* Period */}
+              <div className="text-center flex justify-center">
+                <div className="bg-gradient-to-r from-blue-400 to-blue-500 text-white text-xs font-bold px-1 py-1 rounded-lg max-w-full overflow-hidden">
+                  <span className="block truncate text-xs leading-tight">
+                    {item.period}
+                  </span>
+                </div>
+              </div>
+
+              {/* Size */}
+              <div className="text-center">
+                <span className={`text-xs font-semibold px-1 py-1 rounded-full ${
+                  item.size === 'Big' 
+                    ? 'bg-orange-100 text-orange-700' 
+                    : 'bg-purple-100 text-purple-700'
+                }`}>
+                  {item.size}
+                </span>
+              </div>
+
+              {/* Number */}
+              <div className="text-center">
+                <div className="bg-gray-100 text-gray-800 font-bold text-sm w-7 h-7 rounded-full flex items-center justify-center mx-auto">
+                  {item.number}
+                </div>
+              </div>
+
+              {/* Color */}
+              <div className="flex justify-center items-center">
+                <div className={`w-5 h-5 rounded-full shadow-md border-2 border-white ${
+                  item.colour === "red" 
+                    ? "bg-gradient-to-r from-red-400 to-red-500" 
+                    : "bg-gradient-to-r from-green-400 to-green-500"
+                }`}>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Empty state */}
+        {results.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <div className="text-4xl mb-2">🎯</div>
+            <p>No results available</p>
+          </div>
+        )}
+      </div>
+
+      {/* Win Popup */}
       {showWinner && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
-          <div className="relative w-96 bg-gradient-to-b from-yellow-400 to-orange-300 p-6 rounded-2xl shadow-2xl animate-bounce-in">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50 px-4">
+          <div className="relative w-full max-w-sm bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 p-6 rounded-3xl shadow-2xl animate-bounce">
             {/* Close Button */}
             <button
-              className="absolute top-3 right-3 text-white text-2xl hover:scale-110 transition"
+              className="absolute top-3 right-3 text-white text-2xl hover:scale-110 transition transform"
               onClick={() => setShowWinner(false)}
             >
-              <i className="fa-regular fa-circle-xmark"></i>
+              <i className="fa-regular fa-circle-xmark drop-shadow-lg"></i>
             </button>
 
             {/* Trophy & Glow */}
             <div className="flex flex-col items-center justify-center">
-              <div className="relative w-20 h-20 mb-4">
-                <div className="absolute w-full h-full rounded-full bg-yellow-400 blur-lg opacity-50 animate-ping"></div>
-                <div className="w-20 h-20 bg-yellow-300 rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
-                  <i className="fa-solid fa-trophy text-3xl text-white"></i>
+              <div className="relative w-20 h-20 mb-6">
+                <div className="absolute w-full h-full rounded-full bg-yellow-300 blur-xl opacity-70 animate-pulse"></div>
+                <div className="relative w-20 h-20 bg-gradient-to-br from-yellow-200 to-yellow-400 rounded-full flex items-center justify-center shadow-2xl border-4 border-white">
+                  <i className="fa-solid fa-trophy text-3xl text-yellow-700 drop-shadow-md"></i>
                 </div>
               </div>
 
               {/* Text */}
-              <h2 className="text-3xl font-extrabold text-white mb-2 drop-shadow-lg">Congratulations!</h2>
-              <p className="text-lg text-white font-medium mb-4">You've won</p>
+              <h2 className="text-3xl font-extrabold text-white mb-2 drop-shadow-lg">🎉 You Won! 🎉</h2>
+              <p className="text-lg text-white font-medium mb-6 opacity-90">Congratulations!</p>
 
               {/* Winning Amount */}
-              <div className="bg-white text-green-600 text-4xl font-extrabold py-2 px-6 rounded-xl shadow-md border-2 border-green-500">
+              <div className="bg-white text-green-600 text-4xl font-extrabold py-3 px-8 rounded-2xl shadow-xl border-2 border-green-400 mb-4">
                 ₹{winAmount}
               </div>
 
               {/* Celebration */}
-              <p className="mt-4 text-white font-medium text-sm opacity-90">Keep it up and win more!</p>
+              <p className="text-white font-medium text-sm opacity-90 text-center">
+                Amazing! Keep playing to win even more! 🚀
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* lose popup */}
-    {
-      showLoser&&(
-         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="bg-white/90 backdrop-blur-xl p-6 rounded-3xl shadow-2xl w-full max-w-sm mx-4 animate-popup">
-          <div className="text-center">
-            <div className="text-6xl mb-3">😞</div>
-            <h2 className="text-2xl font-bold text-red-600 mb-2">
-              You Lost
-            </h2>
-            <p className="text-gray-700 mb-4">Better luck next time!</p>
-            <button
-              onClick={()=>{setShowLoser(false)}}
-              className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full font-semibold shadow transition-all"
-            >
-              Try Again
-            </button>
+      {/* Lose Popup */}
+      {showLoser && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 animate-bounce">
+            <div className="text-center">
+              <div className="text-6xl mb-4">💔</div>
+              <h2 className="text-2xl font-bold text-red-500 mb-3">
+                Better Luck Next Time!
+              </h2>
+              <p className="text-gray-600 mb-6 text-sm">
+                Don't give up! Every game is a new chance to win big! 🎯
+              </p>
+              <button
+                onClick={() => {setShowLoser(false)}}
+                className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white px-6 py-3 rounded-full font-semibold shadow-lg transition-all transform hover:scale-105"
+              >
+                Try Again 🎮
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      )
-    } 
-
+      )}
     </div>
   );
 }

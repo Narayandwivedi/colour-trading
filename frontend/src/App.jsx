@@ -41,7 +41,7 @@ function App() {
     <Route path='/mine' element={<Mine/>}/>
     <Route path='/aviator' element={<Aviator/>}/>
     <Route path='/refer' element={<Refer />} />
-          <Route path='/wallet' element={<Wallet />} />
+          {/* <Route path='/wallet' element={<Wallet />} /> */}
           <Route path='/account' element={<Account />} />
           <Route path='/deposit' element={<Addbalance />} />
           <Route path='/payment' element={<PaymentPage />} />
