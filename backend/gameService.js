@@ -40,6 +40,11 @@ const periodCounters = {
 // Generate period ID
 async function generatePeriodId(gameType) {
   const now = new Date();
+
+   if (periodCounters[gameType] >= 999) {
+    periodCounters[gameType] = 1;
+  }
+
   const counter = periodCounters[gameType]++;
   return [
     now.getFullYear(),
