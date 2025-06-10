@@ -106,7 +106,7 @@ function WithdrawalCard({ id, status, amount, paymentMethod, createdAt }) {
           <div className="flex items-center justify-between">
             <span className="text-gray-600 text-sm font-medium">Date</span>
             <span className="bg-gray-100 px-3 py-1 rounded-lg text-gray-800 font-medium text-sm">
-              {new Date(createdAt).toLocaleDateString()}
+               {new Date(createdAt).toLocaleDateString('en-GB').replace(/\//g, '-')}
             </span>
           </div>
         )}
