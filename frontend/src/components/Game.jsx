@@ -222,12 +222,7 @@ export default function Game() {
                   </div>
                 </div>
 
-                {/* Balance Info */}
-                <div className="text-center mb-6 p-3 bg-gray-50 rounded-xl">
-                  <div className="text-sm text-gray-600">Available Balance</div>
-                  <div className="text-lg font-bold text-green-600">₹{balance.toLocaleString()}</div>
-                </div>
-
+         
                 {/* Action Buttons */}
                 <div className="flex gap-4">
                   <button
