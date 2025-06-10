@@ -16,6 +16,8 @@ export default function Result() {
     gameType, timer,
     selectedBetColour,
     setSelectedBetColour,
+    selectedBetSize,
+    setSelectedBetSize,
     betValue,
     showWinner,
     setShowWinner,
@@ -35,15 +37,21 @@ export default function Result() {
         setResults(data.results);
 
         //check winner logic 
-
-        if (selectedBetColour && betValue) {
+        if ((selectedBetColour||selectedBetSize) && betValue) {
           if (selectedBetColour === data.results[0].colour) {
             setWinAmount(betValue * 2);
             setBalance((prevBalance) => prevBalance + (betValue * 2))
             setShowWinner(true)
+            setBetValue(null)
+            setSelectedBetColour(null)
+            setSelectedBetSize(null)
+        
           }
           else {
            setShowLoser(true)
+            setBetValue(null)
+            setSelectedBetColour(null)
+            setSelectedBetSize(null)
           }
           setBetValue(null)
           setSelectedBetColour(null)

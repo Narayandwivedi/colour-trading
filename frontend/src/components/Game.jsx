@@ -78,8 +78,7 @@ export default function Game() {
         setBalance((prevBalance) => prevBalance - betInp);
         setBetValue(betInp);
         setIsBetPopOpen(false);
-        setSelectedBetColour(null)
-        setSelectedBetSize(null)
+       
       }
     } catch (err) {
       console.log(err.message);
