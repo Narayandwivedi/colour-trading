@@ -23,7 +23,7 @@ const handelUserSignup = async (req, res) => {
       return res.status(400).json({ success: false, message: "missing data" });
     }
 
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, referedBy } = req.body;
 
     if (
       !fullName ||
@@ -54,6 +54,7 @@ const handelUserSignup = async (req, res) => {
       email,
       password: hashedpassword,
       referralCode: referralCode,
+      referedBy,
     });
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -166,7 +167,7 @@ const isloggedin = async (req, res) => {
       user.upi = maskUpiId(user.upiId.upi);
       delete user.upiId;
     }
-    return res.status(200).json({ isLoggedIn: true, user});
+    return res.status(200).json({ isLoggedIn: true, user });
   } catch (err) {
     return res
       .status(401)
@@ -217,6 +218,33 @@ const handleUpdateBalance = async (req, res) => {
     if (!fetchedUser) throw new Error("User not found");
 
     fetchedUser.balance += amount;
+
+    if (fetchedUser.isFirstDeposit && fetchedUser.referedBy && amount >= 500) {
+      const referrer = await userModel
+        .findOne({ referralCode: fetchedUser.referedBy })
+        .session(session);
+      if (referrer) {
+        referrer.balance += 50;
+        await referrer.save({ session });
+
+        // add in transaction history
+        const referralTransaction = new transactionModel({
+          userId: referrer._id,
+          amount: 50,
+          type: "referral-bonus",
+          status: "success",
+          metadata: {
+            referredUser: fetchedUser._id,
+            depositId: transaction._id, // Reference the original deposit
+          },
+        });
+        await referralTransaction.save({ session });
+      }
+    }
+
+    if (fetchedUser.isFirstDeposit) {
+      fetchedUser.isFirstDeposit = false;
+    }
     await fetchedUser.save({ session });
 
     // 3. Mark transaction as successful

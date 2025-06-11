@@ -16,7 +16,7 @@ const Login = () => {
 
   async function handleLogin(){
     if(!email || !email.trim() || !password || !password.trim()){
-        return toast.error("email or password is missng")
+        return toast.error("email or password is missing")
     }
     try{
       const {data} = await axios.post(`${BACKEND_URL}/api/users/login`,{
@@ -54,7 +54,8 @@ const Login = () => {
     const {data} = await axios.post(`${BACKEND_URL}/api/users/signup`,{
       fullName,
       email,
-      password
+      password,
+      referedBy:inviteCode
     },
     {
       withCredentials:true

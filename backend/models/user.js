@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
 
+  isFirstDeposit : {
+    type:Boolean,
+    default:true
+  },
+
   bankAccount: {
     accountHolderName: String,
     accountNumber: String,

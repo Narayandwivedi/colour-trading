@@ -7,17 +7,22 @@ const transactionSchema = new mongoose.Schema({
     },
     UTR : {
         type : Number,
-        required:true
     },
+    
 
     status : {
         type:"string",
-        enum:["pending","success","rejected"],
+        enum:["pending","success"],
         default:"pending"
     },
     amount:{
         type:Number
-    }
+    },
+     type: {
+    type: String,
+    enum: ["deposit", "referral-bonus", ],  
+    default: "deposit"
+  },
 },{
     timestamps:true
 })
