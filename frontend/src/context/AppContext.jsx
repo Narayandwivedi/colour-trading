@@ -6,7 +6,7 @@ export const AppContext = createContext();
 export const AppContextProvider = (props) => {
   const [selectedBetColour, setSelectedBetColour] = useState(null);
   const [selectedBetSize , setSelectedBetSize] = useState(null);
-  const [betPlaced , setBetPlaced] = useState(null)
+  const [betAllowed , setBetAllowed] = useState(true)
   const [showWinner, setShowWinner] = useState(false);
   const [timer, setTimer] = useState(30);
   const [balance, setBalance] = useState(0);
@@ -65,7 +65,7 @@ const checkLogin = async () => {
     withdrawableBalance,setWithdrawableBalance,
     finalDepositAmt , setFinalDepositAmt,
     selectedBetSize,setSelectedBetSize,
-    betPlaced , setBetPlaced,
+    betAllowed , setBetAllowed,
     
     BACKEND_URL,
 

@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect, useRef } from "react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 // ⏰ Clock UI
 function Watch({ selected }) {
@@ -29,8 +30,8 @@ const getDurationByGameType = (type) => {
 };
 
 export default function Game() {
-  const [isBetPopOpen, setIsBetPopOpen] = useState(false);
-  const [betInp, setBetInp] = useState(100);
+  
+  
   const [selectedTime, setSelectedTime] = useState("30sec");
 
   const fetchInterval = useRef(null);
@@ -62,6 +63,8 @@ export default function Game() {
       setTimer(timeLeft);
     }, 800);
 
+    
+
     return () => clearInterval(interval);
   }, [periodCreatedAT, gameType]);
 
@@ -83,7 +86,7 @@ export default function Game() {
       }
       return false; // No new period yet
     } catch (err) {
-      console.error("Error fetching latest period:", err);
+      toast.error('error fetching latest period')
       return false;
     }
   }
@@ -94,8 +97,6 @@ export default function Game() {
 
     const startPolling = async () => {
       if (timer <= 1 && !fetchInterval.current) {
-        console.log("⏳ Started polling for new period...");
-
         fetchInterval.current = setInterval(async () => {
           const foundNewPeriod = await fetchLatestPeriodAndCheckChange(period);
           if (foundNewPeriod && isMounted) {

@@ -1,4 +1,4 @@
-import { useContext, useState} from "react";
+import { useContext, useState,useEffect} from "react";
 import { AppContext } from "../context/AppContext";
 import Timer from "../components/Timer";
 import axios from "axios";
@@ -32,7 +32,22 @@ export default function Game() {
     period,
     timer,
     BACKEND_URL,
+    betAllowed , setBetAllowed,
   } = useContext(AppContext);
+  
+  useEffect(() => {
+  if (timer <= 5  && betAllowed) {
+    setBetAllowed(false);
+    setIsBetPopOpen(false)
+    // console.log('bet closed');
+  }
+
+  if( timer>5 && !betAllowed){
+    
+    setBetAllowed(true)
+    // console.log('bet open');
+  }
+}, [timer, betAllowed]);
   
 
   function handelBettingWindow(colour) {
@@ -255,7 +270,27 @@ export default function Game() {
           </div>
         )}
 
-
+      {!betAllowed &&
+  <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center backdrop-blur-sm">
+    <div className="flex flex-col items-center gap-6">
+      <h2 className="text-2xl font-semibold text-white uppercase tracking-wider">
+        Time Remaining
+      </h2>
+      <div className="flex gap-4">
+        <div className="flex flex-col items-center">
+          <p className="text-7xl font-bold text-white bg-red-800 px-6 py-4 rounded-xl shadow-lg">
+            0
+          </p>
+        </div>
+        <div className="flex flex-col items-center">
+          <p className="text-7xl font-bold text-white bg-red-800 px-6 py-4 rounded-xl shadow-lg">
+            {timer}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+}
     </div>
   );
 }

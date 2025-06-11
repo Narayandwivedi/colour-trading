@@ -27,14 +27,12 @@ export default function Result() {
   const fetch_30_results = async () => {
     try {
       const { data } = await axios.get(`${BACKEND_URL}/api/latest/result/${gameType}`);
-      console.log(data);
-      
       const latest = data.results[0];
 
       // Only update when new period is detected
       if (latest && latest.period !== latestPeriod) {
         setResults(data.results);
-
+            
         //check winner logic 
         if ((selectedBetColour||selectedBetSize) && betValue) {
           if (selectedBetColour === data.results[0].colour || selectedBetSize === data.results[0].size) {
@@ -70,7 +68,7 @@ export default function Result() {
   // Polling logic when timer is below threshold
   useEffect(() => {
     if (timer <= 1 && !intervalRef.current) {
-      console.log("start polling for result");
+      // console.log("start polling for result");
 
       intervalRef.current = setInterval(fetch_30_results, 800); // Fast polling
     }
