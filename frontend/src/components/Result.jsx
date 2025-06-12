@@ -5,14 +5,14 @@ import axios from "axios";
 export default function Result() {
   const [results, setResults] = useState([]);
   const [winAmount, setWinAmount] = useState(null);
-  const [showLoser , setShowLoser] = useState(false)
-
-  const [latestPeriod, setLatestPeriod] = useState(null); // Local tracking
+  const [showLoser, setShowLoser] = useState(false);
+  const [latestPeriod, setLatestPeriod] = useState(null);
   const intervalRef = useRef(null);
 
   const {
     BACKEND_URL,
-    gameType, timer,
+    gameType, 
+    timer,
     selectedBetColour,
     setSelectedBetColour,
     selectedBetSize,
@@ -28,25 +28,22 @@ export default function Result() {
     try {
       const { data } = await axios.get(`${BACKEND_URL}/api/latest/result/${gameType}`);
       const latest = data.results[0];
-
-      // Only update when new period is detected
+      
       if (latest && latest.period !== latestPeriod) {
         setResults(data.results);
             
-        //check winner logic 
-        if ((selectedBetColour||selectedBetSize) && betValue) {
+        // Check winner logic 
+        if ((selectedBetColour || selectedBetSize) && betValue) {
           if (selectedBetColour === data.results[0].colour || selectedBetSize === data.results[0].size) {
             setWinAmount(betValue * 2);
-            setBalance((prevBalance) => prevBalance + (betValue * 2))
-            setShowWinner(true)
-        
+            setBalance((prevBalance) => prevBalance + (betValue * 2));
+            setShowWinner(true);
+          } else {
+            setShowLoser(true);
           }
-          else {
-           setShowLoser(true)
-          }
-          setBetValue(null)
-          setSelectedBetColour(null)
-          setSelectedBetSize(null)
+          setBetValue(null);
+          setSelectedBetColour(null);
+          setSelectedBetSize(null);
         }
         setLatestPeriod(latest.period);
 
@@ -60,17 +57,13 @@ export default function Result() {
     }
   };
 
-  // Initial fetch when gameType changes
   useEffect(() => {
     fetch_30_results();
   }, [gameType]);
 
-  // Polling logic when timer is below threshold
   useEffect(() => {
     if (timer <= 1 && !intervalRef.current) {
-      // console.log("start polling for result");
-
-      intervalRef.current = setInterval(fetch_30_results, 800); // Fast polling
+      intervalRef.current = setInterval(fetch_30_results, 800);
     }
     return () => {
       if (intervalRef.current) {
@@ -93,7 +86,7 @@ export default function Result() {
       {/* Gradient divider */}
       <div className="h-1 bg-gradient-to-r from-teal-400 to-teal-600 rounded-full mb-5 shadow-sm"></div>
 
-      {/* Results Grid - Mobile Optimized */}
+      {/* Results Grid */}
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
         <div className="bg-gradient-to-r from-teal-500 to-teal-600 px-3 py-4">
           <div className="grid gap-2 text-white text-sm font-semibold" style={{gridTemplateColumns: '2fr 1fr 1fr 1fr'}}>
@@ -140,14 +133,26 @@ export default function Result() {
                 </div>
               </div>
 
-              {/* Color */}
+              {/* Color - Updated for dual color display */}
               <div className="flex justify-center items-center">
-                <div className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
-                  item.colour === "red" 
-                    ? "bg-gradient-to-r from-red-500 to-red-600" 
-                    : "bg-gradient-to-r from-green-500 to-green-600"
-                }`}>
-                </div>
+                {item.colour === "violetRed" || item.colour === "violetGreen" ? (
+                  <div className="flex items-center space-x-1">
+                    {/* Violet circle */}
+                    <div className={`w-6 h-6 rounded-full shadow-lg border-2 border-white bg-gradient-to-r from-purple-500 to-purple-600`}></div>
+                    {/* Red/Green circle */}
+                    <div className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
+                      item.colour === "violetRed" 
+                        ? "bg-gradient-to-r from-red-500 to-red-600" 
+                        : "bg-gradient-to-r from-green-500 to-green-600"
+                    }`}></div>
+                  </div>
+                ) : (
+                  <div className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
+                    item.colour === "red" 
+                      ? "bg-gradient-to-r from-red-500 to-red-600"
+                      : "bg-gradient-to-r from-green-500 to-green-600"
+                  }`}></div>
+                )}
               </div>
             </div>
           ))}
@@ -162,11 +167,10 @@ export default function Result() {
         )}
       </div>
 
-      {/* Win Popup - No Animation */}
+      {/* Win Popup */}
       {showWinner && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 px-4">
           <div className="relative w-full max-w-sm bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 p-8 rounded-3xl shadow-2xl">
-            {/* Close Button */}
             <button
               className="absolute top-4 right-4 text-white text-2xl hover:scale-110 transition transform"
               onClick={() => setShowWinner(false)}
@@ -174,7 +178,6 @@ export default function Result() {
               <i className="fa-regular fa-circle-xmark drop-shadow-lg"></i>
             </button>
 
-            {/* Trophy & Glow */}
             <div className="flex flex-col items-center justify-center">
               <div className="relative w-24 h-24 mb-8">
                 <div className="absolute w-full h-full rounded-full bg-yellow-300 blur-xl opacity-70"></div>
@@ -183,16 +186,13 @@ export default function Result() {
                 </div>
               </div>
 
-              {/* Text */}
               <h2 className="text-3xl font-extrabold text-white mb-3 drop-shadow-lg">🎉 You Won! 🎉</h2>
               <p className="text-lg text-white font-medium mb-8 opacity-90">Congratulations!</p>
 
-              {/* Winning Amount */}
               <div className="bg-white text-green-600 text-4xl font-extrabold py-4 px-10 rounded-2xl shadow-xl border-2 border-green-400 mb-6">
                 ₹{winAmount}
               </div>
 
-              {/* Celebration */}
               <p className="text-white font-semibold text-sm opacity-90 text-center">
                 Amazing! Keep playing to win even more! 🚀
               </p>
@@ -201,7 +201,7 @@ export default function Result() {
         </div>
       )}
 
-      {/* Lose Popup - No Animation */}
+      {/* Lose Popup */}
       {showLoser && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">

@@ -17,6 +17,13 @@ function BetCard({ Period, Bet, Amount, Result, status }) {
       bg: "bg-green-50",
       border: "border-green-200",
     };
+
+    if(Bet === 'violet')return{
+      color:'text-violet-500',
+      bg:'bg-violet-50',
+      border:'border:violet-200'
+    };
+
     if (Bet === "big") return {
       color: "text-orange-500",
       bg: "bg-orange-50", 
@@ -84,7 +91,26 @@ function BetCard({ Period, Bet, Amount, Result, status }) {
         <div className="flex items-center justify-between">
           <span className="text-gray-600 text-sm font-medium">Game Result</span>
           <span className="bg-gray-100 px-3 py-1 rounded-lg text-gray-800 font-semibold text-sm">
-            {Result}
+            <div className="flex justify-center items-center">
+                {Result === "violetRed" || Result === "violetGreen" ? (
+                  <div className="flex items-center space-x-1">
+                    {/* Violet circle */}
+                    <div className={`w-6 h-6 rounded-full shadow-lg border-2 border-white bg-gradient-to-r from-purple-500 to-purple-600`}></div>
+                    {/* Red/Green circle */}
+                    <div className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
+                      Result === "violetRed" 
+                        ? "bg-gradient-to-r from-red-500 to-red-600" 
+                        : "bg-gradient-to-r from-green-500 to-green-600"
+                    }`}></div>
+                  </div>
+                ) : (
+                  <div className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
+                    Result === "red" 
+                      ? "bg-gradient-to-r from-red-500 to-red-600"
+                      : "bg-gradient-to-r from-green-500 to-green-600"
+                  }`}></div>
+                )}
+              </div>
           </span>
         </div>
       </div>

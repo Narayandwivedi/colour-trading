@@ -12,7 +12,7 @@ const gameSchema = new mongoose.Schema({
   },
   colour: {
     type: String,
-    enum: ["red", "green"]
+    enum: ["red", "green",'violetRed','violetGreen']
   },
   size:{
     type:String,

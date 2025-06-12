@@ -41,7 +41,7 @@ const periodCounters = {
 async function generatePeriodId(gameType) {
   const now = new Date();
 
-   if (periodCounters[gameType] >= 999) {
+  if (periodCounters[gameType] >= 999) {
     periodCounters[gameType] = 1;
   }
 
@@ -56,9 +56,8 @@ async function generatePeriodId(gameType) {
   ].join("");
 }
 
-// Generate colour based on bet amount
-
-async function getRandomOutcome(period) {
+// Generate outcome based on bet amounts
+async function getRandomOutcome(period) { 
   try {
     const result = await bet.aggregate([
       {
@@ -91,16 +90,21 @@ async function getRandomOutcome(period) {
       else if (size === "small") betOnSmall = total;
     }
 
-    // Randomize if equal or no bets
-    const finalColour =
-      betOnGreen === betOnRed
-        ? Math.random() < 0.5
-          ? "red"
-          : "green"
-        : betOnGreen > betOnRed
-        ? "red"
-        : "green";
+    // Determine color outcome
+   const finalColour =
+  betOnRed + betOnGreen === 0
+    ? Math.random() < 0.5 
+      ? "red"
+      : "green"
+    : betOnGreen === betOnRed && betOnRed > 0
+    ? Math.random() < 0.5
+      ? "violetRed"
+      : "violetGreen"
+    : betOnGreen > betOnRed
+    ? "red"
+    : "green";
 
+    // Determine size outcome
     const finalSize =
       betOnBig === betOnSmall
         ? Math.random() < 0.5
@@ -122,84 +126,124 @@ async function getRandomOutcome(period) {
   }
 }
 
-// Process game results
+// Process game results with updated payout rules
 async function processGame(gameInstance, gameType) {
   try {
-    const { colour, size, number } = await getRandomOutcome(
-      gameInstance.period
-    );
+    const { colour, size, number } = await getRandomOutcome(gameInstance.period);
 
     gameInstance.colour = colour;
     gameInstance.size = size;
     gameInstance.number = number;
     gameInstance.status = "closed";
-    console.log(gameInstance);
-
     await gameInstance.save();
 
     const bets = await bet.find({ period: gameInstance.period }).lean();
     if (bets.length === 0) {
       console.log(`No bets to process for period ${gameInstance.period}`);
+      return;
     }
 
-    if (bets.length > 0) {
-      await Promise.all([
-        bet.bulkWrite(
-          bets.map((bet) => {
-            let isWinner = false;
-            const betResult = bet.betColour ? colour : (bet.betSize ? size : null);
+    await Promise.all([
+      bet.bulkWrite(
+        bets.map((bet) => {
+          let isWinner = false;
+          let payoutMultiplier = 0;
+          const betResult = bet.betColour ? colour : (bet.betSize ? size : null);
 
-            if (bet.betColour && bet.betColour === colour) {
-              isWinner = true;
-            } else if (bet.betSize && bet.betSize === size) {
-              isWinner = true;
+          // Handle colour bets
+          if (bet.betColour) {
+            // Violet outcomes
+            if (colour === 'violetRed' || colour === 'violetGreen') {
+              // Violet bet wins 4x
+              if (bet.betColour === 'violet') {
+                isWinner = true;
+                payoutMultiplier = 4;
+              }
+              // Red bet wins 1.5x on violetRed
+              else if (bet.betColour === 'red' && colour === 'violetRed') {
+                isWinner = true;
+                payoutMultiplier = 1.5;
+              }
+              // Green bet wins 1.5x on violetGreen
+              else if (bet.betColour === 'green' && colour === 'violetGreen') {
+                isWinner = true;
+                payoutMultiplier = 1.5;
+              }
             }
+            // Regular outcomes
+            else {
+              // Exact match wins 2x
+              if (bet.betColour === colour) {
+                isWinner = true;
+                payoutMultiplier = 2;
+              }
+            }
+          }
+          // Handle size bets (always 2x)
+          else if (bet.betSize && bet.betSize === size) {
+            isWinner = true;
+            payoutMultiplier = 2;
+          }
 
-            return {
-              updateOne: {
-                filter: { _id: bet._id },
-                update: {
-                  status: isWinner ? "won" : "lost",
-                  payout: isWinner ? bet.betAmount * 2 : 0,
-                  betResult 
+          return {
+            updateOne: {
+              filter: { _id: bet._id },
+              update: {
+                status: isWinner ? "won" : "lost",
+                payout: isWinner ? bet.betAmount * payoutMultiplier : 0,
+                betResult
+              },
+            },
+          };
+        })
+      ),
+      User.bulkWrite(
+        bets.map((bet) => {
+          let isWinner = false;
+          let payoutMultiplier = 0;
 
+          // Same logic as above
+          if (bet.betColour) {
+            if (colour === 'violetRed' || colour === 'violetGreen') {
+              if (bet.betColour === 'violet') {
+                isWinner = true;
+                payoutMultiplier = 4;
+              }
+              else if (bet.betColour === 'red' && colour === 'violetRed') {
+                isWinner = true;
+                payoutMultiplier = 1.5;
+              }
+              else if (bet.betColour === 'green' && colour === 'violetGreen') {
+                isWinner = true;
+                payoutMultiplier = 1.5;
+              }
+            }
+            else if (bet.betColour === colour) {
+              isWinner = true;
+              payoutMultiplier = 2;
+            }
+          }
+          else if (bet.betSize && bet.betSize === size) {
+            isWinner = true;
+            payoutMultiplier = 2;
+          }
+
+          return {
+            updateOne: {
+              filter: { _id: bet.userId },
+              update: {
+                $inc: {
+                  balance: isWinner ? bet.betAmount * payoutMultiplier : 0,
+                  withdrawableBalance: isWinner ? bet.betAmount * payoutMultiplier : 0,
                 },
               },
-            };
-          })
-        ),
+            },
+          };
+        })
+      ),
+    ]);
 
-        User.bulkWrite(
-          bets.map((bet) => {
-            let isWinner = false;
-
-            if (bet.betColour && bet.betColour === colour) {
-              isWinner = true;
-            } else if (bet.betSize && bet.betSize === size) {
-              isWinner = true;
-            }
-
-            return {
-              updateOne: {
-                filter: { _id: bet.userId },
-                update: {
-                  $inc: {
-                    balance: isWinner ? bet.betAmount * 2 : 0,
-                    withdrawableBalance: isWinner ? bet.betAmount * 2 : 0,
-                  },
-                },
-              },
-            };
-          })
-        ),
-      ]);
-    }
-
-    console.log(
-      `[${new Date().toISOString()}] ${gameType} game closed: ${
-        gameInstance.period
-      }`
-    );
+    console.log(`[${new Date().toISOString()}] ${gameType} game closed: ${gameInstance.period}`);
   } catch (error) {
     console.error(`Game processing error (${gameType}):`, error);
   } finally {
@@ -225,14 +269,9 @@ async function executeGameRound(gameType) {
     const period = await generatePeriodId(gameType);
     const newGame = await game.create({ period, gameType });
 
-    console.log(
-      `[${new Date().toISOString()}] ${gameType} game opened: ${period}`
-    );
+    console.log(`[${new Date().toISOString()}] ${gameType} game opened: ${period}`);
 
-    setTimeout(
-      () => processGame(newGame, gameType),
-      GAME_TYPES[gameType].interval
-    );
+    setTimeout(() => processGame(newGame, gameType), GAME_TYPES[gameType].interval);
   } catch (error) {
     console.error(`Game start failed (${gameType}):`, error);
     gameStates[gameType].isRunning = false;

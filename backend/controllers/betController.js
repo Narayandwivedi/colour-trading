@@ -39,7 +39,7 @@ const handlePlaceBet = async (req, res) => {
   }
 
   // Validate betColour if present
-  if (betColour && betColour !== "red" && betColour !== "green") {
+  if (betColour && betColour !== "red" && betColour !== "green" && betColour!=='violet') {
     return res.json({ success: false, message: "invalid bet colour" });
   }
 
