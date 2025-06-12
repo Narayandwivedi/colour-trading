@@ -4,7 +4,7 @@ import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
 
 // Card component with enhanced mobile design
-function BetCard({ Period, Bet, Amount, Result, status }) {
+function BetCard({ Period, Bet, Amount, Result, status , payout , orderId }) {
   const getBetStyle = () => {
     if (Bet === "red") return {
       color: "text-red-500",
@@ -87,6 +87,16 @@ function BetCard({ Period, Bet, Amount, Result, status }) {
           </div>
         </div>
 
+        {/* payout */}
+
+         <div className="flex items-center justify-between">
+          <span className="text-gray-600 text-sm font-medium">win amount</span>
+          <div className="flex items-center space-x-1">
+            <span className="text-gray-500 text-sm">₹</span>
+            <span className="text-gray-800 font-bold text-lg">{payout}</span>
+          </div>
+        </div>
+
         {/* Result */}
         <div className="flex items-center justify-between">
           <span className="text-gray-600 text-sm font-medium">Game Result</span>
@@ -112,6 +122,14 @@ function BetCard({ Period, Bet, Amount, Result, status }) {
                 )}
               </div>
           </span>
+        </div>
+
+                {/* order id */}
+       <div className="flex items-center justify-between">
+          <span className="text-gray-600 text-sm font-medium">order id</span>
+          <div className="flex items-center space-x-1">
+            <span className="text-gray-600 font-medium text-sm">{orderId}</span>
+          </div>
         </div>
       </div>
 
@@ -195,6 +213,8 @@ const BetHistory = () => {
                 Amount={eachBet.betAmount}
                 Result={eachBet.betResult}
                 status={eachBet.status}
+                payout = {eachBet.payout}
+                orderId={eachBet._id}
               />
             ))}
           </div>

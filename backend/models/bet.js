@@ -31,6 +31,10 @@ const betSchema = new mongoose.Schema({
         type:String,
         enum:["pending","win","lost"],
         default:"pending"
+    },
+    payout :{
+        type:Number,
+        min:0
     }
 },{timestamps:true})
 
