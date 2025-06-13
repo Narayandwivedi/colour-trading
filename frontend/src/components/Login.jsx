@@ -74,120 +74,210 @@ const Login = () => {
  }}
 
   return (
-    <div className="min-h-screen bg-blue-950 flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-blue-900 rounded-2xl p-6 shadow-lg">
-        <h2 className="text-white text-2xl font-semibold mb-6 text-center">
-          {state === "signup" ? "Create Account" : "Welcome Back"}
-        </h2>
-
-        {/* Full name  - only for signup*/}
-        {
-          state==="signup"&&(
-            <div className="mb-4">
-          <label className="text-white flex items-center gap-2 mb-1">
-            <i className="fa-solid fa-envelope text-blue-400"></i>Full Name
-          </label>
-          <input
-            onChange={(e)=>{setFullName(e.target.value)}}
-            value={fullName}
-            type="text"
-            id="fullName"
-            name="fullName"
-            placeholder="Enter your full name"
-            className="w-full px-4 py-2 rounded-lg bg-blue-800 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+    <div className="min-h-screen bg-gradient-to-br from-cyan-950 via-teal-900 to-emerald-950 relative">
+      {/* Background for larger screens */}
+      <div className="fixed inset-0 bg-gradient-to-br from-cyan-950 via-teal-900 to-emerald-950 -z-10 w-screen" />
+      
+      {/* Ocean glow effects */}
+      <div className="absolute -top-8 -left-8 w-64 h-64 bg-cyan-400/10 blur-3xl rounded-full"></div>
+      <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-emerald-400/10 blur-3xl rounded-full"></div>
+      
+      {/* Stunning aqua-themed navbar */}
+      <nav className="bg-gradient-to-r from-teal-700 via-cyan-700 to-emerald-700 shadow-2xl px-4 py-4 max-w-[440px] mx-auto backdrop-blur-sm border-b border-cyan-600/50">
+        {/* Winner Club Logo */}
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <svg 
+              width="48" 
+              height="48" 
+              viewBox="0 0 48 48" 
+              className="drop-shadow-2xl"
+            >
+              {/* Trophy Base */}
+              <circle cx="24" cy="24" r="20" fill="url(#aquaGradient)" stroke="#22D3EE" strokeWidth="2"/>
+              
+              {/* Trophy Cup */}
+              <path 
+                d="M16 18 L32 18 L30 28 L18 28 Z" 
+                fill="#67E8F9" 
+                stroke="#06B6D4" 
+                strokeWidth="1"
+              />
+              
+              {/* Trophy Handles */}
+              <path 
+                d="M14 20 Q12 20 12 22 Q12 24 14 24" 
+                fill="none" 
+                stroke="#22D3EE" 
+                strokeWidth="2"
+              />
+              <path 
+                d="M34 20 Q36 20 36 22 Q36 24 34 24" 
+                fill="none" 
+                stroke="#22D3EE" 
+                strokeWidth="2"
+              />
+              
+              {/* Trophy Base */}
+              <rect x="20" y="28" width="8" height="4" fill="#0891B2" rx="1"/>
+              <rect x="18" y="32" width="12" height="3" fill="#0E7490" rx="1"/>
+              
+              {/* Star */}
+              <path 
+                d="M24 12 L25.5 16.5 L30 16.5 L26.5 19.5 L28 24 L24 21 L20 24 L21.5 19.5 L18 16.5 L22.5 16.5 Z" 
+                fill="#FDE047"
+                stroke="#FACC15"
+                strokeWidth="0.5"
+              />
+              
+              <defs>
+                <linearGradient id="aquaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#22D3EE"/>
+                  <stop offset="50%" stopColor="#67E8F9"/>
+                  <stop offset="100%" stopColor="#06B6D4"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-lg">
+              WINNER
+            </h1>
+            <p className="text-sm font-medium text-cyan-200 -mt-1 tracking-wider">
+              CLUB
+            </p>
+          </div>
         </div>
-          )
-        }
+      </nav>
 
-        {/* Email */}
-        <div className="mb-4">
-          <label className="text-white flex items-center gap-2 mb-1">
-            <i className="fa-solid fa-envelope text-blue-400"></i>Email
-          </label>
-          <input
-            onChange={(e)=>{setEmail(e.target.value)}}
-            value={email}
-            type="email"
-            id="email"
-            name="email"
-            placeholder="Enter your email"
-            className="w-full px-4 py-2 rounded-lg bg-blue-800 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+      {/* Login Form Container */}
+      <div className="flex items-center justify-center px-4 py-8 relative z-10 min-h-[calc(100vh-80px)]">
+        <div className="w-full max-w-lg bg-gradient-to-br from-teal-800/80 via-cyan-800/80 to-emerald-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-cyan-600/30">
+          {/* Header with ocean theme */}
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-full mb-4 shadow-xl">
+              <svg width="32" height="32" viewBox="0 0 32 32" className="text-white">
+                <path d="M16 4 L20 12 L28 12 L22 18 L24 28 L16 22 L8 28 L10 18 L4 12 L12 12 Z" fill="currentColor"/>
+              </svg>
+            </div>
+            <h2 className="text-white text-2xl font-bold bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent">
+              {state === "signup" ? "Join Winner Club" : "Welcome Back"}
+            </h2>
+            <p className="text-cyan-200 text-sm mt-1">
+              {state === "signup" ? "Create your account to start winning" : "Sign in to continue your journey"}
+            </p>
+          </div>
 
-        {/* Password */}
-         
-            <div className="mb-4">
-              <label className="text-white flex items-center gap-2 mb-1">
-                <i className="fa-solid fa-lock text-blue-400"></i>{state==='signup'?"Set Password":"password"}
+          {/* Full name - only for signup */}
+          {state === "signup" && (
+            <div className="mb-6">
+              <label className="text-cyan-200 flex items-center gap-2 mb-3 font-medium text-sm">
+                <i className="fa-solid fa-user text-cyan-400"></i>Full Name
               </label>
               <input
-                onChange={(e)=>{setPassword(e.target.value)}}
-                value={password}
-                type="password" 
-                id="password"
-                name="password"
-                placeholder={state==="login"?"Enter password":"Set your password"}
-                className="w-full px-4 py-2 rounded-lg bg-blue-800 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) => {setFullName(e.target.value)}}
+                value={fullName}
+                type="text"
+                id="fullName"
+                name="fullName"
+                placeholder="Enter your full name"
+                className="w-full px-5 py-4 rounded-xl bg-cyan-900/50 border border-cyan-600/30 text-white placeholder-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent backdrop-blur-sm transition-all text-base"
               />
             </div>
-
-            {/* invite code - signup only */}
-
-            {state==="signup"&&(
-               <div className="mb-4">
-               <label className="text-white flex items-center gap-2 mb-1">
-                 <i className="fa-solid fa-message text-blue-400"></i>Invite Code
-               </label>
-               <input
-                 onChange={(e)=>{setInviteCode(e.target.value)}}
-                 value={inviteCode}
-                 type="text"
-                 id="inviteCode"
-                 name="inviteCode"
-                 placeholder="Enter invite code"
-                 className="w-full px-4 py-2 rounded-lg bg-blue-800 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-               />
-             </div>
-            )}
-
-        {/* login and signup button */}
-
-        {
-          state==="login"?(
-          <button onClick={handleLogin} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition">
-          Login
-        </button>
-          ):<button onClick={handleSignup} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition">
-          Signup
-        </button>
-
-        }
-
-        <p className="text-center text-white mt-4">
-          {state === "signup" ? (
-            <>
-              Already have an account?{" "}
-              <button
-                onClick={() => setState("login")}
-                className="text-blue-400 hover:underline"
-              >
-                Login
-              </button>
-            </>
-          ) : (
-            <>
-              New user?{" "}
-              <button
-                onClick={() => setState("signup")}
-                className="text-blue-400 hover:underline"
-              >
-                Sign up here
-              </button>
-            </>
           )}
-        </p>
+
+          {/* Email */}
+          <div className="mb-6">
+            <label className="text-cyan-200 flex items-center gap-2 mb-3 font-medium text-sm">
+              <i className="fa-solid fa-envelope text-cyan-400"></i>Email
+            </label>
+            <input
+              onChange={(e) => {setEmail(e.target.value)}}
+              value={email}
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email"
+              className="w-full px-5 py-4 rounded-xl bg-cyan-900/50 border border-cyan-600/30 text-white placeholder-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent backdrop-blur-sm transition-all text-base"
+            />
+          </div>
+
+          {/* Password */}
+          <div className="mb-6">
+            <label className="text-cyan-200 flex items-center gap-2 mb-3 font-medium text-sm">
+              <i className="fa-solid fa-lock text-cyan-400"></i>{state === 'signup' ? "Set Password" : "Password"}
+            </label>
+            <input
+              onChange={(e) => {setPassword(e.target.value)}}
+              value={password}
+              type="password" 
+              id="password"
+              name="password"
+              placeholder={state === "login" ? "Enter password" : "Set your password"}
+              className="w-full px-5 py-4 rounded-xl bg-cyan-900/50 border border-cyan-600/30 text-white placeholder-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent backdrop-blur-sm transition-all text-base"
+            />
+          </div>
+
+          {/* Invite code - signup only */}
+          {state === "signup" && (
+            <div className="mb-8">
+              <label className="text-cyan-200 flex items-center gap-2 mb-3 font-medium text-sm">
+                <i className="fa-solid fa-gift text-cyan-400"></i>Invite Code
+              </label>
+              <input
+                onChange={(e) => {setInviteCode(e.target.value)}}
+                value={inviteCode}
+                type="text"
+                id="inviteCode"
+                name="inviteCode"
+                placeholder="Enter invite code (optional)"
+                className="w-full px-5 py-4 rounded-xl bg-cyan-900/50 border border-cyan-600/30 text-white placeholder-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent backdrop-blur-sm transition-all text-base"
+              />
+            </div>
+          )}
+
+          {/* Login and signup button */}
+          {state === "login" ? (
+            <button 
+              onClick={handleLogin} 
+              className="w-full bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 hover:from-cyan-500 hover:via-teal-500 hover:to-emerald-500 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-xl hover:shadow-cyan-500/25 hover:scale-105 transform text-lg"
+            >
+              Login to Winner Club
+            </button>
+          ) : (
+            <button 
+              onClick={handleSignup} 
+              className="w-full bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 hover:from-cyan-500 hover:via-teal-500 hover:to-emerald-500 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-xl hover:shadow-cyan-500/25 hover:scale-105 transform text-lg"
+            >
+              Join Winner Club
+            </button>
+          )}
+
+          <p className="text-center text-cyan-200 mt-8 text-base">
+            {state === "signup" ? (
+              <>
+                Already have an account?{" "}
+                <button
+                  onClick={() => setState("login")}
+                  className="text-cyan-400 hover:text-cyan-300 underline font-medium transition-colors"
+                >
+                  Login here
+                </button>
+              </>
+            ) : (
+              <>
+                New to Winner Club?{" "}
+                <button
+                  onClick={() => setState("signup")}
+                  className="text-cyan-400 hover:text-cyan-300 underline font-medium transition-colors"
+                >
+                  Sign up here
+                </button>
+              </>
+            )}
+          </p>
+        </div>
       </div>
     </div>
   );
