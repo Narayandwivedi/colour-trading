@@ -70,7 +70,7 @@ export default function Homepage() {
             
             <div className="flex flex-col">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-lg">
-                WINNER
+                WINNERS
               </h1>
               <p className="text-sm font-medium text-cyan-200 -mt-1 tracking-wider">
                 CLUB

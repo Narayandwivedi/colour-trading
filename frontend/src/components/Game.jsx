@@ -278,12 +278,12 @@ export default function Game() {
       </h2>
       <div className="flex gap-4">
         <div className="flex flex-col items-center">
-          <p className="text-7xl font-bold text-white bg-red-800 px-6 py-4 rounded-xl shadow-lg">
+          <p className="text-7xl font-bold text-white bg-red-600 px-6 py-4 rounded-xl shadow-lg">
             0
           </p>
         </div>
         <div className="flex flex-col items-center">
-          <p className="text-7xl font-bold text-white bg-red-800 px-6 py-4 rounded-xl shadow-lg">
+          <p className="text-7xl font-bold text-white bg-red-600 px-6 py-4 rounded-xl shadow-lg">
             {timer}
           </p>
         </div>

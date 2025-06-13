@@ -74,7 +74,7 @@ export default function Result() {
   }, [timer]);
 
   return (
-    <div className="result-container mb-6 px-4">
+    <div className="result-container mb-6 px-2">
       {/* Header */}
       <div className="flex items-center justify-center gap-3 mb-5">
         <div className="w-7 h-7 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-md">
@@ -204,19 +204,42 @@ export default function Result() {
       )}
 
       {/* Lose popup */}
-      {showLoser && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
-            <div className="text-center">
-              <div className="text-6xl mb-4">💔</div>
-              <h2 className="text-2xl font-bold text-red-500 mb-3">
-                Better Luck Next Time!
-              </h2>
-              <p className="text-gray-600 font-medium">Try again in the next round.</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Lose popup */}
+{showLoser && (
+  <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
+    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 relative">
+      {/* Close button (X) - top right */}
+      <button 
+        onClick={() => setShowLoser(false)}
+        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        aria-label="Close"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      
+      <div className="text-center pt-4">
+        <div className="text-6xl mb-4">💔</div>
+        <h2 className="text-2xl font-bold text-red-500 mb-3">
+          Better Luck Next Time!
+        </h2>
+        <p className="text-gray-600 font-medium mb-6">Try again in the next round.</p>
+        
+        {/* Try Again button - centered with better styling */}
+        <button 
+          onClick={() => {
+            setShowLoser(false);
+            // Add any additional try again logic here
+          }}
+          className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
+        >
+          Try Again
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

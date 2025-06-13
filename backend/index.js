@@ -20,7 +20,6 @@ const { checkLoggedIN } = require("./middleware/checkLoggedIn.js");
 app.use(
   cors({
     origin: [
-      "https://colour-trading.vercel.app",
       "http://localhost:5173",
       "http://localhost:5174",
       "http://winnersclubs.fun"

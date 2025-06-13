@@ -5,34 +5,53 @@ import { AppContext } from "../../context/AppContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { 
+  History, 
+  TrendingUp, 
+  TrendingDown, 
+  Headphones, 
+  ChevronRight, 
+  LogOut,
+  User,
+  Wallet,
+  Crown,
+  Waves
+} from "lucide-react";
 
 const Account = () => {
   const { userData, setUserData, BACKEND_URL } = useContext(AppContext);
   const navigate = useNavigate();
 
-  const userId = "USER123456";
-  // Replace with actual user ID from auth state
+  const userId = "USER123456"; // Replace with actual user ID from auth state
 
   const menuItems = [
     {
       label: "Bet History",
-      icon: "fa-solid fa-clock-rotate-left",
+      icon: History,
       link: "/bethistory",
+      color: "text-cyan-600",
+      bgColor: "bg-cyan-50",
     },
     {
       label: "Withdraw History",
-      icon: "fa-solid fa-arrow-up-right-dots",
+      icon: TrendingUp,
       link: "/withdrawhistory",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
     },
     {
       label: "Deposit History",
-      icon: "fa-solid fa-arrow-down",
+      icon: TrendingDown,
       link: "/deposithistory",
+      color: "text-teal-600",
+      bgColor: "bg-teal-50",
     },
     {
       label: "Customer Support",
-      icon: "fa-solid fa-headset",
+      icon: Headphones,
       link: "/support",
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
     },
   ];
 
@@ -57,54 +76,126 @@ const Account = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pb-24 max-w-[440px] mx-auto relative">
-      {/* Header */}
-      <div className="text-center pt-6 px-4">
-        <h1 className="text-3xl font-bold text-gray-800">Account</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          <span className="font-semibold">{userData?.fullName}</span>
-        </p>
-      </div>
-
-      {/* Withdraw and Deposit Buttons */}
-      <div className="mt-6 px-4 flex justify-center gap-4">
-        <Link
-          to="/withdraw"
-          className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-full shadow-md font-medium transition"
-        >
-          Withdraw
-        </Link>
-        <Link
-          to="/deposit"
-          className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-full shadow-md font-medium transition"
-        >
-          Deposit
-        </Link>
-      </div>
-
-      {/* Options Menu */}
-      <div className="mt-8 mx-4 space-y-4">
-        {menuItems.map((item, index) => (
-          <Link
-            to={item.link}
-            key={index}
-            className="flex items-center justify-between bg-white shadow-sm border border-gray-200 rounded-xl px-4 py-3 hover:bg-gray-50 transition"
-          >
-            <div className="flex items-center gap-3">
-              <i className={`${item.icon} text-lg text-indigo-600`}></i>
-              <span className="text-gray-700 font-medium">{item.label}</span>
+    <div className="min-h-screen bg-gradient-to-br from-cyan-950 via-teal-900 to-emerald-950 pb-24 max-w-[440px] mx-auto relative">
+      {/* Background for larger screens */}
+      <div className="fixed inset-0 bg-gradient-to-br from-cyan-950 via-teal-900 to-emerald-950 -z-10 w-screen" />
+      
+      {/* Ocean-themed header with floating elements */}
+      <div className="relative">
+        {/* Floating bubbles */}
+        <div className="absolute top-4 left-8 w-3 h-3 bg-cyan-400/30 rounded-full animate-pulse"></div>
+        <div className="absolute top-12 right-12 w-2 h-2 bg-emerald-400/40 rounded-full animate-bounce"></div>
+        <div className="absolute top-8 right-20 w-4 h-4 bg-teal-400/20 rounded-full animate-pulse"></div>
+        
+        <div className="bg-gradient-to-r from-teal-700/80 via-cyan-700/80 to-emerald-700/80 backdrop-blur-lg border-b border-cyan-600/30 px-4 py-8">
+          <div className="text-center">
+            {/* Profile Avatar */}
+            <div className="relative inline-block mb-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-cyan-400 via-teal-400 to-emerald-400 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/30">
+                <User className="w-10 h-10 text-white" />
+              </div>
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-yellow-400 to-amber-400 rounded-full flex items-center justify-center shadow-lg">
+                <Crown className="w-4 h-4 text-yellow-800" />
+              </div>
             </div>
-            <i className="fa-solid fa-chevron-right text-gray-400 text-sm"></i>
-          </Link>
-        ))}
+            
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-lg">
+              My Account
+            </h1>
+            <p className="text-lg text-cyan-200 mt-2 font-medium">
+              Welcome back, <span className="text-white font-bold">{userData?.fullName || "User"}</span>
+            </p>
+            
+            {/* Balance Card */}
+            <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Wallet className="w-5 h-5 text-cyan-300" />
+                <span className="text-cyan-300 text-sm font-medium">Current Balance</span>
+              </div>
+              <div className="text-3xl font-bold text-white">
+                ₹{userData?.balance || "0"}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Ocean wave decoration */}
+      <div className="relative -mt-6 mb-6">
+        <svg viewBox="0 0 400 40" className="w-full h-6 text-cyan-600/30">
+          <path d="M0,20 Q100,0 200,20 T400,20 V40 H0 Z" fill="currentColor" />
+        </svg>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="px-4 mb-8">
+        <div className="flex gap-4">
+          <Link
+            to="/withdraw"
+            className="flex-1 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white py-4 rounded-2xl shadow-2xl font-bold text-lg transition-all duration-300 hover:scale-105 border border-red-400/30 backdrop-blur-sm"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <TrendingUp className="w-5 h-5" />
+              Withdraw
+            </div>
+          </Link>
+          <Link
+            to="/deposit"
+            className="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white py-4 rounded-2xl shadow-2xl font-bold text-lg transition-all duration-300 hover:scale-105 border border-emerald-400/30 backdrop-blur-sm"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <TrendingDown className="w-5 h-5" />
+              Deposit
+            </div>
+          </Link>
+        </div>
+      </div>
+
+      {/* Menu Items */}
+      <div className="px-4 space-y-4">
+        {menuItems.map((item, index) => {
+          const IconComponent = item.icon;
+          return (
+            <Link
+              to={item.link}
+              key={index}
+              className="group block bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 hover:bg-white/20 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 ${item.bgColor} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    <IconComponent className={`w-6 h-6 ${item.color}`} />
+                  </div>
+                  <div>
+                    <span className="text-white font-semibold text-lg">{item.label}</span>
+                    <p className="text-cyan-300 text-sm">View your {item.label.toLowerCase()}</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-cyan-400 group-hover:translate-x-1 transition-transform duration-300" />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Logout Button */}
       <div className="mt-8 px-4">
         <button
           onClick={handleLogout}
-          className="w-full bg-gray-800 text-white py-3 rounded-xl shadow-md hover:bg-gray-900 transition text-lg font-semibold"
+          className="w-full bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white py-4 rounded-2xl shadow-2xl font-bold text-lg transition-all duration-300 hover:scale-105 border border-gray-600/30 backdrop-blur-sm group"
         >
-          Logout
+          <div className="flex items-center justify-center gap-3">
+            <LogOut className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
+            Logout
+          </div>
         </button>
+      </div>
+
+      {/* Decorative waves at bottom */}
+      <div className="absolute bottom-20 left-0 right-0 pointer-events-none">
+        <svg viewBox="0 0 400 60" className="w-full h-8 text-teal-600/20">
+          <path d="M0,30 Q100,10 200,30 T400,30 V60 H0 Z" fill="currentColor" />
+        </svg>
       </div>
 
       {/* Bottom Navigation */}
