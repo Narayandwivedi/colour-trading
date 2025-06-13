@@ -34,9 +34,18 @@ async function createTransaction(req, res) {
   }
 }
 
+async function rejectTransaction(req, res) {
+  const { transactionId } = req.body;
+  console.log(transactionId);
+  return res.json({ success: true });
+}
+
 async function getAllTransaction(req, res) {
   try {
-    const allTransaction = await transactionModel.find();
+    const allTransaction = await transactionModel
+      .find()
+      .lean()
+      .sort({ createdAt: -1 });
     if (!allTransaction) {
       return res
         .status(400)
@@ -244,9 +253,9 @@ async function getDepositHistory(req, res) {
       .find({ userId })
       .sort({ createdAt: -1 })
       .lean();
-      if(depositHistory){
-        return res.json({success:true , depositHistory})
-      }
+    if (depositHistory) {
+      return res.json({ success: true, depositHistory });
+    }
   } catch (err) {
     return res
       .status(500)
@@ -261,4 +270,5 @@ module.exports = {
   getAllWithDrawal,
   getWithdrawalHistory,
   getDepositHistory,
+  rejectTransaction,
 };

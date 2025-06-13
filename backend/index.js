@@ -9,6 +9,7 @@ require("./gameService.js");
 const userRoute = require("./routes/userRoute.js");
 const transactionRoute = require("./routes/transactionRoute.js");
 const betRoute = require("./routes/betRoute.js");
+const adminRoute = require("./routes/adminRoute.js")
 
 // import models
 const game = require("./models/game.js");
@@ -22,7 +23,7 @@ app.use(
       "https://colour-trading.vercel.app",
       "http://localhost:5173",
       "http://localhost:5174",
-      "http://168.231.120.131"
+      "http://winnersclubs.fun"
     ],
     credentials: true,
   })
@@ -104,6 +105,7 @@ app.get("/api/latest/period/:gameType", async (req, res) => {
 app.use("/api/users", userRoute);
 app.use("/api/transaction", transactionRoute);
 app.use("/api/bet", betRoute);
+app.use("/api/admin",adminRoute)
 
 
 // // Global error handling middleware

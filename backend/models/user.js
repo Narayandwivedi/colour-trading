@@ -56,6 +56,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  totalReferal :{
+    type:Number,
+    default:0
+  }
 });
 
 const user = mongoose.model("user", userSchema);

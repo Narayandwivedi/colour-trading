@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.js");
 const transactionModel = require("../models/transcationModel.js");
-const user = require("../models/user.js");
+
 
 function generateReferralCode() {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
