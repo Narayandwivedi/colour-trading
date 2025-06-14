@@ -252,7 +252,7 @@ export default function Result() {
           {/* Mobile Pagination Controls */}
           <div className="p-3">
             {/* Previous/Next with Current Page */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-5 px-4">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={!pagination.hasPrevPage}
@@ -265,11 +265,6 @@ export default function Result() {
                 <i className="fas fa-chevron-left text-xs"></i>
                 <span>Previous</span>
               </button>
-
-              {/* Current page indicator */}
-              <div className="bg-teal-100 text-teal-700 px-4 py-2 rounded-lg font-bold text-sm">
-                {currentPage}
-              </div>
 
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
@@ -349,56 +344,6 @@ export default function Result() {
                 </>
               )}
             </div>
-
-            {/* Quick jump buttons for large datasets */}
-            {pagination.totalPages > 10 && (
-              <div className="flex justify-center gap-2 mt-3 pt-3 border-t border-gray-200">
-                <button
-                  onClick={() => handlePageChange(1)}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    currentPage === 1
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-blue-100 text-blue-700 active:bg-blue-200"
-                  }`}
-                >
-                  First
-                </button>
-                <button
-                  onClick={() => handlePageChange(Math.max(1, currentPage - 5))}
-                  disabled={currentPage <= 5}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    currentPage <= 5
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-orange-100 text-orange-700 active:bg-orange-200"
-                  }`}
-                >
-                  -5
-                </button>
-                <button
-                  onClick={() => handlePageChange(Math.min(pagination.totalPages, currentPage + 5))}
-                  disabled={currentPage >= pagination.totalPages - 4}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    currentPage >= pagination.totalPages - 4
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-orange-100 text-orange-700 active:bg-orange-200"
-                  }`}
-                >
-                  +5
-                </button>
-                <button
-                  onClick={() => handlePageChange(pagination.totalPages)}
-                  disabled={currentPage === pagination.totalPages}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    currentPage === pagination.totalPages
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-blue-100 text-blue-700 active:bg-blue-200"
-                  }`}
-                >
-                  Last
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}
