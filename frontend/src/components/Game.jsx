@@ -27,12 +27,13 @@ export default function Game() {
     selectedBetSize , setSelectedBetSize,
     balance,
     setBalance,
-    setBetValue,
     userData,
     period,
     timer,
     BACKEND_URL,
     betAllowed , setBetAllowed,
+    activeBets,
+    setActiveBets
   } = useContext(AppContext);
   
   useEffect(() => {
@@ -91,8 +92,16 @@ export default function Game() {
       if (data.success) {
         toast.success(data.message);
         setBalance((prevBalance) => prevBalance - betInp);
-        setBetValue(betInp);
-        setIsBetPopOpen(false);
+          // Add the bet to activeBets array instead of single variables
+            const newBet = {
+                betValue: betInp,
+                selectedBetColour: selectedBetColour,
+                selectedBetSize: selectedBetSize,
+                period: period,
+            };
+            setActiveBets((prevBets) => [...prevBets, newBet]);
+            console.log(activeBets);
+            setIsBetPopOpen(false);
        
       }
     } catch (err) {

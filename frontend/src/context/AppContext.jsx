@@ -11,13 +11,13 @@ export const AppContextProvider = (props) => {
   const [timer, setTimer] = useState(30);
   const [balance, setBalance] = useState(0);
   const [withdrawableBalance , setWithdrawableBalance] = useState(0);
-  const [betValue, setBetValue] = useState(null);
   const [userData , setUserData] = useState(null)
   const [period , setPeriod] = useState(null)
   const [periodCreatedAT , setPeriodCreatedAT] = useState(null)
   const [gameType , setGameType] = useState('30sec')
   const [finalDepositAmt , setFinalDepositAmt] = useState(100)
   const [loading, setLoading] = useState(true)
+  const [activeBets, setActiveBets] = useState([]);
 
   // const BACKEND_URL = `http://168.231.120.131:8080`;
   // const BACKEND_URL = `http://localhost:8080`;
@@ -68,6 +68,7 @@ const checkLogin = async () => {
     finalDepositAmt , setFinalDepositAmt,
     selectedBetSize,setSelectedBetSize,
     betAllowed , setBetAllowed,
+    activeBets , setActiveBets,
     
     BACKEND_URL,
 

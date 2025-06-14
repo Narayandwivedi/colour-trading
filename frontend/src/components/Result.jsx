@@ -16,15 +16,11 @@ export default function Result() {
     BACKEND_URL,
     gameType,
     timer,
-    selectedBetColour,
-    setSelectedBetColour,
-    selectedBetSize,
-    setSelectedBetSize,
-    betValue,
     showWinner,
     setShowWinner,
-    setBetValue,
     setBalance,
+    activeBets,
+    setActiveBets
   } = useContext(AppContext);
 
   const resultsPerPage = 10; // You can adjust this
@@ -40,19 +36,43 @@ export default function Result() {
         const latest = data.results[0];
         
         if (latest && latest.period !== latestPeriod) {
-          // Handle betting logic for the latest result
-          if ((selectedBetColour || selectedBetSize) && betValue) {
-            if (selectedBetColour === latest.colour || selectedBetSize === latest.size) {
-              setWinAmount(betValue * 2);
-              setBalance((prevBalance) => prevBalance + betValue * 2);
+
+          if(activeBets && activeBets.length>0){
+             let totalWinAmount = 0;
+             let hasWon = false;
+             let hasLost = false;
+
+              // Check each bet against the result
+            activeBets.forEach(bet => {
+              const isWinningBet = (
+                (bet.selectedBetColour && bet.selectedBetColour === latest.colour) ||
+                (bet.selectedBetSize && bet.selectedBetSize === latest.size)
+              );
+
+              if (isWinningBet) {
+                totalWinAmount += bet.betValue * 2;
+                hasWon = true;
+              } else {
+                hasLost = true;
+              }
+            });
+
+            // Update balance and show appropriate message
+            if (hasWon) {
+              setWinAmount(totalWinAmount);
+              setBalance((prevBalance) => prevBalance + totalWinAmount);
               setShowWinner(true);
-            } else {
+            } else if (hasLost && !hasWon) {
+              // Only show loser if no bets won
               setShowLoser(true);
             }
-            setBetValue(null);
-            setSelectedBetColour(null);
-            setSelectedBetSize(null);
+
+            // Clear all active bets after processing
+            setActiveBets([]);
+       
           }
+
+
           setLatestPeriod(latest.period);
         }
       }
