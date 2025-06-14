@@ -20,7 +20,7 @@ export default function Result() {
     setShowWinner,
     setBalance,
     activeBets,
-    setActiveBets
+    setActiveBets,
   } = useContext(AppContext);
 
   const resultsPerPage = 10; // You can adjust this
@@ -31,28 +31,71 @@ export default function Result() {
       const { data } = await axios.get(
         `${BACKEND_URL}/api/latest/result/${gameType}?page=${page}&limit=${resultsPerPage}`
       );
-      
+
       if (isInitialLoad) {
         const latest = data.results[0];
-        
         if (latest && latest.period !== latestPeriod) {
 
-          if(activeBets && activeBets.length>0){
-             let totalWinAmount = 0;
-             let hasWon = false;
-             let hasLost = false;
+          if (activeBets && activeBets.length > 0) {
+            let totalWinAmount = 0;
+            let hasWon = false;
+            let hasLost = false;
 
-              // Check each bet against the result
-            activeBets.forEach(bet => {
-              const isWinningBet = (
-                (bet.selectedBetColour && bet.selectedBetColour === latest.colour) ||
-                (bet.selectedBetSize && bet.selectedBetSize === latest.size)
-              );
+            // Check each bet against the result
+            activeBets.forEach((bet) => {
+              let winAmount = 0;
+              let isWinningBet = false;
 
-              if (isWinningBet) {
-                totalWinAmount += bet.betValue * 2;
+              // Handle color bets with special violet logic
+              if (bet.selectedBetColour) {
+                if (latest.colour === "violetRed") {
+                  if (bet.selectedBetColour === "red") {
+                    // Red bet wins with 1.5x payout on violetRed
+                    winAmount = bet.betValue * 1.5;
+                    isWinningBet = true;
+                  } else if (bet.selectedBetColour === "violet") {
+                    // Violet bet wins with 4x payout on violetRed
+                    winAmount = bet.betValue * 4;
+                    isWinningBet = true;
+                  } else {
+                    // Green bet (or any other) loses on violetRed
+                    winAmount = 0;
+                    isWinningBet = false;
+                  }
+                } else if (latest.colour === "violetGreen") {
+                  if (bet.selectedBetColour === "green") {
+                    // Green bet wins with 1.5x payout on violetGreen
+                    winAmount = bet.betValue * 1.5;
+                    isWinningBet = true;
+                  } else if (bet.selectedBetColour === "violet") {
+                    // Violet bet wins with 4x payout on violetGreen
+                    winAmount = bet.betValue * 4;
+                    isWinningBet = true;
+                  } else {
+                    // Red bet (or any other) loses on violetGreen
+                    winAmount = 0;
+                    isWinningBet = false;
+                  }
+                } else {
+                  // Normal color matching (non-violet results)
+                  if (bet.selectedBetColour === latest.colour) {
+                    winAmount = bet.betValue * 2; // Normal payout
+                    isWinningBet = true;
+                  }
+                }
+              }
+
+              // Handle size bets (unchanged logic)
+              if (bet.selectedBetSize && bet.selectedBetSize === latest.size) {
+                winAmount += bet.betValue * 2; // Add size bet winnings
+                isWinningBet = true;
+              }
+
+              // Add to total if won
+              if (isWinningBet && winAmount > 0) {
+                totalWinAmount += winAmount;
                 hasWon = true;
-              } else {
+              } else if (!isWinningBet || winAmount === 0) {
                 hasLost = true;
               }
             });
@@ -69,9 +112,7 @@ export default function Result() {
 
             // Clear all active bets after processing
             setActiveBets([]);
-       
           }
-
 
           setLatestPeriod(latest.period);
         }
@@ -79,12 +120,11 @@ export default function Result() {
 
       setResults(data.results);
       setPagination(data.pagination);
-      
+
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      
     } catch (err) {
       console.log("Error fetching results:", err.message);
     } finally {
@@ -104,36 +144,36 @@ export default function Result() {
     const pages = [];
     const totalPages = pagination.totalPages || 1;
     const current = currentPage;
-    
+
     // Always show first page
     pages.push(1);
-    
+
     // Add pages around current page
     let start = Math.max(2, current - 1);
     let end = Math.min(totalPages - 1, current + 1);
-    
+
     // Add ellipsis after first page if needed
     if (start > 2) {
-      pages.push('...');
+      pages.push("...");
     }
-    
+
     // Add middle pages
     for (let i = start; i <= end; i++) {
       if (i !== 1 && i !== totalPages) {
         pages.push(i);
       }
     }
-    
+
     // Add ellipsis before last page if needed
     if (end < totalPages - 1) {
-      pages.push('...');
+      pages.push("...");
     }
-    
+
     // Always show last page (if more than 1 page)
     if (totalPages > 1) {
       pages.push(totalPages);
     }
-    
+
     return pages;
   };
 
@@ -201,7 +241,9 @@ export default function Result() {
               >
                 <div className="text-center flex justify-center">
                   <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-2 py-1.5 rounded-lg shadow-sm">
-                    <span className="block truncate text-xs leading-tight">{item.period}</span>
+                    <span className="block truncate text-xs leading-tight">
+                      {item.period}
+                    </span>
                   </div>
                 </div>
 
@@ -224,7 +266,8 @@ export default function Result() {
                 </div>
 
                 <div className="flex justify-center items-center">
-                  {item.colour === "violetRed" || item.colour === "violetGreen" ? (
+                  {item.colour === "violetRed" ||
+                  item.colour === "violetGreen" ? (
                     <div className="flex items-center space-x-1">
                       <div className="w-6 h-6 rounded-full shadow-lg border-2 border-white bg-gradient-to-r from-purple-500 to-purple-600"></div>
                       <div
@@ -265,7 +308,8 @@ export default function Result() {
           {/* Results info - Mobile optimized */}
           <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
             <div className="text-xs text-gray-600 text-center">
-              Page {currentPage} of {pagination.totalPages} ({pagination.totalResults} total)
+              Page {currentPage} of {pagination.totalPages} (
+              {pagination.totalResults} total)
             </div>
           </div>
 
@@ -318,51 +362,60 @@ export default function Result() {
               )}
 
               {/* Pages around current */}
-              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                let pageNum;
-                if (pagination.totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= pagination.totalPages - 2) {
-                  pageNum = pagination.totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
+              {Array.from(
+                { length: Math.min(5, pagination.totalPages) },
+                (_, i) => {
+                  let pageNum;
+                  if (pagination.totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= pagination.totalPages - 2) {
+                    pageNum = pagination.totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+
+                  if (pageNum < 1 || pageNum > pagination.totalPages)
+                    return null;
+                  if (currentPage > 3 && pageNum === 1) return null;
+                  if (
+                    currentPage < pagination.totalPages - 2 &&
+                    pageNum === pagination.totalPages
+                  )
+                    return null;
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
+                        pageNum === currentPage
+                          ? "bg-teal-500 text-white"
+                          : "bg-gray-100 text-gray-700 active:bg-gray-200"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
                 }
-
-                if (pageNum < 1 || pageNum > pagination.totalPages) return null;
-                if (currentPage > 3 && pageNum === 1) return null;
-                if (currentPage < pagination.totalPages - 2 && pageNum === pagination.totalPages) return null;
-
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
-                      pageNum === currentPage
-                        ? "bg-teal-500 text-white"
-                        : "bg-gray-100 text-gray-700 active:bg-gray-200"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
+              )}
 
               {/* Last page */}
-              {currentPage < pagination.totalPages - 2 && pagination.totalPages > 5 && (
-                <>
-                  {currentPage < pagination.totalPages - 3 && (
-                    <span className="text-gray-400 text-xs px-1">...</span>
-                  )}
-                  <button
-                    onClick={() => handlePageChange(pagination.totalPages)}
-                    className="w-8 h-8 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 active:bg-gray-200 transition-colors"
-                  >
-                    {pagination.totalPages}
-                  </button>
-                </>
-              )}
+              {currentPage < pagination.totalPages - 2 &&
+                pagination.totalPages > 5 && (
+                  <>
+                    {currentPage < pagination.totalPages - 3 && (
+                      <span className="text-gray-400 text-xs px-1">...</span>
+                    )}
+                    <button
+                      onClick={() => handlePageChange(pagination.totalPages)}
+                      className="w-8 h-8 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 active:bg-gray-200 transition-colors"
+                    >
+                      {pagination.totalPages}
+                    </button>
+                  </>
+                )}
             </div>
           </div>
         </div>
@@ -387,8 +440,12 @@ export default function Result() {
                 </div>
               </div>
 
-              <h2 className="text-3xl font-extrabold text-white mb-3 drop-shadow-lg">🎉 You Won! 🎉</h2>
-              <p className="text-lg text-white font-medium mb-8 opacity-90">Congratulations!</p>
+              <h2 className="text-3xl font-extrabold text-white mb-3 drop-shadow-lg">
+                🎉 You Won! 🎉
+              </h2>
+              <p className="text-lg text-white font-medium mb-8 opacity-90">
+                Congratulations!
+              </p>
 
               <div className="bg-white text-green-600 text-4xl font-extrabold py-4 px-10 rounded-2xl shadow-xl border-2 border-green-400 mb-6">
                 ₹{winAmount}
@@ -406,24 +463,37 @@ export default function Result() {
       {showLoser && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 relative">
-            <button 
+            <button
               onClick={() => setShowLoser(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
               aria-label="Close"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
-            
+
             <div className="text-center pt-4">
               <div className="text-6xl mb-4">💔</div>
               <h2 className="text-2xl font-bold text-red-500 mb-3">
                 Better Luck Next Time!
               </h2>
-              <p className="text-gray-600 font-medium mb-6">Try again in the next round.</p>
-              
-              <button 
+              <p className="text-gray-600 font-medium mb-6">
+                Try again in the next round.
+              </p>
+
+              <button
                 onClick={() => {
                   setShowLoser(false);
                 }}

@@ -72,7 +72,6 @@ export default function Game() {
     if(!selectedBetColour && !selectedBetSize){
       return toast.error('sorry! error while plcing bet')
     }
-    console.log(betInp , selectedBetColour , selectedBetSize);
     
     try {
       const { data } = await axios.post(
@@ -100,7 +99,6 @@ export default function Game() {
                 period: period,
             };
             setActiveBets((prevBets) => [...prevBets, newBet]);
-            console.log(activeBets);
             setIsBetPopOpen(false);
        
       }
