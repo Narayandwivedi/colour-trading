@@ -37,21 +37,21 @@ function App() {
      <Route path='/' element={<ProtectedRoute><Homepage /></ProtectedRoute>} />
       <Route path='/support' element={<Support />} />
 
-    <Route path='/colourtrading' element={<ColourTrading/>}/>
+    <Route path='/colourtrading' element={<ProtectedRoute><ColourTrading/></ProtectedRoute>}/>
     <Route path='/mine' element={<Mine/>}/>
     <Route path='/aviator' element={<Aviator/>}/>
-    <Route path='/refer' element={<Refer />} />
+    <Route path='/refer' element={<ProtectedRoute><Refer /></ProtectedRoute>} />
           {/* <Route path='/wallet' element={<Wallet />} /> */}
-          <Route path='/account' element={<Account />} />
-          <Route path='/deposit' element={<Addbalance />} />
-          <Route path='/payment' element={<PaymentPage />} />
-          <Route path='/withdraw' element={<Withdraw />} />
+          <Route path='/account' element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path='/deposit' element={<ProtectedRoute><Addbalance /></ProtectedRoute>} />
+          <Route path='/payment' element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
+          <Route path='/withdraw' element={<ProtectedRoute><Withdraw /></ProtectedRoute>} />
           <Route path='/login' element={<Login />} />
-          <Route path='/bethistory' element={<BetHistory />} />
-          <Route path='/deposithistory' element={<DepositHistory />} />
-          <Route path='/withdrawhistory' element={<WithdrawalHistory />} />
-          <Route path='/addbank' element={<AddBank />} />
-          <Route path='/addupi' element={<AddUpi />} />
+          <Route path='/bethistory' element={<ProtectedRoute><BetHistory /></ProtectedRoute>} />
+          <Route path='/deposithistory' element={<ProtectedRoute><DepositHistory /></ProtectedRoute>} />
+          <Route path='/withdrawhistory' element={<ProtectedRoute><WithdrawalHistory /></ProtectedRoute>} />
+          <Route path='/addbank' element={<ProtectedRoute><AddBank /></ProtectedRoute>} />
+          <Route path='/addupi' element={<ProtectedRoute><AddUpi /></ProtectedRoute>} />
     
   </Routes>
   </div>

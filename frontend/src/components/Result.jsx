@@ -7,6 +7,9 @@ export default function Result() {
   const [winAmount, setWinAmount] = useState(null);
   const [showLoser, setShowLoser] = useState(false);
   const [latestPeriod, setLatestPeriod] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({});
+  const [loading, setLoading] = useState(false);
   const intervalRef = useRef(null);
 
   const {
@@ -24,46 +27,103 @@ export default function Result() {
     setBalance,
   } = useContext(AppContext);
 
-  const fetch_30_results = async () => {
+  const resultsPerPage = 10; // You can adjust this
+
+  const fetchResults = async (page = 1, isInitialLoad = false) => {
     try {
-      const { data } = await axios.get(`${BACKEND_URL}/api/latest/result/${gameType}`);
-      const latest = data.results[0];
-
-      if (latest && latest.period !== latestPeriod) {
-        setResults(data.results);
-
-        if ((selectedBetColour || selectedBetSize) && betValue) {
-          if (selectedBetColour === latest.colour || selectedBetSize === latest.size) {
-            setWinAmount(betValue * 2);
-            setBalance((prevBalance) => prevBalance + betValue * 2);
-            setShowWinner(true);
-          } else {
-            setShowLoser(true);
+      setLoading(true);
+      const { data } = await axios.get(
+        `${BACKEND_URL}/api/latest/result/${gameType}?page=${page}&limit=${resultsPerPage}`
+      );
+      
+      if (isInitialLoad) {
+        const latest = data.results[0];
+        
+        if (latest && latest.period !== latestPeriod) {
+          // Handle betting logic for the latest result
+          if ((selectedBetColour || selectedBetSize) && betValue) {
+            if (selectedBetColour === latest.colour || selectedBetSize === latest.size) {
+              setWinAmount(betValue * 2);
+              setBalance((prevBalance) => prevBalance + betValue * 2);
+              setShowWinner(true);
+            } else {
+              setShowLoser(true);
+            }
+            setBetValue(null);
+            setSelectedBetColour(null);
+            setSelectedBetSize(null);
           }
-          setBetValue(null);
-          setSelectedBetColour(null);
-          setSelectedBetSize(null);
-        }
-
-        setLatestPeriod(latest.period);
-
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
+          setLatestPeriod(latest.period);
         }
       }
+
+      setResults(data.results);
+      setPagination(data.pagination);
+      
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      
     } catch (err) {
       console.log("Error fetching results:", err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setCurrentPage(newPage);
+      fetchResults(newPage);
+    }
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const totalPages = pagination.totalPages || 1;
+    const current = currentPage;
+    
+    // Always show first page
+    pages.push(1);
+    
+    // Add pages around current page
+    let start = Math.max(2, current - 1);
+    let end = Math.min(totalPages - 1, current + 1);
+    
+    // Add ellipsis after first page if needed
+    if (start > 2) {
+      pages.push('...');
+    }
+    
+    // Add middle pages
+    for (let i = start; i <= end; i++) {
+      if (i !== 1 && i !== totalPages) {
+        pages.push(i);
+      }
+    }
+    
+    // Add ellipsis before last page if needed
+    if (end < totalPages - 1) {
+      pages.push('...');
+    }
+    
+    // Always show last page (if more than 1 page)
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+    
+    return pages;
+  };
+
   useEffect(() => {
-    fetch_30_results();
+    fetchResults(1, true);
   }, [gameType]);
 
   useEffect(() => {
     if (timer <= 1 && !intervalRef.current) {
-      intervalRef.current = setInterval(fetch_30_results, 800);
+      intervalRef.current = setInterval(() => fetchResults(1, true), 800);
     }
     return () => {
       if (intervalRef.current) {
@@ -100,74 +160,248 @@ export default function Result() {
           </div>
         </div>
 
-        {/* Removed max-h-96 and overflow-y-auto */}
-        <div>
-          {results.map((item, index) => (
-            <div
-              key={index}
-              className={`grid gap-2 px-3 py-4 border-b border-gray-100 ${
-                index % 2 === 0 ? "bg-gray-50" : "bg-white"
-              } hover:bg-teal-50 transition-colors duration-200`}
-              style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr" }}
-            >
-              <div className="text-center flex justify-center">
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-2 py-1.5 rounded-lg shadow-sm">
-                  <span className="block truncate text-xs leading-tight">{item.period}</span>
+        {/* Loading state */}
+        {loading && (
+          <div className="text-center py-12 text-gray-500">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto mb-3"></div>
+            <p className="text-lg font-medium">Loading results...</p>
+          </div>
+        )}
+
+        {/* Results */}
+        {!loading && (
+          <div>
+            {results.map((item, index) => (
+              <div
+                key={index}
+                className={`grid gap-2 px-3 py-4 border-b border-gray-100 ${
+                  index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                } hover:bg-teal-50 transition-colors duration-200`}
+                style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr" }}
+              >
+                <div className="text-center flex justify-center">
+                  <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-2 py-1.5 rounded-lg shadow-sm">
+                    <span className="block truncate text-xs leading-tight">{item.period}</span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="text-center">
-                <span
-                  className={`text-xs font-bold px-2 py-1.5 rounded-full shadow-sm ${
-                    item.size === "Big"
-                      ? "bg-orange-200 text-orange-800"
-                      : "bg-purple-200 text-purple-800"
-                  }`}
-                >
-                  {item.size}
-                </span>
-              </div>
-
-              <div className="text-center">
-                <div className="bg-gray-200 text-gray-800 font-bold text-sm w-8 h-8 rounded-full flex items-center justify-center mx-auto shadow-sm">
-                  {item.number}
+                <div className="text-center">
+                  <span
+                    className={`text-xs font-bold px-2 py-1.5 rounded-full shadow-sm ${
+                      item.size === "Big"
+                        ? "bg-orange-200 text-orange-800"
+                        : "bg-purple-200 text-purple-800"
+                    }`}
+                  >
+                    {item.size}
+                  </span>
                 </div>
-              </div>
 
-              <div className="flex justify-center items-center">
-                {item.colour === "violetRed" || item.colour === "violetGreen" ? (
-                  <div className="flex items-center space-x-1">
-                    <div className="w-6 h-6 rounded-full shadow-lg border-2 border-white bg-gradient-to-r from-purple-500 to-purple-600"></div>
+                <div className="text-center">
+                  <div className="bg-gray-200 text-gray-800 font-bold text-sm w-8 h-8 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                    {item.number}
+                  </div>
+                </div>
+
+                <div className="flex justify-center items-center">
+                  {item.colour === "violetRed" || item.colour === "violetGreen" ? (
+                    <div className="flex items-center space-x-1">
+                      <div className="w-6 h-6 rounded-full shadow-lg border-2 border-white bg-gradient-to-r from-purple-500 to-purple-600"></div>
+                      <div
+                        className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
+                          item.colour === "violetRed"
+                            ? "bg-gradient-to-r from-red-500 to-red-600"
+                            : "bg-gradient-to-r from-green-500 to-green-600"
+                        }`}
+                      ></div>
+                    </div>
+                  ) : (
                     <div
                       className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
-                        item.colour === "violetRed"
+                        item.colour === "red"
                           ? "bg-gradient-to-r from-red-500 to-red-600"
                           : "bg-gradient-to-r from-green-500 to-green-600"
                       }`}
                     ></div>
-                  </div>
-                ) : (
-                  <div
-                    className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
-                      item.colour === "red"
-                        ? "bg-gradient-to-r from-red-500 to-red-600"
-                        : "bg-gradient-to-r from-green-500 to-green-600"
-                    }`}
-                  ></div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {/* Empty state */}
-          {results.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              <div className="text-5xl mb-3">🎯</div>
-              <p className="text-lg font-medium">No results available</p>
-            </div>
-          )}
-        </div>
+            {/* Empty state */}
+            {results.length === 0 && !loading && (
+              <div className="text-center py-12 text-gray-500">
+                <div className="text-5xl mb-3">🎯</div>
+                <p className="text-lg font-medium">No results available</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Mobile-Optimized Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="mt-4 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          {/* Results info - Mobile optimized */}
+          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+            <div className="text-xs text-gray-600 text-center">
+              Page {currentPage} of {pagination.totalPages} ({pagination.totalResults} total)
+            </div>
+          </div>
+
+          {/* Mobile Pagination Controls */}
+          <div className="p-3">
+            {/* Previous/Next with Current Page */}
+            <div className="flex items-center justify-between mb-3">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={!pagination.hasPrevPage}
+                className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  pagination.hasPrevPage
+                    ? "bg-teal-500 text-white active:bg-teal-600"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }`}
+              >
+                <i className="fas fa-chevron-left text-xs"></i>
+                <span>Previous</span>
+              </button>
+
+              {/* Current page indicator */}
+              <div className="bg-teal-100 text-teal-700 px-4 py-2 rounded-lg font-bold text-sm">
+                {currentPage}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={!pagination.hasNextPage}
+                className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  pagination.hasNextPage
+                    ? "bg-teal-500 text-white active:bg-teal-600"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }`}
+              >
+                <span>Next</span>
+                <i className="fas fa-chevron-right text-xs"></i>
+              </button>
+            </div>
+
+            {/* Quick Jump - Only show first few, current, and last few pages */}
+            <div className="flex items-center justify-center gap-1 flex-wrap">
+              {/* First page */}
+              {currentPage > 3 && (
+                <>
+                  <button
+                    onClick={() => handlePageChange(1)}
+                    className="w-8 h-8 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 active:bg-gray-200 transition-colors"
+                  >
+                    1
+                  </button>
+                  {currentPage > 4 && (
+                    <span className="text-gray-400 text-xs px-1">...</span>
+                  )}
+                </>
+              )}
+
+              {/* Pages around current */}
+              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                let pageNum;
+                if (pagination.totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= pagination.totalPages - 2) {
+                  pageNum = pagination.totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+
+                if (pageNum < 1 || pageNum > pagination.totalPages) return null;
+                if (currentPage > 3 && pageNum === 1) return null;
+                if (currentPage < pagination.totalPages - 2 && pageNum === pagination.totalPages) return null;
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
+                      pageNum === currentPage
+                        ? "bg-teal-500 text-white"
+                        : "bg-gray-100 text-gray-700 active:bg-gray-200"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              {/* Last page */}
+              {currentPage < pagination.totalPages - 2 && pagination.totalPages > 5 && (
+                <>
+                  {currentPage < pagination.totalPages - 3 && (
+                    <span className="text-gray-400 text-xs px-1">...</span>
+                  )}
+                  <button
+                    onClick={() => handlePageChange(pagination.totalPages)}
+                    className="w-8 h-8 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 active:bg-gray-200 transition-colors"
+                  >
+                    {pagination.totalPages}
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Quick jump buttons for large datasets */}
+            {pagination.totalPages > 10 && (
+              <div className="flex justify-center gap-2 mt-3 pt-3 border-t border-gray-200">
+                <button
+                  onClick={() => handlePageChange(1)}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    currentPage === 1
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-blue-100 text-blue-700 active:bg-blue-200"
+                  }`}
+                >
+                  First
+                </button>
+                <button
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 5))}
+                  disabled={currentPage <= 5}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    currentPage <= 5
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-orange-100 text-orange-700 active:bg-orange-200"
+                  }`}
+                >
+                  -5
+                </button>
+                <button
+                  onClick={() => handlePageChange(Math.min(pagination.totalPages, currentPage + 5))}
+                  disabled={currentPage >= pagination.totalPages - 4}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    currentPage >= pagination.totalPages - 4
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-orange-100 text-orange-700 active:bg-orange-200"
+                  }`}
+                >
+                  +5
+                </button>
+                <button
+                  onClick={() => handlePageChange(pagination.totalPages)}
+                  disabled={currentPage === pagination.totalPages}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    currentPage === pagination.totalPages
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-blue-100 text-blue-700 active:bg-blue-200"
+                  }`}
+                >
+                  Last
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Win popup */}
       {showWinner && (
@@ -204,42 +438,38 @@ export default function Result() {
       )}
 
       {/* Lose popup */}
-      {/* Lose popup */}
-{showLoser && (
-  <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
-    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 relative">
-      {/* Close button (X) - top right */}
-      <button 
-        onClick={() => setShowLoser(false)}
-        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-        aria-label="Close"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      
-      <div className="text-center pt-4">
-        <div className="text-6xl mb-4">💔</div>
-        <h2 className="text-2xl font-bold text-red-500 mb-3">
-          Better Luck Next Time!
-        </h2>
-        <p className="text-gray-600 font-medium mb-6">Try again in the next round.</p>
-        
-        {/* Try Again button - centered with better styling */}
-        <button 
-          onClick={() => {
-            setShowLoser(false);
-            // Add any additional try again logic here
-          }}
-          className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
-        >
-          Try Again
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+      {showLoser && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 relative">
+            <button 
+              onClick={() => setShowLoser(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            <div className="text-center pt-4">
+              <div className="text-6xl mb-4">💔</div>
+              <h2 className="text-2xl font-bold text-red-500 mb-3">
+                Better Luck Next Time!
+              </h2>
+              <p className="text-gray-600 font-medium mb-6">Try again in the next round.</p>
+              
+              <button 
+                onClick={() => {
+                  setShowLoser(false);
+                }}
+                className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

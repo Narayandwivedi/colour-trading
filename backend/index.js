@@ -32,27 +32,56 @@ app.use(express.json());
 
 
 // Fetch last 30 closed results for a specific gameType
+// Updated backend endpoint with pagination
 app.get("/api/latest/result/:gameType", async (req, res) => {
   const { gameType } = req.params;
-
+  const { page = 1, limit = 10 } = req.query; // Default: page 1, 10 results per page
+  
   if (!["30sec", "1min", "3min"].includes(gameType)) {
     return res
       .status(400)
       .json({ success: false, message: "Invalid game type" });
   }
+
   try {
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Get total count for pagination info
+    const totalResults = await game.countDocuments({
+      gameType,
+      status: "closed"
+    });
+
+    // Get paginated results
     const results = await game
-      .find({gameType , status: "closed" })
+      .find({ gameType, status: "closed" })
       .sort({ createdAt: -1 })
-      .limit(30)
+      .skip(skip)
+      .limit(limitNum)
       .lean();
 
-    res.json({ success: true, results });
+    const totalPages = Math.ceil(totalResults / limitNum);
+    const hasNextPage = pageNum < totalPages;
+    const hasPrevPage = pageNum > 1;
+
+    res.json({
+      success: true,
+      results,
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        totalResults,
+        hasNextPage,
+        hasPrevPage,
+        limit: limitNum
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: "Server error: " + err.message });
   }
 });
-
 // Fetch last 1 closed result for a specific gameType
 app.get("/api/latest/oneresult/:gameType", async (req, res) => {
   const { gameType } = req.params;

@@ -156,17 +156,18 @@ const Account = () => {
       </div>
 
       {/* Logout Button */}
-      <div className="mt-6 px-3">
-        <button
-          onClick={handleLogout}
-          className="w-full bg-gradient-to-r from-gray-700 to-gray-800 text-white py-3 rounded-xl font-medium text-sm border border-gray-600/30"
-        >
-          <div className="flex items-center justify-center gap-2">
-            <LogOut className="w-4 h-4" />
-            Logout
-          </div>
-        </button>
-      </div>
+      {/* Logout Button - Blue Gradient */}
+<div className="mt-4 px-3">
+  <button
+    onClick={handleLogout}
+    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-xl font-medium text-sm border border-blue-500/30 shadow-md transition-colors"
+  >
+    <div className="flex items-center justify-center gap-2">
+      <LogOut className="w-4 h-4" />
+      Logout
+    </div>
+  </button>
+</div>
 
       {/* Bottom Navigation */}
       <BottomNav />
