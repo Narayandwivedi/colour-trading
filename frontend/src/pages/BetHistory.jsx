@@ -4,38 +4,40 @@ import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
 
 // Card component with enhanced mobile design
-function BetCard({ Period, Bet, Amount, Result, status , payout , orderId }) {
+function BetCard({ Period, Bet, Amount, Result, status, payout, orderId }) {
   const getBetStyle = () => {
-    if (Bet === "red") return {
-      color: "text-red-500",
-      bg: "bg-red-50",
-      border: "border-red-200",
-      
-    };
-    if (Bet === "green") return {
-      color: "text-green-500", 
-      bg: "bg-green-50",
-      border: "border-green-200",
-    };
+    if (Bet === "red")
+      return {
+        color: "text-red-500",
+        bg: "bg-red-50",
+        border: "border-red-200",
+      };
+    if (Bet === "green")
+      return {
+        color: "text-green-500",
+        bg: "bg-green-50",
+        border: "border-green-200",
+      };
 
-    if(Bet === 'violet')return{
-      color:'text-violet-500',
-      bg:'bg-violet-50',
-      border:'border:violet-200'
-    };
+    if (Bet === "violet")
+      return {
+        color: "text-violet-500",
+        bg: "bg-violet-50",
+        border: "border:violet-200",
+      };
 
-    if (Bet === "big") return {
-      color: "text-orange-500",
-      bg: "bg-orange-50", 
-      border: "border-orange-200",
-      
-    };
-    if (Bet === "small") return {
-      color: "text-blue-500",
-      bg: "bg-blue-50",
-      border: "border-blue-200", 
-     
-    };
+    if (Bet === "big")
+      return {
+        color: "text-orange-500",
+        bg: "bg-orange-50",
+        border: "border-orange-200",
+      };
+    if (Bet === "small")
+      return {
+        color: "text-blue-500",
+        bg: "bg-blue-50",
+        border: "border-blue-200",
+      };
     return {
       color: "text-gray-500",
       bg: "bg-gray-50",
@@ -49,7 +51,13 @@ function BetCard({ Period, Bet, Amount, Result, status , payout , orderId }) {
   return (
     <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
       {/* Header with status indicator */}
-      <div className={`px-6 py-4 ${isWon ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-rose-500'}`}>
+      <div
+        className={`px-6 py-4 ${
+          isWon
+            ? "bg-gradient-to-r from-green-500 to-emerald-500"
+            : "bg-gradient-to-r from-red-500 to-rose-500"
+        }`}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="text-white text-sm font-medium">Period</span>
@@ -57,10 +65,12 @@ function BetCard({ Period, Bet, Amount, Result, status , payout , orderId }) {
               {Period}
             </span>
           </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            isWon ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
-            {isWon ? '✅ WON' : '❌ LOST'}
+          <div
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              isWon ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+            }`}
+          >
+            {isWon ? "✅ WON" : "❌ LOST"}
           </div>
         </div>
       </div>
@@ -69,8 +79,12 @@ function BetCard({ Period, Bet, Amount, Result, status , payout , orderId }) {
       <div className="p-6 space-y-4">
         {/* Bet selection with icon */}
         <div className="flex items-center justify-between">
-          <span className="text-gray-600 text-sm font-medium">Bet Selection</span>
-          <div className={`flex items-center space-x-2 px-3 py-2 rounded-xl ${betStyle.bg} ${betStyle.border} border`}>
+          <span className="text-gray-600 text-sm font-medium">
+            Bet Selection
+          </span>
+          <div
+            className={`flex items-center space-x-2 px-3 py-2 rounded-xl ${betStyle.bg} ${betStyle.border} border`}
+          >
             <span className="text-lg">{betStyle.icon}</span>
             <span className={`font-bold text-sm uppercase ${betStyle.color}`}>
               {Bet}
@@ -89,7 +103,7 @@ function BetCard({ Period, Bet, Amount, Result, status , payout , orderId }) {
 
         {/* payout */}
 
-         <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <span className="text-gray-600 text-sm font-medium">win amount</span>
           <div className="flex items-center space-x-1">
             <span className="text-gray-500 text-sm">₹</span>
@@ -98,34 +112,47 @@ function BetCard({ Period, Bet, Amount, Result, status , payout , orderId }) {
         </div>
 
         {/* Result */}
-        <div className="flex items-center justify-between">
-          <span className="text-gray-600 text-sm font-medium">Game Result</span>
-          <span className="bg-gray-100 px-3 py-1 rounded-lg text-gray-800 font-semibold text-sm">
-            <div className="flex justify-center items-center">
-                {Result === "violetRed" || Result === "violetGreen" ? (
-                  <div className="flex items-center space-x-1">
-                    {/* Violet circle */}
-                    <div className={`w-6 h-6 rounded-full shadow-lg border-2 border-white bg-gradient-to-r from-purple-500 to-purple-600`}></div>
-                    {/* Red/Green circle */}
-                    <div className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
-                      Result === "violetRed" 
-                        ? "bg-gradient-to-r from-red-500 to-red-600" 
-                        : "bg-gradient-to-r from-green-500 to-green-600"
-                    }`}></div>
-                  </div>
-                ) : (
-                  <div className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
-                    Result === "red" 
-                      ? "bg-gradient-to-r from-red-500 to-red-600"
-                      : "bg-gradient-to-r from-green-500 to-green-600"
-                  }`}></div>
-                )}
-              </div>
-          </span>
+      <div className="flex items-center justify-between">
+  <span className="text-gray-600 text-sm font-medium">Game Result</span>
+  <span className="bg-gray-100 px-3 py-1 rounded-lg text-gray-800 font-semibold text-sm">
+    <div className="flex justify-center items-center">
+      {Result === "violetRed" || Result === "violetGreen" ? (
+        <div className="flex items-center space-x-1">
+          {/* Violet circle */}
+          <div
+            className={`w-6 h-6 rounded-full shadow-lg border-2 border-white bg-gradient-to-r from-purple-500 to-purple-600`}
+          ></div>
+          {/* Red/Green circle */}
+          <div
+            className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
+              Result === "violetRed"
+                ? "bg-gradient-to-r from-red-500 to-red-600"
+                : "bg-gradient-to-r from-green-500 to-green-600"
+            }`}
+          ></div>
         </div>
-
-                {/* order id */}
-       <div className="flex items-center justify-between">
+      ) : Result === "big" || Result === "small" ? (
+        <span className={`px-5 py-1 rounded-md font-bold ${
+          Result === "big" 
+            ? "bg-yellow-100 text-yellow-700" 
+            : "bg-blue-100 text-blue-700"
+        }`}>
+          {Result}
+        </span>
+      ) : (
+        <div
+          className={`w-6 h-6 rounded-full shadow-lg border-2 border-white ${
+            Result === "red"
+              ? "bg-gradient-to-r from-red-500 to-red-600"
+              : Result === 'green'?"bg-gradient-to-r from-green-500 to-green-600":''
+          }`}
+        ></div>
+      )}
+    </div>
+  </span>
+</div>
+        {/* order id */}
+        <div className="flex items-center justify-between">
           <span className="text-gray-600 text-sm font-medium">order id</span>
           <div className="flex items-center space-x-1">
             <span className="text-gray-600 font-medium text-sm">{orderId}</span>
@@ -134,7 +161,13 @@ function BetCard({ Period, Bet, Amount, Result, status , payout , orderId }) {
       </div>
 
       {/* Bottom accent line */}
-      <div className={`h-1 ${isWon ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-gradient-to-r from-red-400 to-rose-400'}`}></div>
+      <div
+        className={`h-1 ${
+          isWon
+            ? "bg-gradient-to-r from-green-400 to-emerald-400"
+            : "bg-gradient-to-r from-red-400 to-rose-400"
+        }`}
+      ></div>
     </div>
   );
 }
@@ -201,7 +234,9 @@ const BetHistory = () => {
               <span className="text-gray-400 text-3xl">📊</span>
             </div>
             <h3 className="text-gray-600 font-medium mb-2">No Bets Yet</h3>
-            <p className="text-gray-500 text-sm">Your betting history will appear here</p>
+            <p className="text-gray-500 text-sm">
+              Your betting history will appear here
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -213,7 +248,7 @@ const BetHistory = () => {
                 Amount={eachBet.betAmount}
                 Result={eachBet.betResult}
                 status={eachBet.status}
-                payout = {eachBet.payout}
+                payout={eachBet.payout}
                 orderId={eachBet._id}
               />
             ))}

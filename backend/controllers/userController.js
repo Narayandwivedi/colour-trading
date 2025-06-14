@@ -43,9 +43,22 @@ const handelUserSignup = async (req, res) => {
         .json({ success: false, message: "user already exist" });
     }
 
+
+    // check if referal code is correct or not  
+
+     if(referedBy){
+      const referer = await userModel.findOne({referralCode:referedBy})
+      if(referer){
+        referer.totalReferal+=1
+        await referer.save()
+      }
+    }
+
+
     // generate unique referral code
     const referralCode = generateReferralCode();
 
+   
     // hashpassword
     const hashedpassword = await bcrypt.hash(password, 8);
     console.log(fullName, email, password, hashedpassword);
