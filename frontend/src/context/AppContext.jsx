@@ -57,7 +57,6 @@ const checkLogin = async () => {
     selectedBetColour, setSelectedBetColour,
     showWinner, setShowWinner,
     timer, setTimer,
-    betValue, setBetValue,
     userData , setUserData,
     period, setPeriod,
     periodCreatedAT , setPeriodCreatedAT,
