@@ -22,7 +22,8 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "http://winnersclubs.fun"
+      "https://winnersclubs.fun",
+      "https://api.winnersclubs.fun"
     ],
     credentials: true,
   })
