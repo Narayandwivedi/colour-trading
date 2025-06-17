@@ -113,6 +113,8 @@ const Transaction = () => {
       const { data } = await axios.get(`${BACKEND_URL}/api/transaction`);
       if (data.success) {
         setAllTransaction(data.allTransaction);
+        console.log("transaction fetched successfully");
+        
       }
     } catch (err) {
       toast.error("Unable to fetch transactions");
@@ -123,7 +125,10 @@ const Transaction = () => {
   };
 
   useEffect(() => {
-    fetchAllTransaction();
+    fetchAllTransaction()
+    setInterval(() => {
+      fetchAllTransaction()
+    }, 8000);
   }, []);
 
   const filteredTransactions = allTransaction ? 

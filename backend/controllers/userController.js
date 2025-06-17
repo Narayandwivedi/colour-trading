@@ -54,7 +54,6 @@ const handelUserSignup = async (req, res) => {
       }
     }
 
-
     // generate unique referral code
     const referralCode = generateReferralCode();
 

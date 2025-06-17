@@ -1,9 +1,9 @@
-const User = require("../models/user")
-const Bet = require("../models/bet")
-const express = require('express');
-const router = express.Router()
-const Transaction = require("../models/transcationModel")
-
+const User = require("../models/user");
+const Bet = require("../models/bet");
+const express = require("express");
+const router = express.Router();
+const Transaction = require("../models/transcationModel");
+const Withdraw = require("../models/Withdraw");
 
 router.get("/stats", async (req, res) => {
   try {
@@ -26,9 +26,9 @@ router.get("/stats", async (req, res) => {
         $group: {
           _id: null,
           totalBetAmount: { $sum: "$betAmount" },
-          betCount: { $sum: 1 }
-        }
-      }
+          betCount: { $sum: 1 },
+        },
+      },
     ]);
 
     // Aggregate for last 7 days
@@ -38,49 +38,48 @@ router.get("/stats", async (req, res) => {
         $group: {
           _id: null,
           totalBetAmount: { $sum: "$betAmount" },
-          betCount: { $sum: 1 }
-        }
-      }
+          betCount: { $sum: 1 },
+        },
+      },
     ]);
-
 
     // deposit today
 
     const depositsToday = await Transaction.aggregate([
-  {
-    $match: {
-      type: "deposit",
-      status: "success",
-      createdAt: { $gte: today, $lt: tomorrow }
-    }
-  },
-  {
-    $group: {
-      _id: null,
-      totalAmount: { $sum: "$amount" },
-      count: { $sum: 1 }
-    }
-  }
-]);
+      {
+        $match: {
+          type: "deposit",
+          status: "success",
+          createdAt: { $gte: today, $lt: tomorrow },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
 
-// deposit last 7 day
+    // deposit last 7 day
 
-const depositsLast7Days = await Transaction.aggregate([
-  {
-    $match: {
-      type: "deposit",
-      status: "success",
-      createdAt: { $gte: sevenDaysAgo }
-    }
-  },
-  {
-    $group: {
-      _id: null,
-      totalAmount: { $sum: "$amount" },
-      count: { $sum: 1 }
-    }
-  }
-]);
+    const depositsLast7Days = await Transaction.aggregate([
+      {
+        $match: {
+          type: "deposit",
+          status: "success",
+          createdAt: { $gte: sevenDaysAgo },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
 
     res.json({
       totalUsers,
@@ -93,16 +92,46 @@ const depositsLast7Days = await Transaction.aggregate([
         totalCount: betsLast7Days[0]?.betCount || 0,
       },
 
-      depositsToday :depositsToday[0]?.totalAmount||0,
-      depositsLast7Days :depositsLast7Days[0]?.totalAmount ||0
-
+      depositsToday: depositsToday[0]?.totalAmount || 0,
+      depositsLast7Days: depositsLast7Days[0]?.totalAmount || 0,
     });
-
   } catch (error) {
     console.error("Error fetching admin stats:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
+router.get("/allusers", async (req, res) => {
+  try {
+    const allUsers = await User.find().lean().select("-password");
+    return res.json({ success: true, allUsers });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: "internal server error" });
+  }
+});
 
-module.exports = router
+router.get("/allBets", async (req, res) => {
+  try {
+    const allBets = await Bet.find().lean().sort({ createdAt: -1 });
+    return res.json({success:true , allBets})
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: "internal server error" });
+  }
+});
+
+router.get("/allwithdraw", async (req, res) => {
+  try {
+    const allwithdraw = await Withdraw.find().sort({ createdAt: -1 }).lean();
+    return res.json({ success: true, allwithdraw });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: "internal server error" });
+  }
+});
+
+module.exports = router;
