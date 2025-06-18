@@ -23,7 +23,8 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "https://winnersclubs.fun",
-      "https://api.winnersclubs.fun"
+      "https://api.winnersclubs.fun",
+      "https://colour-trading-admin.vercel.app"
     ],
     credentials: true,
   })

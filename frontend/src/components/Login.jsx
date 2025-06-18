@@ -62,6 +62,7 @@ const Login = () => {
   )
   if(data.success){
     setUserData(data.userData)
+    setBalance(data.userData.balance)
     navigate("/")
     toast.success(data.message)
     
