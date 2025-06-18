@@ -61,6 +61,7 @@ const Login = () => {
     }
   )
   if(data.success){
+    setUserData(data.userData)
     navigate("/")
     toast.success(data.message)
     

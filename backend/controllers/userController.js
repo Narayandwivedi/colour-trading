@@ -78,9 +78,10 @@ const handelUserSignup = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expires in 7 days
     });
 
+    delete newUser.password
     return res
       .status(201)
-      .json({ success: true, message: "user created successfully" });
+      .json({ success: true, message: "user created successfully" , userId:newUser});
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({ message: err.message });

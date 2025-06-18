@@ -4,6 +4,7 @@ const express = require("express");
 const router = express.Router();
 const Transaction = require("../models/transcationModel");
 const Withdraw = require("../models/Withdraw");
+const mongoose = require("mongoose");
 
 router.get("/stats", async (req, res) => {
   try {
@@ -112,10 +113,10 @@ router.get("/allusers", async (req, res) => {
   }
 });
 
-router.get("/allBets", async (req, res) => {
+router.get("/allbets", async (req, res) => {
   try {
     const allBets = await Bet.find().lean().sort({ createdAt: -1 });
-    return res.json({success:true , allBets})
+    return res.json({ success: true, allBets });
   } catch (err) {
     return res
       .status(500)
@@ -133,5 +134,77 @@ router.get("/allwithdraw", async (req, res) => {
       .json({ success: false, message: "internal server error" });
   }
 });
+
+router.put("/approve-withdraw", async (req, res) => {
+  try {
+    const { withdrawId } = req.body;
+
+    if (!withdrawId) {
+      return res.status(400).json({ success: false, message: "Missing withdrawId" });
+    }
+
+    if (!mongoose.isValidObjectId(withdrawId)) {
+      return res.status(400).json({ success: false, message: "Invalid withdrawId" });
+    }
+
+    const getWithdraw = await Withdraw.findById(withdrawId);
+    if (!getWithdraw) {
+      return res.status(404).json({ success: false, message: "Withdraw request not found" });
+    }
+
+    if (getWithdraw.status === "success" || getWithdraw.status=== 'rejected') {
+      return res.status(400).json({ success: false, message: "Withdraw request already approved or rejected" });
+    }
+
+    const getUser = await User.findById(getWithdraw.userId);
+    if (!getUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    getWithdraw.status = "success";
+    await getWithdraw.save();
+
+    return res.json({ success: true, message: "Withdraw approved successfully" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+router.put("/reject-withdraw",async(req,res)=>{
+      try {
+    const { withdrawId } = req.body;
+
+    if (!withdrawId) {
+      return res.status(400).json({ success: false, message: "Missing withdrawId" });
+    }
+
+    if (!mongoose.isValidObjectId(withdrawId)) {
+      return res.status(400).json({ success: false, message: "Invalid withdrawId" });
+    }
+
+    const getWithdraw = await Withdraw.findById(withdrawId);
+    if (!getWithdraw) {
+      return res.status(404).json({ success: false, message: "Withdraw request not found" });
+    }
+
+    if (getWithdraw.status === "success" || getWithdraw.status=== 'rejected') {
+      return res.status(400).json({ success: false, message: "Withdraw request already approved or rejected" });
+    }
+
+    const getUser = await User.findById(getWithdraw.userId);
+    if (!getUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    getWithdraw.status = "rejected";
+    await getWithdraw.save();
+
+    return res.json({ success: true, message: "Withdraw rejected successfully" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+})
 
 module.exports = router;

@@ -36,6 +36,10 @@ const Withdraw = () => {
         if(!amount || parsedAmount<300){
             return toast.error('invalid withdrawal amount')
         }
+
+        if(amount>userData.withdrawableBalance){
+            return toast.error("insufficient balance")
+        }
         
         const {data} = await axios.post(`${BACKEND_URL}/api/transaction/withdraw`,{
             userId : userData._id,
@@ -45,6 +49,7 @@ const Withdraw = () => {
         
         if(data.success){
             toast.success('Withdrawal request submitted successfully!')
+            
             // Reset form
             setAmount('')
             setPaymentMethod('')
