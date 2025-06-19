@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { CheckCircle, Clock, XCircle, User, Calendar, Hash, DollarSign, Eye } from "lucide-react";
+import {
+  CheckCircle,
+  Clock,
+  XCircle,
+  User,
+  Calendar,
+  Hash,
+  DollarSign,
+  Eye,
+} from "lucide-react";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 
@@ -11,8 +20,7 @@ const Transaction = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
 
-  const {BACKEND_URL} = useContext(AppContext)
-
+  const { BACKEND_URL } = useContext(AppContext);
 
   const formatDate = (isoString) => {
     const date = new Date(isoString);
@@ -27,9 +35,9 @@ const Transaction = () => {
   };
 
   const formatAmount = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
@@ -44,7 +52,7 @@ const Transaction = () => {
           borderColor: "border-green-200",
           textColor: "text-green-700",
           badgeColor: "bg-green-100 text-green-800",
-          shadowColor: "shadow-green-100"
+          shadowColor: "shadow-green-100",
         };
       case "pending":
         return {
@@ -53,7 +61,7 @@ const Transaction = () => {
           borderColor: "border-amber-200",
           textColor: "text-amber-700",
           badgeColor: "bg-amber-100 text-amber-800",
-          shadowColor: "shadow-amber-100"
+          shadowColor: "shadow-amber-100",
         };
       case "rejected":
         return {
@@ -62,7 +70,7 @@ const Transaction = () => {
           borderColor: "border-red-200",
           textColor: "text-red-700",
           badgeColor: "bg-red-100 text-red-800",
-          shadowColor: "shadow-red-100"
+          shadowColor: "shadow-red-100",
         };
       default:
         return {
@@ -71,7 +79,7 @@ const Transaction = () => {
           borderColor: "border-gray-200",
           textColor: "text-gray-700",
           badgeColor: "bg-gray-100 text-gray-800",
-          shadowColor: "shadow-gray-100"
+          shadowColor: "shadow-gray-100",
         };
     }
   };
@@ -86,7 +94,7 @@ const Transaction = () => {
         {
           userId,
           totalAmount,
-          transactionId
+          transactionId,
         }
       );
 
@@ -104,8 +112,21 @@ const Transaction = () => {
     }
   };
 
-  const handleReject = async () => {
-    toast.info("Reject functionality coming soon!");
+  const handleReject = async (transactionId) => {
+    try {
+      const { data } = await axios.put(
+        `${BACKEND_URL}/api/admin/reject-deposit`,
+        {
+          transactionId,
+        }
+      );
+
+      if (data.success) {
+        toast.success(data.message || "transaction rejected success");
+      }
+    } catch (err) {
+      toast.error("some error ");
+    }
   };
 
   const fetchAllTransaction = async () => {
@@ -114,7 +135,6 @@ const Transaction = () => {
       if (data.success) {
         setAllTransaction(data.allTransaction);
         console.log("transaction fetched successfully");
-        
       }
     } catch (err) {
       toast.error("Unable to fetch transactions");
@@ -125,25 +145,29 @@ const Transaction = () => {
   };
 
   useEffect(() => {
-    fetchAllTransaction()
+    fetchAllTransaction();
     setInterval(() => {
-      fetchAllTransaction()
+      fetchAllTransaction();
     }, 8000);
   }, []);
 
-  const filteredTransactions = allTransaction ? 
-    allTransaction.filter(transaction => 
-      filter === "all" || transaction.status === filter
-    ) : [];
+  const filteredTransactions = allTransaction
+    ? allTransaction.filter(
+        (transaction) => filter === "all" || transaction.status === filter
+      )
+    : [];
 
   const getStatusCounts = () => {
     if (!allTransaction) return { all: 0, success: 0, pending: 0, rejected: 0 };
-    
-    return allTransaction.reduce((acc, transaction) => {
-      acc.all++;
-      acc[transaction.status] = (acc[transaction.status] || 0) + 1;
-      return acc;
-    }, { all: 0, success: 0, pending: 0, rejected: 0 });
+
+    return allTransaction.reduce(
+      (acc, transaction) => {
+        acc.all++;
+        acc[transaction.status] = (acc[transaction.status] || 0) + 1;
+        return acc;
+      },
+      { all: 0, success: 0, pending: 0, rejected: 0 }
+    );
   };
 
   const statusCounts = getStatusCounts();
@@ -164,18 +188,34 @@ const Transaction = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Transaction Management</h1>
-          <p className="text-gray-600">Monitor and manage all transaction requests</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            Transaction Management
+          </h1>
+          <p className="text-gray-600">
+            Monitor and manage all transaction requests
+          </p>
         </div>
 
         {/* Status Filter Tabs */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex flex-wrap gap-4 justify-center">
             {[
-              { key: "all", label: "All Transactions", count: statusCounts.all },
-              { key: "success", label: "Approved", count: statusCounts.success },
+              {
+                key: "all",
+                label: "All Transactions",
+                count: statusCounts.all,
+              },
+              {
+                key: "success",
+                label: "Approved",
+                count: statusCounts.success,
+              },
               { key: "pending", label: "Pending", count: statusCounts.pending },
-              { key: "rejected", label: "Rejected", count: statusCounts.rejected }
+              {
+                key: "rejected",
+                label: "Rejected",
+                count: statusCounts.rejected,
+              },
             ].map(({ key, label, count }) => (
               <button
                 key={key}
@@ -209,7 +249,9 @@ const Transaction = () => {
                 >
                   {/* Status Badge */}
                   <div className="flex items-center justify-between mb-4">
-                    <span className={`${statusConfig.badgeColor} px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex items-center gap-1`}>
+                    <span
+                      className={`${statusConfig.badgeColor} px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex items-center gap-1`}
+                    >
                       <StatusIcon size={14} />
                       {transaction.status}
                     </span>
@@ -222,7 +264,9 @@ const Transaction = () => {
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar size={16} className="text-gray-500" />
-                      <span className="text-gray-700">{formatDate(transaction.createdAt)}</span>
+                      <span className="text-gray-700">
+                        {formatDate(transaction.createdAt)}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-2 text-sm">
@@ -273,7 +317,7 @@ const Transaction = () => {
                           Approve
                         </button>
                         <button
-                          onClick={handleReject}
+                          onClick={()=>handleReject(transaction._id)}
                           className="flex-1 bg-red-500 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium flex items-center justify-center gap-1"
                         >
                           <XCircle size={16} />
@@ -292,10 +336,12 @@ const Transaction = () => {
               <div className="text-gray-400 mb-4">
                 <Eye size={48} className="mx-auto" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No transactions found</h3>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                No transactions found
+              </h3>
               <p className="text-gray-500">
-                {filter === "all" 
-                  ? "There are no transactions to display." 
+                {filter === "all"
+                  ? "There are no transactions to display."
                   : `No ${filter} transactions found.`}
               </p>
             </div>
