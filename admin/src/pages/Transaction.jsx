@@ -114,10 +114,12 @@ const Transaction = () => {
 
   const handleReject = async (transactionId) => {
     try {
+      console.log(transactionId);
+      
       const { data } = await axios.put(
         `${BACKEND_URL}/api/admin/reject-deposit`,
         {
-          transactionId,
+         transactionId,
         }
       );
 
