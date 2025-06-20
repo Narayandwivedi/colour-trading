@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.js");
 const transactionModel = require("../models/transcationModel.js");
-
+const transporter = require("../config/nodemailer.js")
 
 function generateReferralCode() {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -43,21 +43,19 @@ const handelUserSignup = async (req, res) => {
         .json({ success: false, message: "user already exist" });
     }
 
+    // check if referal code is correct or not
 
-    // check if referal code is correct or not  
-
-     if(referedBy){
-      const referer = await userModel.findOne({referralCode:referedBy})
-      if(referer){
-        referer.totalReferal+=1
-        await referer.save()
+    if (referedBy) {
+      const referer = await userModel.findOne({ referralCode: referedBy });
+      if (referer) {
+        referer.totalReferal += 1;
+        await referer.save();
       }
     }
 
     // generate unique referral code
     const referralCode = generateReferralCode();
 
-   
     // hashpassword
     const hashedpassword = await bcrypt.hash(password, 8);
     console.log(fullName, email, password, hashedpassword);
@@ -78,10 +76,14 @@ const handelUserSignup = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expires in 7 days
     });
 
-    delete newUser.password
+    delete newUser.password;
     return res
       .status(201)
-      .json({ success: true, message: "user created successfully" , userId:newUser});
+      .json({
+        success: true,
+        message: "user created successfully",
+        userId: newUser,
+      });
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({ message: err.message });
@@ -152,6 +154,97 @@ const handleUserLogout = async (req, res) => {
   } catch (error) {
     console.error("Logout Error:", error.message);
     return res.status(500).json({ success: false, message: "Logout failed" });
+  }
+};
+
+const generateResetPassOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "please provide email address" });
+    }
+    
+    const getUser = await userModel.findOne({ email });
+    
+         
+    if (!getUser) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: `user with this email doesn't exist`,
+        });
+    }
+    
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    getUser.resetOtp = otp;
+    getUser.otpExpiresAt = Date.now() + 10* 60 * 1000; // 10 mins
+    await getUser.save();
+
+    const mailOptions = {
+      from: "winnersclubsofficial@gmail.com",
+      to: email,
+      subject: "Account password reset OTP",
+      text: `Your OTP for password reset is: ${otp}. It will expire in 10 minutes.`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    return res.json({ success: true, message: 'otp sent successfully' });
+       
+  } catch (err) {
+    console.error('Generate OTP Error:', err);
+    return res.status(500).json({ success: false, message: "internal server error" });
+  }
+};
+
+const submitResetPassOTP = async (req, res) => {
+  try {
+    const { otp, newPass, email } = req.body;
+    
+    if (!otp || !newPass || !email) {
+      return res.status(400).json({ success: false, message: 'missing data' });
+    }
+
+    const getUser = await userModel.findOne({ email });
+    if (!getUser) {
+      return res.status(400).json({ success: false, message: 'user not found try again' });
+    }
+
+    // Check if OTP exists
+    if (!getUser.resetOtp) {
+      return res.status(400).json({ success: false, message: 'no otp found for this user' });
+    }
+
+    // Check if OTP is expired
+    if (getUser.otpExpiresAt < Date.now()) {
+      // Clear expired OTP
+      getUser.resetOtp = undefined;
+      getUser.otpExpiresAt = undefined;
+      await getUser.save();
+      return res.status(400).json({ success: false, message: 'otp expired' });
+    }
+
+    // Convert both OTP values to numbers for comparison
+    if (Number(otp) === Number(getUser.resetOtp)) {
+      const newHashedPass = await bcrypt.hash(newPass, 10);
+      getUser.password = newHashedPass;
+      
+      // Clear OTP fields after successful password reset
+      getUser.resetOtp = undefined;
+      getUser.otpExpiresAt = undefined;
+      
+      await getUser.save();
+      
+      return res.json({ success: true, message: 'password reset successfully' });
+    } else {
+      return res.status(400).json({ success: false, message: 'invalid otp' });
+    }
+    
+  } catch (err) {
+    console.error('Submit OTP Error:', err);
+    return res.status(500).json({ success: false, message: 'server error' });
   }
 };
 
@@ -406,4 +499,6 @@ module.exports = {
   handleUpdateBalance,
   handleAddBank,
   handleAddUpi,
+ generateResetPassOTP,
+ submitResetPassOTP
 };

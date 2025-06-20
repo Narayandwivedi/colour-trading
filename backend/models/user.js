@@ -59,7 +59,10 @@ const userSchema = new mongoose.Schema({
   totalReferal :{
     type:Number,
     default:0
-  }
+  },
+  resetOtp: String,
+  otpExpiresAt: Date,
+  
 });
 
 const user = mongoose.model("user", userSchema);

@@ -4,6 +4,7 @@ import Transaction from "./pages/Transaction"
 import { ToastContainer, toast } from 'react-toastify';
 import ManageUser from "./pages/ManageUser";
 import ManageWithdraw from "./pages/ManageWithdraw";
+import LiveBets from "./pages/LiveBets";
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
      <Link to={"/manageusers  "}><button className='bg-blue-500 px-3 py-2 rounded-md text-white'>Manage users</button></Link>
      <Link to={"/withdraw"}><button className='bg-blue-500 px-3 py-2 rounded-md text-white'>Manage withdraw</button></Link>
      <Link to={"/transaction"}><button className='bg-blue-500 px-3 py-2 rounded-md text-white'>Manage transcations</button></Link>
+     <Link to={"/livebet"}><button className='bg-blue-500 px-3 py-2 rounded-md text-white'>Manage Bets</button></Link>
      
      </div>
     </div>
@@ -24,6 +26,7 @@ function App() {
       <Route path="/transaction" element={<Transaction/>}/>
       <Route path="/manageusers" element={<ManageUser/>}/>
       <Route path="/withdraw" element={<ManageWithdraw/>}/>
+      <Route path="/livebet" element={<LiveBets/>}/>
     </Routes>
   </div>
   )

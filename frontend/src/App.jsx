@@ -21,6 +21,7 @@ import WithdrawalHistory from './pages/WithdrawalHistory'
 import AddBank from './pages/AddBank'
 import AddUpi from './pages/AddUpi'
 import Support from './pages/Support'
+import ResetPass from './pages/ResetPass'
 
 
 function App() {
@@ -52,6 +53,8 @@ function App() {
           <Route path='/withdrawhistory' element={<ProtectedRoute><WithdrawalHistory /></ProtectedRoute>} />
           <Route path='/addbank' element={<ProtectedRoute><AddBank /></ProtectedRoute>} />
           <Route path='/addupi' element={<ProtectedRoute><AddUpi /></ProtectedRoute>} />
+          <Route path='/reset-pass' element={<ResetPass/>} />
+
     
   </Routes>
   </div>

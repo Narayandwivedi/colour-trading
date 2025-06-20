@@ -74,6 +74,7 @@ const Login = () => {
     }
  }}
 
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-950 via-teal-900 to-emerald-950 relative">
       {/* Background for larger screens */}
@@ -205,7 +206,7 @@ const Login = () => {
           </div>
 
           {/* Password */}
-          <div className="mb-6">
+          <div className="mb-4">
             <label className="text-cyan-200 flex items-center gap-2 mb-3 font-medium text-sm">
               <i className="fa-solid fa-lock text-cyan-400"></i>{state === 'signup' ? "Set Password" : "Password"}
             </label>
@@ -219,6 +220,18 @@ const Login = () => {
               className="w-full px-5 py-4 rounded-xl bg-cyan-900/50 border border-cyan-600/30 text-white placeholder-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent backdrop-blur-sm transition-all text-base"
             />
           </div>
+
+          {/* Forgot Password - only show for login */}
+          {state === "login" && (
+            <div className="mb-6 text-right">
+              <button
+                onClick={()=>{ navigate("/reset-pass")}}
+                className="text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors hover:underline"
+              >
+                Forgot Password?
+              </button>
+            </div>
+          )}
 
           {/* Invite code - signup only */}
           {state === "signup" && (
