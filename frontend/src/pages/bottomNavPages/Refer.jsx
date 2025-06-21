@@ -13,48 +13,65 @@ const Refer = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pb-20 max-w-[440px] mx-auto relative">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-950 via-teal-900 to-emerald-950 pb-20 max-w-[440px] mx-auto relative">
+      {/* Background for larger screens */}
+      <div className="fixed inset-0 bg-gradient-to-br from-cyan-950 via-teal-900 to-emerald-950 -z-10 w-screen" />
+
       {/* Header */}
-      <div className="text-center pt-8 px-6 pb-4 bg-white shadow-sm">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+      <div className="text-center pt-8 px-6 pb-6">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-lg">
           Refer & Earn
         </h1>
-        <p className="text-gray-600 mt-2 text-sm max-w-md mx-auto">
+        <p className="text-cyan-200 mt-3 text-base max-w-md mx-auto">
           Invite friends and earn ₹50 for each successful referral
         </p>
       </div>
 
-      {/* Bonus Card */}
-      <div className="mx-6 mt-6 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-xl shadow-lg p-5 relative overflow-hidden">
-        <div className="absolute -right-4 -top-4 w-20 h-20 bg-white bg-opacity-10 rounded-full"></div>
-        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white bg-opacity-5 rounded-full"></div>
-        <div className="flex justify-between items-center relative z-10">
-          <div>
-            <p className="text-sm font-medium opacity-90">GET ₹50</p>
-            <p className="text-2xl font-bold mt-1">On ₹500 Deposit</p>
-            <p className="text-xs mt-2 opacity-90">By your friend</p>
+      {/* Stats Card */}
+      <div className="mx-6 mt-4 bg-gradient-to-r from-teal-600 via-cyan-600 to-emerald-600 text-white rounded-2xl shadow-2xl p-6 relative overflow-hidden border border-cyan-400/30">
+        {/* Ocean glow effects */}
+        <div className="absolute -top-8 -left-8 w-32 h-32 bg-cyan-400/20 blur-3xl rounded-full z-0"></div>
+        <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-emerald-400/15 blur-2xl rounded-full z-0"></div>
+        
+        <div className="relative z-10">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <p className="text-sm font-medium text-cyan-100">Total Referrals</p>
+              <p className="text-3xl font-bold mt-1">{userData?.totalReferal || 0}</p>
+            </div>
+            <div className="text-5xl">👥</div>
           </div>
-          <div className="text-5xl">💰</div>
+          
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-cyan-100">GET ₹50</p>
+                <p className="text-xl font-bold mt-1">On ₹500 Deposit</p>
+                <p className="text-xs mt-1 text-cyan-200">By your friend</p>
+              </div>
+              <div className="text-4xl">💰</div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Referral Section */}
       <div className="mx-6 mt-8">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">Your Referral Code</h2>
-        <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-          <div className="flex items-center justify-between bg-gray-50 rounded-md px-4 py-3">
-            <span className="text-sm font-mono text-gray-800 tracking-wide">
-              {userData ? userData.referralCode : ''}
+        <h2 className="text-xl font-semibold text-cyan-200 mb-4">Your Referral Code</h2>
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-cyan-400/30 p-4 shadow-2xl">
+          <div className="flex items-center justify-between bg-black/20 backdrop-blur-sm rounded-xl px-4 py-4 border border-cyan-500/30">
+            <span className="text-lg font-mono text-cyan-100 tracking-widest font-bold">
+              {userData ? userData.referralCode : 'Loading...'}
             </span>
             <button
               onClick={handleCopy}
-              className={`ml-2 text-sm px-4 py-2 rounded-md font-medium transition-all ${
+              className={`ml-3 text-sm px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                 copied
-                  ? 'bg-green-500 text-white'
-                  : 'bg-purple-600 text-white hover:bg-purple-700'
+                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
+                  : 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40'
               }`}
             >
-              {copied ? 'Copied!' : 'Copy'}
+              {copied ? '✓ Copied!' : 'Copy'}
             </button>
           </div>
         </div>
@@ -62,8 +79,8 @@ const Refer = () => {
 
       {/* Bonus Tiers Section */}
       <div className="mx-6 mt-8">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Bonus Tiers</h2>
-        <ul className="space-y-3">
+        <h2 className="text-xl font-semibold text-cyan-200 mb-4">Bonus Tiers</h2>
+        <div className="space-y-3">
           {[
             { deposit: 500, bonus: 50 },
             { deposit: 1000, bonus: 120 },
@@ -71,52 +88,57 @@ const Refer = () => {
             { deposit: 4000, bonus: 520 },
             { deposit: 8000, bonus: 1100 },
           ].map((tier, index) => (
-            <li
+            <div
               key={index}
-              className="flex items-center justify-between bg-white px-4 py-3 rounded-lg border border-gray-200 shadow-sm"
+              className="flex items-center justify-between bg-white/10 backdrop-blur-sm px-5 py-4 rounded-xl border border-cyan-400/20 shadow-lg hover:bg-white/15 transition-all duration-300"
             >
-              <span className="text-sm text-gray-700">Deposit ₹{tier.deposit}</span>
-              <span className="text-sm font-semibold text-purple-700">Get ₹{tier.bonus}</span>
-            </li>
+              <span className="text-sm text-cyan-200 font-medium">Deposit ₹{tier.deposit}</span>
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 rounded-lg">
+                <span className="text-sm font-bold text-white">Get ₹{tier.bonus}</span>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
 
       {/* How It Works Section */}
       <div className="mx-6 mt-8">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">How It Works</h2>
-        <div className="space-y-3">
-          <div className="flex items-start bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
-            <div className="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">
+        <h2 className="text-xl font-semibold text-cyan-200 mb-4">How It Works</h2>
+        <div className="space-y-4">
+          <div className="flex items-start bg-white/10 backdrop-blur-sm p-5 rounded-xl border border-cyan-400/20 shadow-lg">
+            <div className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-4 flex-shrink-0 font-bold shadow-lg">
               1
             </div>
             <div>
-              <h3 className="font-medium text-gray-800">Share your referral link</h3>
-              <p className="text-sm text-gray-600 mt-1">Send your unique code to friends</p>
+              <h3 className="font-semibold text-cyan-100 text-base">Share your referral code</h3>
+              <p className="text-sm text-cyan-300 mt-2">Send your unique code to friends and family</p>
             </div>
           </div>
 
-          <div className="flex items-start bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
-            <div className="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">
+          <div className="flex items-start bg-white/10 backdrop-blur-sm p-5 rounded-xl border border-cyan-400/20 shadow-lg">
+            <div className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-4 flex-shrink-0 font-bold shadow-lg">
               2
             </div>
             <div>
-              <h3 className="font-medium text-gray-800">Friend signs up & deposits</h3>
-              <p className="text-sm text-gray-600 mt-1">They need to deposit ₹500 to qualify</p>
+              <h3 className="font-semibold text-cyan-100 text-base">Friend signs up & deposits</h3>
+              <p className="text-sm text-cyan-300 mt-2">They need to deposit minimum ₹500 to qualify</p>
             </div>
           </div>
 
-          <div className="flex items-start bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
-            <div className="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">
+          <div className="flex items-start bg-white/10 backdrop-blur-sm p-5 rounded-xl border border-cyan-400/20 shadow-lg">
+            <div className="bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-full w-10 h-10 flex items-center justify-center mr-4 flex-shrink-0 font-bold shadow-lg">
               3
             </div>
             <div>
-              <h3 className="font-medium text-gray-800">You get rewarded</h3>
-              <p className="text-sm text-gray-600 mt-1">₹50 bonus credited instantly</p>
+              <h3 className="font-semibold text-cyan-100 text-base">You get rewarded instantly</h3>
+              <p className="text-sm text-cyan-300 mt-2">₹50 bonus credited to your account immediately</p>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Bottom spacing for nav */}
+      <div className="h-8"></div>
 
       {/* Bottom Nav */}
       <BottomNav />

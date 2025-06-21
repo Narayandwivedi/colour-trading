@@ -63,7 +63,7 @@ function WithdrawalCard({ id, status, amount, paymentMethod, createdAt }) {
             status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
             'bg-red-100 text-red-800'
           }`}>
-            {statusStyle.icon} {status?.toUpperCase() || 'UNKNOWN'}
+             {status?.toUpperCase() || 'UNKNOWN'}
           </div>
         </div>
       </div>

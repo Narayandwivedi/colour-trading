@@ -17,78 +17,81 @@ function generateReferralCode() {
 
 const handelUserSignup = async (req, res) => {
   try {
-    // checking req body
-
     if (!req.body || Object.keys(req.body).length === 0) {
       return res.status(400).json({ success: false, message: "missing data" });
     }
 
-    const { fullName, email, password, referedBy } = req.body;
+    let { fullName, email, password, referedBy } = req.body;
 
-    if (
-      !fullName ||
-      !fullName.trim() ||
-      !email ||
-      !email.trim() ||
-      !password ||
-      !password.trim()
-    ) {
+    // Trim input fields
+    fullName = fullName?.trim();
+    email = email?.trim();
+    password = password?.trim();
+    referedBy = referedBy?.trim();
+
+    if (!fullName || !email || !password) {
       return res.status(400).json({ success: false, message: "missing field" });
     }
-    // checks if email already exist
+
+    // Check if user already exists
     const user = await userModel.findOne({ email });
     if (user) {
-      return res
-        .status(400)
-        .json({ success: false, message: "user already exist" });
+      return res.status(400).json({ success: false, message: "user already exist" });
     }
 
-    // check if referal code is correct or not
-
+    // Handle referral
     if (referedBy) {
       const referer = await userModel.findOne({ referralCode: referedBy });
-      if (referer) {
-        referer.totalReferal += 1;
-        await referer.save();
+      if (!referer) {
+        return res.status(400).json({ success: false, message: "Invalid referral code" });
       }
+      referer.totalReferal += 1;
+      await referer.save();
     }
 
-    // generate unique referral code
+    // Generate unique referral code
     const referralCode = generateReferralCode();
 
-    // hashpassword
-    const hashedpassword = await bcrypt.hash(password, 8);
-    console.log(fullName, email, password, hashedpassword);
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 8);
+
+    // Create new user
     const newUser = await userModel.create({
       fullName,
       email,
-      password: hashedpassword,
-      referralCode: referralCode,
+      password: hashedPassword,
+      referralCode,
       referedBy,
     });
+
+    // Generate JWT token
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
+
     res.cookie("token", token, {
-      httpOnly: true, // protect from client side js access
-      sameSite: "None", // protect from CSRF ATTACK
+      httpOnly: true,
+      sameSite: "None",
       secure: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expires in 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    delete newUser.password;
-    return res
-      .status(201)
-      .json({
-        success: true,
-        message: "user created successfully",
-        userId: newUser,
-      });
+    // Remove password before sending response
+    const userObj = newUser.toObject();
+    delete userObj.password;
+
+    return res.status(201).json({
+      success: true,
+      message: "user created successfully",
+      userId: userObj,
+    });
+
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({ message: err.message });
   }
 };
+
 
 const handelUserLogin = async (req, res) => {
   try {

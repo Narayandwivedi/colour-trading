@@ -26,7 +26,6 @@ const Login = () => {
         withCredentials:true
       })
       if(data.success){
-        
         setUserData(data.userData)
         setBalance(data.userData.balance)
           navigate("/")

@@ -52,8 +52,6 @@ function TransactionCard({ id, status, amount, paymentMethod, createdAt, type, u
     switch(method?.toLowerCase()) {
       case 'upi': return '📱';
       case 'bank': case 'bank_transfer': return '🏦';
-      case 'card': case 'credit_card': case 'debit_card': return '💳';
-      case 'wallet': return '👝';
       default: return '💰';
     }
   };
@@ -78,7 +76,7 @@ function TransactionCard({ id, status, amount, paymentMethod, createdAt, type, u
               {id || 'N/A'}
             </span>
           </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+          <div className={`px-3 py-1 rounded-full text-xs font-semibold  ${
             isCompleted ? 'bg-green-100 text-green-800' : 
             status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
             'bg-red-100 text-red-800'
