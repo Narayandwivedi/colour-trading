@@ -5,6 +5,7 @@ const userModel = require("../models/user.js");
 const transactionModel = require("../models/transcationModel.js");
 const transporter = require("../config/nodemailer.js")
 
+
 function generateReferralCode() {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
   let code = "";
@@ -138,11 +139,11 @@ const handelUserLogin = async (req, res) => {
       message: "user logged in successfully",
       userData: user,
     });
-  } catch (error) {
-    console.error("Login Error:", error.message);
+  } catch (err) {
+    // console.error("Login Error:", error.message);
     return res
       .status(500)
-      .json({ success: false, message: "Something went wrong" });
+      .json({ success: false, message:"Something went wrong" });
   }
 };
 

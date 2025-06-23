@@ -15,10 +15,12 @@ const Login = () => {
   const {setBalance , BACKEND_URL, setUserData} = useContext(AppContext);
 
   async function handleLogin(){
-    if(!email || !email.trim() || !password || !password.trim()){
+   
+    try{
+
+       if(!email || !email.trim() || !password || !password.trim()){
         return toast.error("email or password is missing")
     }
-    try{
       const {data} = await axios.post(`${BACKEND_URL}/api/users/login`,{
         email:email,
         password:password
@@ -60,8 +62,10 @@ const Login = () => {
     }
   )
   if(data.success){
-    setUserData(data.userData)
-    setBalance(data.userData.balance)
+    // setState("login")
+    //  console.log(data);
+    
+    setUserData(data.userId)
     navigate("/")
     toast.success(data.message)
     
