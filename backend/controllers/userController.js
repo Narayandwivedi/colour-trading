@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.js");
 const transactionModel = require("../models/transcationModel.js");
-const transporter = require("../config/nodemailer.js")
-
+const transporter = require("../config/nodemailer.js");
 
 function generateReferralCode() {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -37,14 +36,18 @@ const handelUserSignup = async (req, res) => {
     // Check if user already exists
     const user = await userModel.findOne({ email });
     if (user) {
-      return res.status(400).json({ success: false, message: "user already exist" });
+      return res
+        .status(400)
+        .json({ success: false, message: "user already exist" });
     }
 
     // Handle referral
     if (referedBy) {
       const referer = await userModel.findOne({ referralCode: referedBy });
       if (!referer) {
-        return res.status(400).json({ success: false, message: "Invalid referral code" });
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid referral code" });
       }
       referer.totalReferal += 1;
       await referer.save();
@@ -56,14 +59,20 @@ const handelUserSignup = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 8);
 
-    // Create new user
-    const newUser = await userModel.create({
+    const newUserData = {
       fullName,
       email,
       password: hashedPassword,
       referralCode,
-      referedBy,
-    });
+    };
+
+    if (referedBy) {
+      newUserData.referedBy = referedBy;
+      newUserData.balance = 20
+    }
+
+    // Create new user
+    const newUser = await userModel.create(newUserData);
 
     // Generate JWT token
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
@@ -86,13 +95,11 @@ const handelUserSignup = async (req, res) => {
       message: "user created successfully",
       userId: userObj,
     });
-
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({ message: err.message });
   }
 };
-
 
 const handelUserLogin = async (req, res) => {
   try {
@@ -143,7 +150,7 @@ const handelUserLogin = async (req, res) => {
     // console.error("Login Error:", error.message);
     return res
       .status(500)
-      .json({ success: false, message:"Something went wrong" });
+      .json({ success: false, message: "Something went wrong" });
   }
 };
 
@@ -169,22 +176,19 @@ const generateResetPassOTP = async (req, res) => {
         .status(400)
         .json({ success: false, message: "please provide email address" });
     }
-    
+
     const getUser = await userModel.findOne({ email });
-    
-         
+
     if (!getUser) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `user with this email doesn't exist`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `user with this email doesn't exist`,
+      });
     }
-    
+
     const otp = Math.floor(100000 + Math.random() * 900000);
     getUser.resetOtp = otp;
-    getUser.otpExpiresAt = Date.now() + 10* 60 * 1000; // 10 mins
+    getUser.otpExpiresAt = Date.now() + 10 * 60 * 1000; // 10 mins
     await getUser.save();
 
     const mailOptions = {
@@ -195,30 +199,35 @@ const generateResetPassOTP = async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
-    return res.json({ success: true, message: 'otp sent successfully' });
-       
+    return res.json({ success: true, message: "otp sent successfully" });
   } catch (err) {
-    console.error('Generate OTP Error:', err);
-    return res.status(500).json({ success: false, message: "internal server error" });
+    console.error("Generate OTP Error:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "internal server error" });
   }
 };
 
 const submitResetPassOTP = async (req, res) => {
   try {
     const { otp, newPass, email } = req.body;
-    
+
     if (!otp || !newPass || !email) {
-      return res.status(400).json({ success: false, message: 'missing data' });
+      return res.status(400).json({ success: false, message: "missing data" });
     }
 
     const getUser = await userModel.findOne({ email });
     if (!getUser) {
-      return res.status(400).json({ success: false, message: 'user not found try again' });
+      return res
+        .status(400)
+        .json({ success: false, message: "user not found try again" });
     }
 
     // Check if OTP exists
     if (!getUser.resetOtp) {
-      return res.status(400).json({ success: false, message: 'no otp found for this user' });
+      return res
+        .status(400)
+        .json({ success: false, message: "no otp found for this user" });
     }
 
     // Check if OTP is expired
@@ -227,28 +236,30 @@ const submitResetPassOTP = async (req, res) => {
       getUser.resetOtp = undefined;
       getUser.otpExpiresAt = undefined;
       await getUser.save();
-      return res.status(400).json({ success: false, message: 'otp expired' });
+      return res.status(400).json({ success: false, message: "otp expired" });
     }
 
     // Convert both OTP values to numbers for comparison
     if (Number(otp) === Number(getUser.resetOtp)) {
       const newHashedPass = await bcrypt.hash(newPass, 10);
       getUser.password = newHashedPass;
-      
+
       // Clear OTP fields after successful password reset
       getUser.resetOtp = undefined;
       getUser.otpExpiresAt = undefined;
-      
+
       await getUser.save();
-      
-      return res.json({ success: true, message: 'password reset successfully' });
+
+      return res.json({
+        success: true,
+        message: "password reset successfully",
+      });
     } else {
-      return res.status(400).json({ success: false, message: 'invalid otp' });
+      return res.status(400).json({ success: false, message: "invalid otp" });
     }
-    
   } catch (err) {
-    console.error('Submit OTP Error:', err);
-    return res.status(500).json({ success: false, message: 'server error' });
+    console.error("Submit OTP Error:", err);
+    return res.status(500).json({ success: false, message: "server error" });
   }
 };
 
@@ -503,6 +514,6 @@ module.exports = {
   handleUpdateBalance,
   handleAddBank,
   handleAddUpi,
- generateResetPassOTP,
- submitResetPassOTP
+  generateResetPassOTP,
+  submitResetPassOTP,
 };

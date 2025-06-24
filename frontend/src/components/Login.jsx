@@ -9,7 +9,7 @@ const Login = () => {
   const [fullName , setFullName] = useState("")
   const [email , setEmail] = useState("");
   const [password ,setPassword]= useState("")
-  const [inviteCode , setInviteCode] = useState("");
+  const [inviteCode , setInviteCode] = useState(undefined);
   const navigate = useNavigate();
 
   const {setBalance , BACKEND_URL, setUserData} = useContext(AppContext);
