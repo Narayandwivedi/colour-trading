@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
+const { exec } = require('child_process');
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const { connectToDb } = require("./config/mongodb.js");
@@ -84,27 +85,7 @@ app.get("/api/latest/result/:gameType", async (req, res) => {
     res.status(500).json({ error: "Server error: " + err.message });
   }
 });
-// Fetch last 1 closed result for a specific gameType
-app.get("/api/latest/oneresult/:gameType", async (req, res) => {
-  const { gameType } = req.params;
 
-  if (!["30sec", "1min", "3min"].includes(gameType)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid game type" });
-  }
-
-  try {
-    const result = await game
-      .findOne({ status: "closed", gameType })
-      .sort({ createdAt: -1 })
-      .lean();
-
-    res.json({ success: true, result });
-  } catch (err) {
-    res.status(500).json({ error: "Server error: " + err.message });
-  }
-});
 
 // Fetch currently open period for a specific gameType
 app.get("/api/latest/period/:gameType", async (req, res) => {
@@ -131,6 +112,22 @@ app.get("/api/latest/period/:gameType", async (req, res) => {
     });
   }
 });
+
+
+app.post('/restart-server', (req, res) => {
+  exec('pm2 restart project-backend', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${error.message}`);
+      return res.status(500).send('Failed to restart server');
+    }
+    if (stderr) {
+      console.error(`Stderr: ${stderr}`);
+    }
+    console.log(`Stdout: ${stdout}`);
+    res.send('Server restarted successfully');
+  });
+});
+
 
 app.use("/api/users", userRoute);
 app.use("/api/transaction", transactionRoute);
