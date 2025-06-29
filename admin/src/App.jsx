@@ -83,7 +83,7 @@ function App() {
       
       {/* Main content */}
       <div className="flex-1 overflow-auto">
-        <div className="p-4 md:p-6">
+        <div className="p-1 md:p-6">
           {/* Page Header - Desktop only */}
           <div className="hidden md:block mb-6">
             <div className="flex items-center space-x-3 mb-2">
@@ -101,7 +101,7 @@ function App() {
 
           {/* Content Container */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 min-h-[calc(100vh-8rem)] md:min-h-[calc(100vh-12rem)]">
-            <div className="p-4 md:p-6">
+            <div className="p-1 md:p-6">
               <ToastContainer 
                 position="top-right"
                 autoClose={3000}
