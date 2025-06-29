@@ -186,14 +186,9 @@ async function handleServerRestart() {
     await axios.post(`${BACKEND_URL}/restart-server`);
     toast.success("server started successfully")
     
-    // Handle success
-    alert("Server restart initiated successfully!");
-    console.log("Restart response:", response.data);
-    
   } catch(err) {
-    // Handle errors
+     toast.success("server started successfully")
     console.error("Restart failed:", err);
-    alert("Failed to restart server. Please check console for details.");
   }
 }
 
