@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
+import {toast} from 'react-toastify'
 
 // Enhanced Card Component
 const Card = ({
@@ -171,14 +172,30 @@ const Homepage = () => {
     },
   ];
 
-  async function handleServerRestart() {
-   try{
-     await axios.post(`${BACKEND_URL}/restart-server`)
-   } catch(err){
-    console.log(err);
+async function handleServerRestart() {
+  try {
+    // Use a more modern confirmation dialog
+    const userConfirmed = window.confirm("Are you sure you want to restart the server? This will cause temporary downtime.");
     
-   }
+    if (!userConfirmed) {
+      console.log("Server restart cancelled by user");
+      return;
+    }
+
+    // Show loading state (optional)
+    await axios.post(`${BACKEND_URL}/restart-server`);
+    toast.success("server started successfully")
+    
+    // Handle success
+    alert("Server restart initiated successfully!");
+    console.log("Restart response:", response.data);
+    
+  } catch(err) {
+    // Handle errors
+    console.error("Restart failed:", err);
+    alert("Failed to restart server. Please check console for details.");
   }
+}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-8">
