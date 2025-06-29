@@ -15,6 +15,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+  },
   balance: {
     type: Number,
     default: 0,
@@ -31,9 +37,9 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
 
-  isFirstDeposit : {
-    type:Boolean,
-    default:true
+  isFirstDeposit: {
+    type: Boolean,
+    default: true,
   },
 
   bankAccount: {
@@ -56,13 +62,12 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  totalReferal :{
-    type:Number,
-    default:0
+  totalReferal: {
+    type: Number,
+    default: 0,
   },
   resetOtp: String,
   otpExpiresAt: Date,
-  
 });
 
 const user = mongoose.model("user", userSchema);

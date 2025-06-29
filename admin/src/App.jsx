@@ -9,7 +9,7 @@ import LiveBets from "./pages/LiveBets";
 function App() {
 
   return (
-    <div className='bg-gray-100 flex'>
+    <div className='bg-gray-100 flex '>
     <div className='h-screen w-[300px] bg-white shadow p-5'>
      <div className='flex flex-col gap-3 mt-5'>
      <Link to={"/"}><button className='bg-blue-500 px-3 py-2 rounded-md text-white'>user stats</button></Link>
@@ -17,6 +17,7 @@ function App() {
      <Link to={"/withdraw"}><button className='bg-blue-500 px-3 py-2 rounded-md text-white'>Manage withdraw</button></Link>
      <Link to={"/transaction"}><button className='bg-blue-500 px-3 py-2 rounded-md text-white'>Manage transcations</button></Link>
      <Link to={"/livebet"}><button className='bg-blue-500 px-3 py-2 rounded-md text-white'>Manage Bets</button></Link>
+     
      
      </div>
     </div>

@@ -115,7 +115,16 @@ app.get("/api/latest/period/:gameType", async (req, res) => {
 
 
 app.post('/restart-server', (req, res) => {
+
+  const {vpsPass} = req.body
+  if(!vpsPass){
+    return res.status(401).json({
+      success:false , message:'unauthorized'
+    })
+  }
+
   exec('pm2 restart project-backend', (error, stdout, stderr) => {
+     
     if (error) {
       console.error(`Error: ${error.message}`);
       return res.status(500).send('Failed to restart server');
