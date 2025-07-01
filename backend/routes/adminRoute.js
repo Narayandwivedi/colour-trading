@@ -249,7 +249,6 @@ router.put("/reject-withdraw", async (req, res) => {
 });
 
 
-
 router.put("/reject-deposit", async (req, res) => {
   try {
     const { transactionId } = req.body;
@@ -281,6 +280,27 @@ router.put("/reject-deposit", async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 });
+
+router.delete("/user/:id",async(req,res)=>{
+  try{
+
+    const {id} = req.params
+    if(!id){
+      return res.status(400).json({success:false , message:"provide valid userid to delete"})
+    }
+    if(!mongoose.isValidObjectId(id)){
+      return res.status(400).json({success:false , message:'invalid user id'})
+    }
+    const deletedUser = await User.findByIdAndDelete(id)
+    if(!deletedUser){
+      return res.status(400).json({success:false , message:"invalid request"})
+    }
+    res.json({success:true , message:"user deleted successfully",deletedUser})
+
+  }catch(err){
+      return res.status(500).json({success:false , message:'internal server error'})
+  }
+})
 
 
 module.exports = router;

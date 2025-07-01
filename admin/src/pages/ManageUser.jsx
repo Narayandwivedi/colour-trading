@@ -11,7 +11,7 @@ const ManageUser = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 6;
+  const usersPerPage = 9;
 
   async function fetchAllUsers() {
     try {

@@ -4,8 +4,11 @@ const app = express();
 const { exec } = require('child_process');
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+
 const { connectToDb } = require("./config/mongodb.js");
 require("./gameService.js");
+
+
 // import routes
 const userRoute = require("./routes/userRoute.js");
 const transactionRoute = require("./routes/transactionRoute.js");
@@ -115,13 +118,6 @@ app.get("/api/latest/period/:gameType", async (req, res) => {
 
 
 app.post('/restart-server', (req, res) => {
-
-  const {vpsPass} = req.body
-  if(!vpsPass){
-    return res.status(401).json({
-      success:false , message:'unauthorized'
-    })
-  }
 
   exec('pm2 restart project-backend', (error, stdout, stderr) => {
      

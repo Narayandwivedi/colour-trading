@@ -17,7 +17,7 @@ const {
 
 const limiter = rateLimit({
   windowMs: 30 * 60 * 1000,
-  limit: 10,
+  limit: 20,
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
@@ -30,7 +30,7 @@ const limiter = rateLimit({
 
 const otpLimiter = rateLimit({
   windowMs: 30 * 60 * 1000,
-  limit: 5,
+  limit: 8,
   handler: (req, res) => {
     res.status(429).json({
       success: false,
