@@ -158,87 +158,126 @@ const ManageBets = () => {
   }, []);
 
   const BetCard = ({ timeframe, title }) => (
-    <div className="h-[450px] w-[320px] bg-gray-200 rounded-lg shadow-md p-4 m-4">
-      {/* Header */}
-      <div className="flex items-center justify-between px-2 py-3 border-b border-gray-300 mb-4">
-        <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
-        <div className="text-right">
-          <p className="text-sm text-gray-600">Period</p>
-          <p className="text-lg font-bold text-blue-600">
-            {periods[timeframe].period || 'Loading...'}
-          </p>
+    <div className="w-full max-w-sm mx-auto bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      {/* Header - Mobile Optimized */}
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-white font-bold text-lg">{title}</h2>
+          <div className="text-right">
+            <p className="text-blue-100 text-xs uppercase tracking-wide">Period</p>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-2 py-1 mt-1">
+              <p className="text-white font-bold text-sm break-all">
+                {periods[timeframe].period || 'Loading...'}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Input Fields */}
-      <div className="flex flex-col gap-3">
-        <input
-          type="number"
-          placeholder="Enter number (0-9)"
-          value={inputs[timeframe].number}
-          onChange={(e) => handleInputChange(timeframe, 'number', e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          min="0"
-          max="9"
-        />
-        
-        <select
-          value={inputs[timeframe].colour}
-          onChange={(e) => handleInputChange(timeframe, 'colour', e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select colour</option>
-          <option value="red">Red</option>
-          <option value="green">Green</option>
-          <option value="violet">Violet</option>
-        </select>
-        
-        <select
-          value={inputs[timeframe].size}
-          onChange={(e) => handleInputChange(timeframe, 'size', e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select size</option>
-          <option value="small">Small</option>
-          <option value="big">Big</option>
-        </select>
-        
-        {/* Two buttons: Set Result and Create Admin Result */}
+      {/* Content */}
+      <div className="p-4 space-y-4">
+        {/* Input Fields */}
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Number (0-9)
+            </label>
+            <input
+              type="number"
+              placeholder="Enter number"
+              value={inputs[timeframe].number}
+              onChange={(e) => handleInputChange(timeframe, 'number', e.target.value)}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              min="0"
+              max="9"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Colour
+            </label>
+            <select
+              value={inputs[timeframe].colour}
+              onChange={(e) => handleInputChange(timeframe, 'colour', e.target.value)}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+            >
+              <option value="">Select colour</option>
+              <option value="red">🔴 Red</option>
+              <option value="green">🟢 Green</option>
+              <option value="violet">🟣 Violet</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Size
+            </label>
+            <select
+              value={inputs[timeframe].size}
+              onChange={(e) => handleInputChange(timeframe, 'size', e.target.value)}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+            >
+              <option value="">Select size</option>
+              <option value="small">📏 Small</option>
+              <option value="big">📐 Big</option>
+            </select>
+          </div>
+        </div>
 
-        <button
-          onClick={() => createAdminResult(timeframe)}
-          disabled={loading[timeframe]}
-          className={`py-2 px-4 rounded font-semibold transition-colors ${
-            loading[timeframe]
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-red-500 hover:bg-red-600 text-white'
-          }`}
-        >
-          {loading[timeframe] ? 'Creating...' : 'Set Result'}
-        </button>
+        {/* Action Buttons */}
+        <div className="space-y-2 pt-2">
+          <button
+            onClick={() => createAdminResult(timeframe)}
+            disabled={loading[timeframe]}
+            className={`w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 ${
+              loading[timeframe]
+                ? 'bg-gray-400 cursor-not-allowed text-gray-600'
+                : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md hover:shadow-lg transform hover:scale-[1.02]'
+            }`}
+          >
+            {loading[timeframe] ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                Creating...
+              </div>
+            ) : (
+              'Set Result'
+            )}
+          </button>
+          
+          <button
+            onClick={() => fetchLatestPeriod(timeframe)}
+            className="w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors border border-gray-300"
+          >
+            🔄 Refresh Period
+          </button>
+        </div>
       </div>
-
-      {/* Refresh Button */}
-      <button
-        onClick={() => fetchLatestPeriod(timeframe)}
-        className="mt-3 w-full py-1 px-3 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
-      >
-        Refresh Period
-      </button>
     </div>
   );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Manage Bets</h1>
-        <p className="text-gray-600">Control betting results for different time frames</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b border-gray-200 px-4 py-6">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+            Manage Bets
+          </h1>
+          <p className="text-gray-600 text-sm md:text-base">
+            Control betting results for different time frames
+          </p>
+        </div>
       </div>
-      
-      <div className="flex flex-wrap justify-center lg:justify-start">
-        <BetCard timeframe="30sec" title="30 Second" />
-        <BetCard timeframe="1min" title="1 Minute" />
-        <BetCard timeframe="3min" title="3 Minutes" />
+
+      {/* Cards Grid */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <BetCard timeframe="30sec" title="30 Second" />
+          <BetCard timeframe="1min" title="1 Minute" />
+          <BetCard timeframe="3min" title="3 Minutes" />
+        </div>
       </div>
     </div>
   );
