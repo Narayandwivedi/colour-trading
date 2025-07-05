@@ -8,12 +8,13 @@ const cors = require("cors");
 const { connectToDb } = require("./config/mongodb.js");
 require("./gameService.js");
 
+console.log("server");
 
 // import routes
 const userRoute = require("./routes/userRoute.js");
 const transactionRoute = require("./routes/transactionRoute.js");
 const betRoute = require("./routes/betRoute.js");
-const adminRoute = require("./routes/AdminRoute.js")
+const adminRoute = require("./routes/adminRoute.js")
 
 // import models
 const game = require("./models/game.js");
