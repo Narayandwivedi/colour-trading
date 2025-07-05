@@ -35,6 +35,7 @@ export default function Game() {
     timer,
     BACKEND_URL,
     betAllowed , setBetAllowed,
+    activeBets,
     setActiveBets
   } = useContext(AppContext);
   
@@ -115,6 +116,8 @@ export default function Game() {
                 period: period,
             };
             setActiveBets((prevBets) => [...prevBets, newBet]);
+            console.log(activeBets);
+            
             setIsBetPopOpen(false);
        
       }

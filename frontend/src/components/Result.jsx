@@ -91,6 +91,11 @@ export default function Result() {
                 isWinningBet = true;
               }
 
+               if((bet.selectedBetNumber!==undefined && bet.selectedBetNumber!==null)&& bet.selectedBetNumber===latest.number){
+                winAmount+=bet.betValue*9
+                isWinningBet = true
+              }
+
               // Add to total if won
               if (isWinningBet && winAmount > 0) {
                 totalWinAmount += winAmount;
