@@ -19,8 +19,8 @@ export const AppContextProvider = (props) => {
   const [loading, setLoading] = useState(true)
   const [activeBets, setActiveBets] = useState([]);
 
-  // const BACKEND_URL = `http://168.231.120.131:8080`;
-  const BACKEND_URL = `http://localhost:8080`;
+  const BACKEND_URL = `http://82.112.231.55:8080`;
+  // const BACKEND_URL = `http://localhost:8080`;
   // const BACKEND_URL = `https://api.winnersclubs.fun`;
   
   
