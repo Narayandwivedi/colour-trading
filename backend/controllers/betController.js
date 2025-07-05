@@ -4,10 +4,13 @@ const user = require("../models/user");
 const game = require("../models/game");
 
 const handlePlaceBet = async (req, res) => {
-  const { userId, betAmount, period, betColour, betSize } = req.body;
+  const { userId, betAmount, period, betColour, betSize , betNumber } = req.body;
+
+console.log( typeof(betNumber));
+
 
   // Validate required fields
-  if (!userId || !period || !betAmount || (!betColour && !betSize)) {
+  if (!userId || !period || !betAmount || (!betColour && !betSize && (betNumber===null || betNumber===undefined))) {
     return res.json({ success: false, message: "missing field" });
   }
 
@@ -34,7 +37,7 @@ const handlePlaceBet = async (req, res) => {
     return res.json({ success: false, message: "invalid bet amount" });
   }
 
-  if (numericAmount > 200000) {
+  if (numericAmount > 2000000) {
     return res.json({ success: false, message: "bet amount exceed" });
   }
 
@@ -77,6 +80,7 @@ const handlePlaceBet = async (req, res) => {
     };
     if (betColour) betData.betColour = betColour;
     if (betSize) betData.betSize = betSize;
+    if (betNumber!==null || betNumber!==undefined) betData.betNumber = betNumber
 
     // Save bet
     const newBet = await bet.create([betData], { session });

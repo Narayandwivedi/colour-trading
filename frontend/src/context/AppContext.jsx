@@ -6,6 +6,7 @@ export const AppContext = createContext();
 export const AppContextProvider = (props) => {
   const [selectedBetColour, setSelectedBetColour] = useState(null);
   const [selectedBetSize , setSelectedBetSize] = useState(null);
+  const [ selectedBetNumber,setSelectedBetNumber] = useState(null)
   const [betAllowed , setBetAllowed] = useState(true)
   const [showWinner, setShowWinner] = useState(false);
   const [timer, setTimer] = useState(30);
@@ -20,8 +21,8 @@ export const AppContextProvider = (props) => {
   const [activeBets, setActiveBets] = useState([]);
 
   // const BACKEND_URL = `http://82.112.231.55:8080`;
-  // const BACKEND_URL = `http://localhost:8080`;
-  const BACKEND_URL = `https://api.winnersclubs.fun`;
+  const BACKEND_URL = `http://localhost:8080`;
+  // const BACKEND_URL = `https://api.winnersclubs.fun`;
   
   
   
@@ -54,6 +55,8 @@ const checkLogin = async () => {
 
   const value = {
     selectedBetColour, setSelectedBetColour,
+    selectedBetSize,setSelectedBetSize,
+    selectedBetNumber , setSelectedBetNumber,
     showWinner, setShowWinner,
     timer, setTimer,
     userData , setUserData,
@@ -64,7 +67,6 @@ const checkLogin = async () => {
     balance, setBalance,
     withdrawableBalance,setWithdrawableBalance,
     finalDepositAmt , setFinalDepositAmt,
-    selectedBetSize,setSelectedBetSize,
     betAllowed , setBetAllowed,
     activeBets , setActiveBets,
     

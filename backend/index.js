@@ -13,7 +13,7 @@ require("./gameService.js");
 const userRoute = require("./routes/userRoute.js");
 const transactionRoute = require("./routes/transactionRoute.js");
 const betRoute = require("./routes/betRoute.js");
-const adminRoute = require("./routes/adminRoute.js")
+const adminRoute = require("./routes/AdminRoute.js")
 
 // import models
 const game = require("./models/game.js");

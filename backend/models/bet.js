@@ -1,42 +1,46 @@
 const mongoose = require("mongoose");
 
 const betSchema = new mongoose.Schema({
-
-    period :{
-        type : Number,
-        required:true
+    period: {
+        type: Number,
+        required: true
     },
-    userId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"userModel"
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "userModel"
     },
-    betColour:{
-        type:"String",
-        enum:["red","green","violet"],
+    betColour: {
+        type: String,  // Fixed: was "String" 
+        enum: ["red", "green", "violet"],
     },
-    betSize:{
-        type:"string",
-        enum:["big","small"]
+    betSize: {
+        type: String,  // Fixed: was "string"
+        enum: ["big", "small"]
     },
-    betResult :{
-        type : "string",
-        enum : ["red" , "green" , "big", "small"]
+    betNumber: {
+        type: Number,
+        min: 0,
+        max: 9
     },
-    betAmount:{
-        type:Number,
-        min:1,
-        required:true
+    betResult: {
+        type: mongoose.Schema.Types.Mixed,  // Can store both strings and numbers
+        // No enum since it can be colors, sizes, or numbers (0-9)
     },
-    status:{
-        type:String,
-        enum:["pending","win","lost"],
-        default:"pending"
+    betAmount: {
+        type: Number,
+        min: 1,
+        required: true
     },
-    payout :{
-        type:Number,
-        min:0
+    status: {
+        type: String,
+        enum: ["pending", "win", "lost"],
+        default: "pending"
+    },
+    payout: {
+        type: Number,
+        min: 0
     }
-},{timestamps:true})
+}, { timestamps: true });
 
-const bet = mongoose.model("bet",betSchema);
-module.exports = bet
+const bet = mongoose.model("bet", betSchema);
+module.exports = bet;

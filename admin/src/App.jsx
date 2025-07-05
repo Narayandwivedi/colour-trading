@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import ManageUser from "./pages/ManageUser";
 import ManageWithdraw from "./pages/ManageWithdraw";
 import LiveBets from "./pages/LiveBets";
+import ManageBets from "./pages/ManageBets";
 
 function App() {
   const location = useLocation();
@@ -14,7 +15,8 @@ function App() {
     { path: "/manageusers", label: "Users", icon: "👥", description: "Manage users" },
     { path: "/withdraw", label: "Withdrawals", icon: "💸", description: "Manage withdraw" },
     { path: "/transaction", label: "Transactions", icon: "💳", description: "Manage transactions" },
-    { path: "/livebet", label: "Bets", icon: "🎲", description: "Manage Bets" },
+    { path: "/livebet", label: "Bets", icon: "🎲", description: "Live Bets" },
+    { path: "/managebet", label: "Manage Bets", icon: "🎲", description: "Manage Bets" },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -120,6 +122,7 @@ function App() {
                 <Route path="/manageusers" element={<ManageUser/>}/>
                 <Route path="/withdraw" element={<ManageWithdraw/>}/>
                 <Route path="/livebet" element={<LiveBets/>}/>
+                <Route path="/managebet" element={<ManageBets/>}/>
               </Routes>
             </div>
           </div>

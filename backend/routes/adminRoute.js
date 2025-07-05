@@ -5,6 +5,7 @@ const router = express.Router();
 const Transaction = require("../models/transcationModel");
 const Withdraw = require("../models/Withdraw");
 const mongoose = require("mongoose");
+const AdminResult = require("../models/AdminResult")
 
 router.get("/stats", async (req, res) => {
   try {
@@ -300,6 +301,23 @@ router.delete("/user/:id",async(req,res)=>{
   }catch(err){
       return res.status(500).json({success:false , message:'internal server error'})
   }
+})
+
+router.post("/set-result",async(req,res)=>{
+
+  const {period , adminNumber , adminColour , adminSize} = req.body
+  if(!period && (!adminNumber && !adminColour && !adminSize)){
+    return res.status(400).json({success:false , message:"missing details"})
+  }
+    await AdminResult.create({
+      period,
+      adminNumber,
+      adminColour,
+      adminSize
+    })
+
+    return res.json({success:true , message:"result set successfully"})
+
 })
 
 

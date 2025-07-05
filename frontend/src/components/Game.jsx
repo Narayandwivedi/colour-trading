@@ -1,6 +1,5 @@
 import { useContext, useState,useEffect} from "react";
 import { AppContext } from "../context/AppContext";
-import Timer from "../components/Timer";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -24,7 +23,11 @@ export default function Game() {
   const {
     selectedBetColour,
     setSelectedBetColour,
-    selectedBetSize , setSelectedBetSize,
+    selectedBetSize ,
+    setSelectedBetSize,
+    selectedBetNumber,
+    setSelectedBetNumber,
+
     balance,
     setBalance,
     userData,
@@ -32,7 +35,6 @@ export default function Game() {
     timer,
     BACKEND_URL,
     betAllowed , setBetAllowed,
-    activeBets,
     setActiveBets
   } = useContext(AppContext);
   
@@ -53,15 +55,26 @@ export default function Game() {
 
   function handelBettingWindow(colour) {
     setSelectedBetSize(null)
+    setSelectedBetNumber(null)
     setIsBetPopOpen(true);
     setSelectedBetColour(colour);
   }
 
   function handleSizeBettingWindow(size){
     setSelectedBetColour(null)
+    setSelectedBetNumber(null)
     setIsBetPopOpen(true)
     setSelectedBetSize(size)
 
+  }
+
+  function handleNumberBettingWindow(number){
+    setSelectedBetColour(null)
+    setSelectedBetSize(null)
+    setSelectedBetNumber(number) // Fixed: was selectedBetNumber(Number) - missing 'set'
+      console.log(number);
+      setIsBetPopOpen(true)
+      
   }
 
 
@@ -69,8 +82,9 @@ export default function Game() {
     if (betInp > balance || betInp <= 0) {
       return toast.error("invalid bet amount")
     }
-    if(!selectedBetColour && !selectedBetSize){
-      return toast.error('sorry! error while plcing bet')
+    // Updated validation to include number betting
+    if(!selectedBetColour && !selectedBetSize && selectedBetNumber === null){
+      return toast.error('sorry! error while placing bet')
     }
     
     try {
@@ -82,6 +96,7 @@ export default function Game() {
           period,
           betColour: selectedBetColour,
           betSize : selectedBetSize,
+          betNumber: selectedBetNumber, // Added number betting to API call
         },
         {
           withCredentials: true,
@@ -91,11 +106,12 @@ export default function Game() {
       if (data.success) {
         toast.success(data.message);
         setBalance((prevBalance) => prevBalance - betInp);
-          // Add the bet to activeBets array instead of single variables
+          // Add the bet to activeBets array including number
             const newBet = {
                 betValue: betInp,
                 selectedBetColour: selectedBetColour,
                 selectedBetSize: selectedBetSize,
+                selectedBetNumber: selectedBetNumber, // Added number to active bets
                 period: period,
             };
             setActiveBets((prevBets) => [...prevBets, newBet]);
@@ -139,6 +155,7 @@ export default function Game() {
       <div className="mt-8 grid grid-cols-5 gap-4 justify-center">
         {[...Array(10).keys()].map((num) => (
           <button
+            onClick={()=>{handleNumberBettingWindow(num)}}
             key={num}
             className={`w-11 h-11 rounded-full text-white text-xl font-semibold shadow-md transform transition duration-200 hover:scale-110 ${num === 0
               ? "bg-gradient-to-tr from-red-500 via-pink-500 to-violet-600"
@@ -168,9 +185,16 @@ export default function Game() {
                   selectedBetColour === "violet" ? "bg-violet-500" :
                   selectedBetColour === "red" ? "bg-red-500" :
                   selectedBetSize === "big" ? "bg-yellow-500" :
-                  selectedBetSize === "small" ? "bg-blue-500" : "bg-gray-500"
+                  selectedBetSize === "small" ? "bg-blue-500" : 
+                  selectedBetNumber !== null ? (
+                    selectedBetNumber === 0 ? "bg-gradient-to-tr from-red-500 via-pink-500 to-violet-600" :
+                    selectedBetNumber % 2 === 0 ? "bg-gradient-to-br from-green-400 to-emerald-600" :
+                    "bg-gradient-to-br from-red-400 to-pink-500"
+                  ) : "bg-gray-500"
                 }`}>
-                  {selectedBetColour ? selectedBetColour.toUpperCase() : selectedBetSize?.toUpperCase()}
+                  {selectedBetColour ? selectedBetColour.toUpperCase() : 
+                   selectedBetSize ? selectedBetSize.toUpperCase() :
+                   selectedBetNumber !== null ? `NUMBER ${selectedBetNumber}` : "SELECT BET"}
                 </div>
               </div>
 
@@ -255,6 +279,7 @@ export default function Game() {
                       selectedBetColour === "red" ? "bg-gradient-to-r from-red-500 to-pink-600" :
                       selectedBetSize === "big" ? "bg-gradient-to-r from-yellow-500 to-orange-600" :
                       selectedBetSize === "small" ? "bg-gradient-to-r from-blue-500 to-cyan-600" :
+                      selectedBetNumber !== null ? "bg-gradient-to-r from-indigo-500 to-purple-600" :
                       "bg-gradient-to-r from-gray-500 to-gray-600"
                     }`}
                   >
@@ -266,6 +291,7 @@ export default function Game() {
                       setIsBetPopOpen(false);
                       setSelectedBetColour(null);
                       setSelectedBetSize(null);
+                      setSelectedBetNumber(null); // Reset number selection
                     }}
                     className="flex-1 py-4 rounded-xl font-bold text-gray-700 bg-gray-200 hover:bg-gray-300 shadow-lg transform transition-all duration-200 hover:scale-105 active:scale-95"
                   >

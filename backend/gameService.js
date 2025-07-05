@@ -1,6 +1,7 @@
 const game = require("./models/game");
 const bet = require("./models/bet");
 const User = require("./models/user");
+const AdminResult = require("./models/AdminResult"); // Add AdminResult model
 const cron = require("node-cron");
 
 // Constants
@@ -56,9 +57,63 @@ async function generatePeriodId(gameType) {
   ].join("");
 }
 
-// Generate outcome based on bet amounts
-async function getRandomOutcome(period) { 
+// Helper function to calculate random number based on betting data
+function calculateRandomNumber(betOnNumbers) {
+  const totalNumberBets = Object.values(betOnNumbers).reduce((sum, amount) => sum + amount, 0);
+  
+  if (totalNumberBets === 0) {
+    // No number bets, completely random
+    return Math.floor(Math.random() * 10);
+  } else {
+    // Find numbers with highest bets and avoid them
+    const maxBet = Math.max(...Object.values(betOnNumbers));
+    const highestBetNumbers = Object.keys(betOnNumbers).filter(num => betOnNumbers[num] === maxBet);
+    
+    // Create array of numbers with lower bets
+    const availableNumbers = [];
+    for (let i = 0; i < 10; i++) {
+      if (!highestBetNumbers.includes(i.toString())) {
+        availableNumbers.push(i);
+      }
+    }
+    
+    // If all numbers have equal bets or no available numbers, choose randomly
+    if (availableNumbers.length === 0) {
+      return Math.floor(Math.random() * 10);
+    } else {
+      return availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
+    }
+  }
+}
+
+// Helper function to calculate random colour based on betting data
+function calculateRandomColour(betOnRed, betOnGreen) {
+  if (betOnRed + betOnGreen === 0) {
+    return Math.random() < 0.5 ? "red" : "green";
+  } else if (betOnGreen === betOnRed && betOnRed > 0) {
+    return Math.random() < 0.5 ? "violetRed" : "violetGreen";
+  } else {
+    return betOnGreen > betOnRed ? "red" : "green";
+  }
+}
+
+// Helper function to calculate random size based on betting data
+function calculateRandomSize(betOnBig, betOnSmall) {
+  return betOnBig === betOnSmall
+    ? Math.random() < 0.5 ? "big" : "small"
+    : betOnBig > betOnSmall ? "small" : "big";
+}
+
+// Generate outcome based on bet amounts with admin result integration
+async function getRandomOutcome(period) {
   try {
+    // 1. First check if admin result exists for this period
+    const adminResult = await AdminResult.findOne({ 
+      period, 
+      isActive: true 
+    });
+
+    // 2. Get betting data (same as current)
     const result = await bet.aggregate([
       {
         $match: { period },
@@ -68,19 +123,20 @@ async function getRandomOutcome(period) {
           _id: {
             colour: "$betColour",
             size: "$betSize",
+            number: "$betNumber",
           },
           totalAmount: { $sum: "$betAmount" },
         },
       },
     ]);
 
-    let betOnRed = 0,
-      betOnGreen = 0;
-    let betOnBig = 0,
-      betOnSmall = 0;
+    // Calculate bet totals (same as current logic)
+    let betOnRed = 0, betOnGreen = 0;
+    let betOnBig = 0, betOnSmall = 0;
+    let betOnNumbers = {}; // Track bets on specific numbers
 
     for (const entry of result) {
-      const { colour, size } = entry._id;
+      const { colour, size, number } = entry._id;
       const total = entry.totalAmount;
 
       if (colour === "red") betOnRed = total;
@@ -88,40 +144,57 @@ async function getRandomOutcome(period) {
 
       if (size === "big") betOnBig = total;
       else if (size === "small") betOnSmall = total;
+
+      // Track number bets
+      if (number !== null && number !== undefined) {
+        betOnNumbers[number] = (betOnNumbers[number] || 0) + total;
+      }
     }
 
-    // Determine color outcome
-   const finalColour =
-  betOnRed + betOnGreen === 0
-    ? Math.random() < 0.5 
-      ? "red"
-      : "green"
-    : betOnGreen === betOnRed && betOnRed > 0
-    ? Math.random() < 0.5
-      ? "violetRed"
-      : "violetGreen"
-    : betOnGreen > betOnRed
-    ? "red"
-    : "green";
+    // 3. Determine outcomes based on admin preference
+    let finalColour, finalSize, finalNumber;
+    
+    // NUMBER: Always check admin first
+    if (adminResult && adminResult.adminNumber !== null && adminResult.adminNumber !== undefined) {
+      finalNumber = adminResult.adminNumber;
+    } else {
+      // Use existing random logic for number
+      finalNumber = calculateRandomNumber(betOnNumbers);
+    }
+    
+    // COLOUR: Use admin if available, otherwise random logic
+    if (adminResult && adminResult.adminColour) {
+      finalColour = adminResult.adminColour;
+    } else {
+      // Use existing random logic for colour
+      finalColour = calculateRandomColour(betOnRed, betOnGreen);
+    }
+    
+    // SIZE: Use admin if available, otherwise random logic
+    if (adminResult && adminResult.adminSize) {
+      finalSize = adminResult.adminSize;
+    } else {
+      // Use existing random logic for size
+      finalSize = calculateRandomSize(betOnBig, betOnSmall);
+    }
 
-    // Determine size outcome
-    const finalSize =
-      betOnBig === betOnSmall
-        ? Math.random() < 0.5
-          ? "big"
-          : "small"
-        : betOnBig > betOnSmall
-        ? "small"
-        : "big";
+    // 4. Mark admin result as used (optional)
+    if (adminResult) {
+      await AdminResult.updateOne(
+        { _id: adminResult._id },
+        { isActive: false }
+      );
+    }
 
-    const randomNum = Math.floor(Math.random() * 10); // generates integer from 0 to 9
-
-    return { colour: finalColour, size: finalSize, number: randomNum };
+    return { colour: finalColour, size: finalSize, number: finalNumber };
+    
   } catch (error) {
     console.error("Error determining outcomes:", error);
+    // Fallback to completely random
     return {
       colour: Math.random() < 0.5 ? "red" : "green",
       size: Math.random() < 0.5 ? "big" : "small",
+      number: Math.floor(Math.random() * 10),
     };
   }
 }
@@ -148,10 +221,11 @@ async function processGame(gameInstance, gameType) {
         bets.map((bet) => {
           let isWinner = false;
           let payoutMultiplier = 0;
-          const betResult = bet.betColour ? colour : (bet.betSize ? size : null);
+          let betResult = null;
 
           // Handle colour bets
           if (bet.betColour) {
+            betResult = colour;
             // Violet outcomes
             if (colour === 'violetRed' || colour === 'violetGreen') {
               // Violet bet wins 4x
@@ -180,9 +254,20 @@ async function processGame(gameInstance, gameType) {
             }
           }
           // Handle size bets (always 2x)
-          else if (bet.betSize && bet.betSize === size) {
-            isWinner = true;
-            payoutMultiplier = 2;
+          else if (bet.betSize) {
+            betResult = size;
+            if (bet.betSize === size) {
+              isWinner = true;
+              payoutMultiplier = 2;
+            }
+          }
+          // Handle number bets (9x payout)
+          else if (bet.betNumber !== null && bet.betNumber !== undefined) {
+            betResult = number;
+            if (bet.betNumber === number) {
+              isWinner = true;
+              payoutMultiplier = 9; // Number betting typically has higher payout
+            }
           }
 
           return {
@@ -202,7 +287,7 @@ async function processGame(gameInstance, gameType) {
           let isWinner = false;
           let payoutMultiplier = 0;
 
-          // Same logic as above
+          // Same logic as above for user balance updates
           if (bet.betColour) {
             if (colour === 'violetRed' || colour === 'violetGreen') {
               if (bet.betColour === 'violet') {
@@ -227,6 +312,11 @@ async function processGame(gameInstance, gameType) {
             isWinner = true;
             payoutMultiplier = 2;
           }
+          // Handle number bet winnings
+          else if (bet.betNumber !== null && bet.betNumber !== undefined && bet.betNumber === number) {
+            isWinner = true;
+            payoutMultiplier = 9;
+          }
 
           return {
             updateOne: {
@@ -243,7 +333,7 @@ async function processGame(gameInstance, gameType) {
       ),
     ]);
 
-    console.log(`[${new Date().toISOString()}] ${gameType} game closed: ${gameInstance.period}`);
+    console.log(`[${new Date().toISOString()}] ${gameType} game closed: ${gameInstance.period} - Result: ${colour}, ${size}, ${number}`);
   } catch (error) {
     console.error(`Game processing error (${gameType}):`, error);
   } finally {
