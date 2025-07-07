@@ -13,6 +13,7 @@ const {
   handleAddUpi,
   generateResetPassOTP,
   submitResetPassOTP,
+  handelAdminLogin
 } = require("../controllers/userController.js");
 
 const limiter = rateLimit({
@@ -47,6 +48,7 @@ router.post("/get-otp",otpLimiter, generateResetPassOTP);
 router.post("/submit-otp",otpLimiter, submitResetPassOTP);
 router.post("/addbank", handleAddBank);
 router.post("/addupi", handleAddUpi);
+router.post("/admin-login", handelAdminLogin);
 router.put("/updatebalance", handleUpdateBalance);
 
 module.exports = router;

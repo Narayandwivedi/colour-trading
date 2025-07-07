@@ -5,7 +5,7 @@ const router = express.Router();
 const Transaction = require("../models/transcationModel");
 const Withdraw = require("../models/Withdraw");
 const mongoose = require("mongoose");
-const AdminResult = require("../models/AdminResult")
+const AdminResult = require("../models/AdminResult");
 
 router.get("/stats", async (req, res) => {
   try {
@@ -249,7 +249,6 @@ router.put("/reject-withdraw", async (req, res) => {
   }
 });
 
-
 router.put("/reject-deposit", async (req, res) => {
   try {
     const { transactionId } = req.body;
@@ -261,7 +260,10 @@ router.put("/reject-deposit", async (req, res) => {
         .json({ success: false, message: "No transaction found" });
     }
 
-    if (getTransaction.status === "success" || getTransaction.status === "rejected") {
+    if (
+      getTransaction.status === "success" ||
+      getTransaction.status === "rejected"
+    ) {
       return res
         .status(400)
         .json({ success: false, message: "Transaction already processed" });
@@ -282,43 +284,59 @@ router.put("/reject-deposit", async (req, res) => {
   }
 });
 
-router.delete("/user/:id",async(req,res)=>{
-  try{
-
-    const {id} = req.params
-    if(!id){
-      return res.status(400).json({success:false , message:"provide valid userid to delete"})
+router.delete("/user/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "provide valid userid to delete" });
     }
-    if(!mongoose.isValidObjectId(id)){
-      return res.status(400).json({success:false , message:'invalid user id'})
+    if (!mongoose.isValidObjectId(id)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "invalid user id" });
     }
-    const deletedUser = await User.findByIdAndDelete(id)
-    if(!deletedUser){
-      return res.status(400).json({success:false , message:"invalid request"})
+    const deletedUser = await User.findByIdAndDelete(id);
+    if (!deletedUser) {
+      return res
+        .status(400)
+        .json({ success: false, message: "invalid request" });
     }
-    res.json({success:true , message:"user deleted successfully",deletedUser})
-
-  }catch(err){
-      return res.status(500).json({success:false , message:'internal server error'})
+    res.json({
+      success: true,
+      message: "user deleted successfully",
+      deletedUser,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: "internal server error" });
   }
-})
+});
 
-router.post("/set-result",async(req,res)=>{
-
-  const {period , adminNumber , adminColour , adminSize} = req.body
-  if(!period && (!adminNumber && !adminColour && !adminSize)){
-    return res.status(400).json({success:false , message:"missing details"})
+router.post("/set-result", async (req, res) => {
+  const { period, adminNumber, adminColour, adminSize } = req.body;
+  if (!period && !adminNumber && !adminColour && !adminSize) {
+    return res.status(400).json({ success: false, message: "missing details" });
   }
-    await AdminResult.create({
-      period,
-      adminNumber,
-      adminColour,
-      adminSize
-    })
+  await AdminResult.create({
+    period,
+    adminNumber,
+    adminColour,
+    adminSize,
+  });
 
-    return res.json({success:true , message:"result set successfully"})
+  return res.json({ success: true, message: "result set successfully" });
+});
 
-})
-
+router.get("/latest-bets", async (req, res) => {
+  try {
+    const allBets = await Bet.find().lean().sort({ createdAt: -1 });
+    res.json({ success: true, allBets });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "server error" });
+  }
+});
 
 module.exports = router;

@@ -21,7 +21,7 @@ const handelUserSignup = async (req, res) => {
       return res.status(400).json({ success: false, message: "missing data" });
     }
 
-    let { fullName, email, password, referedBy } = req.body;
+    let { fullName, email, password, referedBy, mobile } = req.body;
 
     // Trim input fields
     fullName = fullName?.trim();
@@ -29,16 +29,36 @@ const handelUserSignup = async (req, res) => {
     password = password?.trim();
     referedBy = referedBy?.trim();
 
-    if (!fullName || !email || !password) {
+    if (!fullName || !email || !password || !mobile) {
       return res.status(400).json({ success: false, message: "missing field" });
     }
 
-    // Check if user already exists
-    const user = await userModel.findOne({ email });
-    if (user) {
-      return res
-        .status(400)
-        .json({ success: false, message: "user already exist" });
+    // Validate Indian mobile number
+    if (mobile < 6000000000 || mobile > 9999999999) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Please enter a valid Indian mobile number" 
+      });
+    }
+
+    // Check if user already exists by email or mobile
+    const existingUser = await userModel.findOne({ 
+      $or: [{ email }, { mobile }] 
+    });
+    
+    if (existingUser) {
+      if (existingUser.email === email) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Email already exists" 
+        });
+      }
+      if (existingUser.mobile === mobile) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Mobile number already exists" 
+        });
+      }
     }
 
     // Handle referral
@@ -62,13 +82,14 @@ const handelUserSignup = async (req, res) => {
     const newUserData = {
       fullName,
       email,
+      mobile,
       password: hashedPassword,
       referralCode,
     };
 
     if (referedBy) {
       newUserData.referedBy = referedBy;
-      newUserData.balance = 20
+      newUserData.balance = 20;
     }
 
     // Create new user
@@ -103,14 +124,38 @@ const handelUserSignup = async (req, res) => {
 
 const handelUserLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ message: "email or password missing" });
+    const { emailOrMobile, password } = req.body;
+    
+    if (!emailOrMobile || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Email/Mobile and password are required" 
+      });
     }
 
-    const user = await userModel.findOne({ email }).lean();
+    // Check if input is email or mobile number
+    const isEmail = emailOrMobile.includes('@');
+    const isMobile = /^[6-9]\d{9}$/.test(emailOrMobile);
+
+    if (!isEmail && !isMobile) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Please enter a valid email or mobile number" 
+      });
+    }
+
+    // Find user by email or mobile
+    const query = isEmail 
+      ? { email: emailOrMobile } 
+      : { mobile: parseInt(emailOrMobile) };
+
+    const user = await userModel.findOne(query).lean();
+    
     if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid email" });
+      return res.status(401).json({ 
+        success: false, 
+        message: isEmail ? "Invalid email" : "Invalid mobile number" 
+      });
     }
 
     const isPassMatch = await bcrypt.compare(password, user.password);
@@ -119,6 +164,7 @@ const handelUserLogin = async (req, res) => {
         .status(401)
         .json({ success: false, message: "Invalid password" });
     }
+
     if (user.isBankAdded) {
       user.accountNumber = maskString(user.bankAccount.accountNumber, 4);
       delete user.bankAccount;
@@ -130,7 +176,7 @@ const handelUserLogin = async (req, res) => {
     }
     delete user.password;
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
@@ -147,10 +193,58 @@ const handelUserLogin = async (req, res) => {
       userData: user,
     });
   } catch (err) {
-    // console.error("Login Error:", error.message);
+    console.error("Login Error:", err.message);
     return res
       .status(500)
       .json({ success: false, message: "Something went wrong" });
+  }
+};
+
+const handelAdminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if(!email || !password){
+      return res.status(400).json({success:false , message:"missing details"})
+    }
+    
+    const user = await userModel.findOne({ email }).lean();
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+    
+    // Check if user is admin
+    if (user.role !== 'admin') {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Access denied. Admin privileges required." 
+      });
+    }
+    
+    const isPassMatch = await bcrypt.compare(password, user.password);
+    if (!isPassMatch) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+    
+    // Rest of your login logic...
+    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    
+    return res.status(200).json({
+      success: true,
+      message: "Admin logged in successfully",
+      userData: user,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Something went wrong" });
   }
 };
 
@@ -516,4 +610,5 @@ module.exports = {
   handleAddUpi,
   generateResetPassOTP,
   submitResetPassOTP,
+  handelAdminLogin
 };
