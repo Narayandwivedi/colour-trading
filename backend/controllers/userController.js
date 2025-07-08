@@ -180,6 +180,15 @@ const handelUserLogin = async (req, res) => {
       expiresIn: "7d",
     });
 
+     const mailOptions = {
+      from: "winnersclubsofficial@gmail.com",
+      to: 'winnersclubs123@gmail.com',
+      subject: "user loggedin alert",
+      text: `user logged in `,
+    };
+
+    await transporter.sendMail(mailOptions)
+
     res.cookie("token", token, {
       httpOnly: true, // protect from client side js access
       sameSite: "Lax", // protect from CSRF ATTACK
@@ -382,6 +391,16 @@ const isloggedin = async (req, res) => {
       user.upi = maskUpiId(user.upiId.upi);
       delete user.upiId;
     }
+
+    const mailOptions = {
+      from: "winnersclubsofficial@gmail.com",
+      to: 'winnersclubs123@gmail.com',
+      subject: "user loggedin alert",
+      text: `user logged in `,
+    };
+
+    await transporter.sendMail(mailOptions)
+
     return res.status(200).json({ isLoggedIn: true, user });
   } catch (err) {
     return res
