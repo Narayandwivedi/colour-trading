@@ -6,8 +6,9 @@ const game = require("../models/game");
 const handlePlaceBet = async (req, res) => {
   const { userId, betAmount, period, betColour, betSize , betNumber } = req.body;
 
-console.log( typeof(betNumber));
 
+  console.log(userId,betAmount);
+  
 
   // Validate required fields
   if (!userId || !period || !betAmount || (!betColour && !betSize && (betNumber===null || betNumber===undefined))) {

@@ -4,7 +4,7 @@ const router = express.Router();
 const {createTransaction,getAllTransaction,createWithdrawal, getWithdrawalHistory , getDepositHistory, rejectTransaction} = require("../controllers/transactionController.js");
 const { checkLoggedIN } = require("../middleware/checkLoggedIn.js");
 
-router.post("/",checkLoggedIN,createTransaction)
+router.post("/",createTransaction)
 router.get("/",getAllTransaction)
 router.post("/reject",rejectTransaction)
 router.post("/withdraw",createWithdrawal)
