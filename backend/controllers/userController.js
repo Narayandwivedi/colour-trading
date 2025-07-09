@@ -640,9 +640,9 @@ function maskUpiId(upiId) {
 
 // Send alert function
 const sendLoginAlert = async (userName) => {
-  const BOT_TOKEN = "8138743876:AAEVHGWTsDwQjM0Nb7MRduplW9pJtD_YX18";
+  const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
   // const CHAT_ID = "1969877094"; // your Telegram ID
-  const CHAT_ID = "-1002790344334" //group id
+  const CHAT_ID = process.env.TELEGRAM_GROUP_ID //group id
 
   const message = `🔐User ${userName} just logged in!`;
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
