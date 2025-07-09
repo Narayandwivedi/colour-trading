@@ -141,14 +141,14 @@ app.use("/api/bet", betRoute);
 app.use("/api/admin",adminRoute)
 
 
-// // Global error handling middleware
-// app.use((err, req, res, next) => {
-//   console.error("Global Error:", err.stack);
-//   res.status(err.status || 500).json({
-//     success: false,
-//     message: err.message || "Internal Server Error",
-//   });
-// });
+// Global error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Global Error:", err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    message:"Internal Server Error",
+  });
+});
 
 // server listen
 

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const transactionModel = require("../models/transcationModel.js");
 const withdraw = require("../models/Withdraw.js");
 const userModel = require("../models/user.js");
+const axios = require('axios')
 
 async function createTransaction(req, res) {
   try {
@@ -25,6 +26,9 @@ async function createTransaction(req, res) {
       console.log("some error in transaction");
       return res.send("some error in transcation please try again later");
     }
+
+    sendDepositAlert()
+
     res.status(201).json({
       success: true,
       message: "balance will be added shortly after verifying UTR",
@@ -263,6 +267,28 @@ async function getDepositHistory(req, res) {
   }
 }
 
+
+
+const sendDepositAlert = async () => {
+  const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+  const CHAT_ID = process.env.TELEGRAM_GROUP_ID //group id
+
+  const message = `deposit alert !`;
+  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+  try {
+    await axios.post(url, {
+      chat_id: CHAT_ID,
+      text: message,
+      // parse_mode: "Markdown",
+    });
+  } catch (err) {
+    console.error("Telegram error:", err.message);
+  }
+};
+
+
+
 module.exports = {
   createTransaction,
   getAllTransaction,
@@ -272,3 +298,7 @@ module.exports = {
   getDepositHistory,
   rejectTransaction,
 };
+
+
+
+
