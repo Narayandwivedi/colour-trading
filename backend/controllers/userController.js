@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.js");
 const transactionModel = require("../models/transcationModel.js");
 const transporter = require("../config/nodemailer.js");
+const axios = require("axios");
 
 function generateReferralCode() {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -35,28 +36,28 @@ const handelUserSignup = async (req, res) => {
 
     // Validate Indian mobile number
     if (mobile < 6000000000 || mobile > 9999999999) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Please enter a valid Indian mobile number" 
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid Indian mobile number",
       });
     }
 
     // Check if user already exists by email or mobile
-    const existingUser = await userModel.findOne({ 
-      $or: [{ email }, { mobile }] 
+    const existingUser = await userModel.findOne({
+      $or: [{ email }, { mobile }],
     });
-    
+
     if (existingUser) {
       if (existingUser.email === email) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Email already exists" 
+        return res.status(400).json({
+          success: false,
+          message: "Email already exists",
         });
       }
       if (existingUser.mobile === mobile) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Mobile number already exists" 
+        return res.status(400).json({
+          success: false,
+          message: "Mobile number already exists",
         });
       }
     }
@@ -125,36 +126,36 @@ const handelUserSignup = async (req, res) => {
 const handelUserLogin = async (req, res) => {
   try {
     const { emailOrMobile, password } = req.body;
-    
+
     if (!emailOrMobile || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Email/Mobile and password are required" 
+      return res.status(400).json({
+        success: false,
+        message: "Email/Mobile and password are required",
       });
     }
 
     // Check if input is email or mobile number
-    const isEmail = emailOrMobile.includes('@');
+    const isEmail = emailOrMobile.includes("@");
     const isMobile = /^[6-9]\d{9}$/.test(emailOrMobile);
 
     if (!isEmail && !isMobile) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Please enter a valid email or mobile number" 
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email or mobile number",
       });
     }
 
     // Find user by email or mobile
-    const query = isEmail 
-      ? { email: emailOrMobile } 
+    const query = isEmail
+      ? { email: emailOrMobile }
       : { mobile: parseInt(emailOrMobile) };
 
     const user = await userModel.findOne(query).lean();
-    
+
     if (!user) {
-      return res.status(401).json({ 
-        success: false, 
-        message: isEmail ? "Invalid email" : "Invalid mobile number" 
+      return res.status(401).json({
+        success: false,
+        message: isEmail ? "Invalid email" : "Invalid mobile number",
       });
     }
 
@@ -176,18 +177,24 @@ const handelUserLogin = async (req, res) => {
     }
     delete user.password;
 
-    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
 
-     const mailOptions = {
-      from: "winnersclubsofficial@gmail.com",
-      to: 'winnersclubs123@gmail.com',
-      subject: "user loggedin alert",
-      text: `user logged in `,
-    };
+    // send notifications
 
-    await transporter.sendMail(mailOptions)
+    // const mailOptions = {
+    //   from: "winnersclubsofficial@gmail.com",
+    //   to: "winnersclubs123@gmail.com",
+    //   subject: "user loggedin alert",
+    //   text: `user logged in `,
+    // };
+
+    // await transporter.sendMail(mailOptions);
 
     res.cookie("token", token, {
       httpOnly: true, // protect from client side js access
@@ -195,6 +202,10 @@ const handelUserLogin = async (req, res) => {
       secure: false,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+   sendLoginAlert(user.fullName).catch((err) =>
+  console.error("Telegram Error:", err.message)
+);
 
     return res.status(200).json({
       success: true,
@@ -213,47 +224,59 @@ const handelAdminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if(!email || !password){
-      return res.status(400).json({success:false , message:"missing details"})
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "missing details" });
     }
-    
+
     const user = await userModel.findOne({ email }).lean();
     if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
-    
+
     // Check if user is admin
-    if (user.role !== 'admin') {
-      return res.status(403).json({ 
-        success: false, 
-        message: "Access denied. Admin privileges required." 
+    if (user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin privileges required.",
       });
     }
-    
+
     const isPassMatch = await bcrypt.compare(password, user.password);
     if (!isPassMatch) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
-    
+
     // Rest of your login logic...
-    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-    
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "Lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    
+
     return res.status(200).json({
       success: true,
       message: "Admin logged in successfully",
       userData: user,
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: "Something went wrong" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Something went wrong" });
   }
 };
 
@@ -392,15 +415,9 @@ const isloggedin = async (req, res) => {
       delete user.upiId;
     }
 
-    const mailOptions = {
-      from: "winnersclubsofficial@gmail.com",
-      to: 'winnersclubs123@gmail.com',
-      subject: "user loggedin alert",
-      text: `user logged in `,
-    };
-
-    await transporter.sendMail(mailOptions)
-
+    sendLoginAlert(user.fullName).catch((err) =>
+  console.error("Telegram Error:", err.message)
+);
     return res.status(200).json({ isLoggedIn: true, user });
   } catch (err) {
     return res
@@ -619,6 +636,28 @@ function maskUpiId(upiId) {
   return maskedName + domainPart;
 }
 
+// login alert function for telegram:
+
+// Send alert function
+const sendLoginAlert = async (userName) => {
+  const BOT_TOKEN = "8138743876:AAEVHGWTsDwQjM0Nb7MRduplW9pJtD_YX18";
+  // const CHAT_ID = "1969877094"; // your Telegram ID
+  const CHAT_ID = "-1002790344334" //group id
+
+  const message = `🔐User ${userName} just logged in!`;
+  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+  try {
+    await axios.post(url, {
+      chat_id: CHAT_ID,
+      text: message,
+      // parse_mode: "Markdown",
+    });
+  } catch (err) {
+    console.error("Telegram error:", err.message);
+  }
+};
+
 module.exports = {
   handelUserSignup,
   handelUserLogin,
@@ -629,5 +668,5 @@ module.exports = {
   handleAddUpi,
   generateResetPassOTP,
   submitResetPassOTP,
-  handelAdminLogin
+  handelAdminLogin,
 };
