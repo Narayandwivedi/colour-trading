@@ -4,6 +4,7 @@ const app = express();
 const { exec } = require('child_process');
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const cron = require('node-cron');
 
 const { connectToDb } = require("./config/mongodb.js");
 require("./gameService.js");
@@ -139,6 +140,35 @@ app.use("/api/users", userRoute);
 app.use("/api/transaction", transactionRoute);
 app.use("/api/bet", betRoute);
 app.use("/api/admin",adminRoute)
+
+
+
+
+
+const restartServer = () => {
+  console.log(`Scheduled server restart at ${new Date().toISOString()}`);
+  exec('pm2 restart project-backend', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Restart Error: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.error(`Restart Stderr: ${stderr}`);
+    }
+    console.log(`Restart Stdout: ${stdout}`);
+    console.log('Server restarted successfully via cron job');
+  });
+};
+
+// cron.schedule('0 0 6 * * *', restartServer, {
+//   scheduled: true,
+//   timezone: "Asia/Kolkata"
+// });
+
+cron.schedule('0 20 10 * * *', restartServer, {
+  scheduled: true,
+  timezone: "Asia/Kolkata"
+});
 
 
 // Global error handling middleware
