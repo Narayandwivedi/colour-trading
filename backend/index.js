@@ -160,12 +160,7 @@ const restartServer = () => {
   });
 };
 
-// cron.schedule('0 0 6 * * *', restartServer, {
-//   scheduled: true,
-//   timezone: "Asia/Kolkata"
-// });
-
-cron.schedule('0 20 10 * * *', restartServer, {
+cron.schedule('0 0 6 * * *', restartServer, {
   scheduled: true,
   timezone: "Asia/Kolkata"
 });
