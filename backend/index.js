@@ -20,8 +20,7 @@ const adminRoute = require("./routes/adminRoute.js")
 // import models
 const game = require("./models/game.js");
 
-// import middleware
-const { checkLoggedIN } = require("./middleware/checkLoggedIn.js");
+
 
 app.use(
   cors({
@@ -160,11 +159,10 @@ const restartServer = () => {
   });
 };
 
-cron.schedule('0 0 6 * * *', restartServer, {
+cron.schedule('0 6 * * *', restartServer, {
   scheduled: true,
   timezone: "Asia/Kolkata"
 });
-
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
