@@ -657,6 +657,186 @@ const sendLoginAlert = async (userName) => {
   }
 };
 
+const editUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { fullName, email, balance, withdrawableBalance, password } = req.body;
+
+    // Validate userId
+    if (!userId || !mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid user ID is required"
+      });
+    }
+
+    // Validate at least one field is provided
+    if (!fullName && !email && balance === undefined && withdrawableBalance === undefined && !password) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one field must be provided to update"
+      });
+    }
+
+    // Find the user
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Check if email is already taken by another user
+    if (email && email !== user.email) {
+      const existingUser = await userModel.findOne({ 
+        email: email.trim().toLowerCase(),
+        _id: { $ne: userId }
+      });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already exists"
+        });
+      }
+    }
+
+    // Validate password
+    if (password) {
+      if (password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: "Password must be at least 6 characters long"
+        });
+      }
+    }
+
+    // Validate balance values
+    if (balance !== undefined) {
+      const balanceNum = Number(balance);
+      if (isNaN(balanceNum) || balanceNum < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Balance must be a valid non-negative number"
+        });
+      }
+    }
+
+    if (withdrawableBalance !== undefined) {
+      const withdrawableBalanceNum = Number(withdrawableBalance);
+      if (isNaN(withdrawableBalanceNum) || withdrawableBalanceNum < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Withdrawable balance must be a valid non-negative number"
+        });
+      }
+    }
+
+    // Store original values for comparison
+    const originalValues = {
+      fullName: user.fullName,
+      email: user.email,
+      balance: user.balance,
+      withdrawableBalance: user.withdrawableBalance
+    };
+
+    // Update fields
+    const updateFields = {};
+    if (fullName && fullName.trim() !== user.fullName) {
+      updateFields.fullName = fullName.trim();
+    }
+    if (email && email.trim().toLowerCase() !== user.email) {
+      updateFields.email = email.trim().toLowerCase();
+    }
+    if (balance !== undefined && Number(balance) !== user.balance) {
+      updateFields.balance = Number(balance);
+    }
+    if (withdrawableBalance !== undefined && Number(withdrawableBalance) !== user.withdrawableBalance) {
+      updateFields.withdrawableBalance = Number(withdrawableBalance);
+    }
+    
+    // Hash password if provided
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password.trim(), 8);
+      updateFields.password = hashedPassword;
+    }
+
+    // If no changes detected
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No changes detected",
+        user: {
+          _id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          balance: user.balance,
+          withdrawableBalance: user.withdrawableBalance
+        }
+      });
+    }
+
+    // Update the user
+    const updatedUser = await userModel.findByIdAndUpdate(
+      userId,
+      updateFields,
+      { new: true, runValidators: true }
+    ).select('_id fullName email balance withdrawableBalance mobile role');
+
+    // Create change summary
+    const changes = [];
+    if (updateFields.fullName) {
+      changes.push(`Name: "${originalValues.fullName}" → "${updateFields.fullName}"`);
+    }
+    if (updateFields.email) {
+      changes.push(`Email: "${originalValues.email}" → "${updateFields.email}"`);
+    }
+    if (updateFields.balance !== undefined) {
+      changes.push(`Balance: ₹${originalValues.balance} → ₹${updateFields.balance}`);
+    }
+    if (updateFields.withdrawableBalance !== undefined) {
+      changes.push(`Withdrawable Balance: ₹${originalValues.withdrawableBalance} → ₹${updateFields.withdrawableBalance}`);
+    }
+    if (updateFields.password) {
+      changes.push(`Password: Updated by admin`);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      user: updatedUser,
+      changes: changes
+    });
+
+  } catch (err) {
+    console.error("Edit user error:", err);
+    
+    // Handle mongoose validation errors
+    if (err.name === 'ValidationError') {
+      const errors = Object.values(err.errors).map(e => e.message);
+      return res.status(400).json({
+        success: false,
+        message: "Validation error",
+        errors: errors
+      });
+    }
+
+    // Handle duplicate key errors
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern)[0];
+      return res.status(400).json({
+        success: false,
+        message: `${field} already exists`
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
+
 module.exports = {
   handelUserSignup,
   handelUserLogin,
@@ -668,4 +848,5 @@ module.exports = {
   generateResetPassOTP,
   submitResetPassOTP,
   handelAdminLogin,
+  editUser,
 };

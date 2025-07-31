@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import {
@@ -10,15 +10,22 @@ import {
   Hash,
   DollarSign,
   Eye,
+  RefreshCw,
 } from "lucide-react";
-import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 
 const Transaction = () => {
-  const [allTransaction, setAllTransaction] = useState(null);
-  const [amountInputs, setAmountInputs] = useState({});
+  const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all");
+  const [currentStatus, setCurrentStatus] = useState("pending"); // Default to pending
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalDeposits: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit: 20
+  });
 
   const { BACKEND_URL } = useContext(AppContext);
 
@@ -84,102 +91,100 @@ const Transaction = () => {
     }
   };
 
-  const handleApprove = async (userId, transactionId) => {
-    const totalAmount = amountInputs[transactionId];
-    if (!totalAmount) return toast.error("Please enter amount");
-
+  const handleApprove = async (transactionId) => {
     try {
-      const { data } = await axios.put(
-        `${BACKEND_URL}/api/users/updatebalance`,
+      const { data } = await axios.post(
+        `${BACKEND_URL}/api/transaction/approve`,
         {
-          userId,
-          totalAmount,
           transactionId,
         }
       );
 
       if (data.success) {
         toast.success(data.message);
-        setAmountInputs((prev) => ({
-          ...prev,
-          [transactionId]: "",
-        }));
-        // Refresh transactions after approval
-        fetchAllTransaction();
+        // Refresh current page
+        fetchDepositsByStatus(currentStatus, pagination.currentPage);
       }
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.response?.data?.message || "Error approving deposit");
     }
   };
 
   const handleReject = async (transactionId) => {
     try {
-      console.log(transactionId);
-      
-      const { data } = await axios.put(
-        `${BACKEND_URL}/api/admin/reject-deposit`,
+      const { data } = await axios.post(
+        `${BACKEND_URL}/api/transaction/reject`,
         {
-         transactionId,
+          transactionId,
         }
       );
 
       if (data.success) {
-        toast.success(data.message || "transaction rejected success");
+        toast.success(data.message);
+        // Refresh current page
+        fetchDepositsByStatus(currentStatus, pagination.currentPage);
       }
     } catch (err) {
-      toast.error("some error ");
+      toast.error(err.response?.data?.message || "Error rejecting deposit");
     }
   };
 
-  const fetchAllTransaction = async () => {
+  const fetchDepositsByStatus = async (status, page = 1) => {
     try {
-      const { data } = await axios.get(`${BACKEND_URL}/api/transaction`);
+      setLoading(true);
+      console.log(`Fetching deposits with status: ${status}, page: ${page}`);
+      const { data } = await axios.get(
+        `${BACKEND_URL}/api/transaction/deposits?status=${status}&page=${page}&limit=20`
+      );
+      
+      console.log('API Response:', data);
+      
       if (data.success) {
-        setAllTransaction(data.allTransaction);
-        console.log("transaction fetched successfully");
+        setDeposits(data.data.deposits);
+        setPagination(data.data.pagination);
+      } else {
+        toast.error(data.message || "Failed to fetch deposits");
       }
     } catch (err) {
-      toast.error("Unable to fetch transactions");
-      setAllTransaction([]);
+      console.error('Error fetching deposits:', err);
+      toast.error(err.response?.data?.message || "Unable to fetch deposits");
+      setDeposits([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchAllTransaction();
-    setInterval(() => {
-      fetchAllTransaction();
-    }, 8000);
-  }, []);
-
-  const filteredTransactions = allTransaction
-    ? allTransaction.filter(
-        (transaction) => filter === "all" || transaction.status === filter
-      )
-    : [];
-
-  const getStatusCounts = () => {
-    if (!allTransaction) return { all: 0, success: 0, pending: 0, rejected: 0 };
-
-    return allTransaction.reduce(
-      (acc, transaction) => {
-        acc.all++;
-        acc[transaction.status] = (acc[transaction.status] || 0) + 1;
-        return acc;
-      },
-      { all: 0, success: 0, pending: 0, rejected: 0 }
-    );
+  const handleStatusChange = (status) => {
+    setCurrentStatus(status);
+    setPagination(prev => ({ ...prev, currentPage: 1 })); // Reset to page 1
+    fetchDepositsByStatus(status, 1);
   };
 
-  const statusCounts = getStatusCounts();
+  const handlePageChange = (newPage) => {
+    fetchDepositsByStatus(currentStatus, newPage);
+  };
 
-  if (loading) {
+  useEffect(() => {
+    fetchDepositsByStatus("pending", 1);
+  }, []); // Only run once on mount
+
+  useEffect(() => {
+    // Auto-refresh every 30 seconds for pending deposits only
+    if (currentStatus === "pending") {
+      const interval = setInterval(() => {
+        fetchDepositsByStatus(currentStatus, pagination.currentPage);
+      }, 30000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [currentStatus, pagination.currentPage]);
+
+  if (loading && deposits.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading transactions...</p>
+          <p className="text-lg text-gray-600">Loading deposits...</p>
         </div>
       </div>
     );
@@ -189,149 +194,194 @@ const Transaction = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            Transaction Management
-          </h1>
-          <p className="text-gray-600">
-            Monitor and manage all transaction requests
-          </p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">
+              Deposit Management
+            </h1>
+            <p className="text-gray-600">
+              Monitor and manage deposit requests - {pagination.totalDeposits} total {currentStatus} deposits
+            </p>
+          </div>
+          <button
+            onClick={() => fetchDepositsByStatus(currentStatus, pagination.currentPage)}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+          >
+            <RefreshCw size={16} />
+            Refresh
+          </button>
         </div>
 
         {/* Status Filter Tabs */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex flex-wrap gap-4 justify-center">
             {[
-              {
-                key: "all",
-                label: "All Transactions",
-                count: statusCounts.all,
-              },
-              {
-                key: "success",
-                label: "Approved",
-                count: statusCounts.success,
-              },
-              { key: "pending", label: "Pending", count: statusCounts.pending },
-              {
-                key: "rejected",
-                label: "Rejected",
-                count: statusCounts.rejected,
-              },
-            ].map(({ key, label, count }) => (
+              { key: "pending", label: "Pending Deposits", activeColor: "bg-amber-600 text-white shadow-lg shadow-amber-200", inactiveColor: "bg-amber-100 text-amber-800 hover:bg-amber-200" },
+              { key: "success", label: "Approved Deposits", activeColor: "bg-green-600 text-white shadow-lg shadow-green-200", inactiveColor: "bg-green-100 text-green-800 hover:bg-green-200" },
+              { key: "rejected", label: "Rejected Deposits", activeColor: "bg-red-600 text-white shadow-lg shadow-red-200", inactiveColor: "bg-red-100 text-red-800 hover:bg-red-200" },
+            ].map(({ key, label, activeColor, inactiveColor }) => (
               <button
                 key={key}
-                onClick={() => setFilter(key)}
+                onClick={() => handleStatusChange(key)}
                 className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-                  filter === key
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  currentStatus === key ? activeColor : inactiveColor
                 }`}
               >
                 {label}
-                <span className="ml-2 px-2 py-1 text-xs rounded-full bg-white bg-opacity-20">
-                  {count}
-                </span>
+                {currentStatus === key && (
+                  <span className="ml-2 px-2 py-1 text-xs rounded-full bg-white bg-opacity-20">
+                    {pagination.totalDeposits}
+                  </span>
+                )}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Transactions Grid */}
-        {filteredTransactions.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredTransactions.map((transaction) => {
-              const statusConfig = getStatusConfig(transaction.status);
-              const StatusIcon = statusConfig.icon;
+        {/* Deposits Grid */}
+        {deposits.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {deposits.map((deposit) => {
+                const statusConfig = getStatusConfig(deposit.status);
+                const StatusIcon = statusConfig.icon;
 
-              return (
-                <div
-                  key={transaction._id}
-                  className={`${statusConfig.bgColor} ${statusConfig.borderColor} ${statusConfig.shadowColor} border-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
-                >
-                  {/* Status Badge */}
-                  <div className="flex items-center justify-between mb-4">
-                    <span
-                      className={`${statusConfig.badgeColor} px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex items-center gap-1`}
-                    >
-                      <StatusIcon size={14} />
-                      {transaction.status}
-                    </span>
-                    <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded-lg">
-                      {transaction.type}
-                    </div>
-                  </div>
-
-                  {/* Transaction Details */}
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar size={16} className="text-gray-500" />
-                      <span className="text-gray-700">
-                        {formatDate(transaction.createdAt)}
+                return (
+                  <div
+                    key={deposit._id}
+                    className={`${statusConfig.bgColor} ${statusConfig.borderColor} ${statusConfig.shadowColor} border-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
+                  >
+                    {/* Status Badge */}
+                    <div className="flex items-center justify-between mb-4">
+                      <span
+                        className={`${statusConfig.badgeColor} px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex items-center gap-1`}
+                      >
+                        <StatusIcon size={14} />
+                        {deposit.status}
                       </span>
+                      <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded-lg">
+                        {deposit.type}
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm">
-                      <User size={16} className="text-gray-500" />
-                      <span className="text-gray-700 font-mono text-xs bg-white px-2 py-1 rounded">
-                        {transaction.userId}
-                      </span>
+                    {/* Deposit Details */}
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar size={16} className="text-gray-500" />
+                        <span className="text-gray-700">
+                          {formatDate(deposit.createdAt)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm">
+                        <User size={16} className="text-gray-500" />
+                        <div>
+                          <div className="text-gray-700 font-medium">
+                            {deposit.userId?.fullName || 'N/A'}
+                          </div>
+                          <div className="text-gray-500 text-xs">
+                            {deposit.userId?.email || 'N/A'}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm">
+                        <Hash size={16} className="text-gray-500" />
+                        <span className="text-gray-700 font-mono text-xs bg-white px-2 py-1 rounded">
+                          UTR: {deposit.UTR}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <DollarSign size={16} className="text-gray-500" />
+                        <span className="text-xl font-bold text-gray-800">
+                          {formatAmount(deposit.amount)}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm">
-                      <Hash size={16} className="text-gray-500" />
-                      <span className="text-gray-700 font-mono text-xs bg-white px-2 py-1 rounded">
-                        {transaction.UTR}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <DollarSign size={16} className="text-gray-500" />
-                      <span className="text-xl font-bold text-gray-800">
-                        {formatAmount(transaction.amount)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons for Pending Transactions */}
-                  {transaction.status === "pending" && (
-                    <div className="space-y-3 pt-4 border-t border-amber-200">
-                      <input
-                        type="number"
-                        placeholder="Enter approved amount"
-                        className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
-                        value={amountInputs[transaction._id] || ""}
-                        onChange={(e) =>
-                          setAmountInputs((prev) => ({
-                            ...prev,
-                            [transaction._id]: e.target.value,
-                          }))
-                        }
-                      />
-                      <div className="flex gap-2">
+                    {/* Action Buttons for Pending Deposits */}
+                    {deposit.status === "pending" && (
+                      <div className="flex gap-2 pt-4 border-t border-amber-200">
                         <button
-                          onClick={() =>
-                            handleApprove(transaction.userId, transaction._id)
-                          }
+                          onClick={() => handleApprove(deposit._id)}
                           className="flex-1 bg-green-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium flex items-center justify-center gap-1"
                         >
                           <CheckCircle size={16} />
                           Approve
                         </button>
                         <button
-                          onClick={()=>handleReject(transaction._id)}
+                          onClick={() => handleReject(deposit._id)}
                           className="flex-1 bg-red-500 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium flex items-center justify-center gap-1"
                         >
                           <XCircle size={16} />
                           Reject
                         </button>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-200 px-6 py-4 mt-8">
+                <div className="text-sm text-gray-700">
+                  Showing page {pagination.currentPage} of {pagination.totalPages}
+                  <span className="ml-2 text-gray-500">
+                    ({pagination.totalDeposits} total {currentStatus} deposits)
+                  </span>
                 </div>
-              );
-            })}
-          </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handlePageChange(pagination.currentPage - 1)}
+                    disabled={!pagination.hasPrevPage}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                      pagination.hasPrevPage
+                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    Previous
+                  </button>
+                  
+                  {/* Page numbers */}
+                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                    const pageNum = Math.max(1, pagination.currentPage - 2) + i;
+                    if (pageNum <= pagination.totalPages) {
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium ${
+                            pageNum === pagination.currentPage
+                              ? 'bg-indigo-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    }
+                    return null;
+                  })}
+                  
+                  <button
+                    onClick={() => handlePageChange(pagination.currentPage + 1)}
+                    disabled={!pagination.hasNextPage}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                      pagination.hasNextPage
+                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-16">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 max-w-md mx-auto">
@@ -339,12 +389,10 @@ const Transaction = () => {
                 <Eye size={48} className="mx-auto" />
               </div>
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                No transactions found
+                No {currentStatus} deposits found
               </h3>
               <p className="text-gray-500">
-                {filter === "all"
-                  ? "There are no transactions to display."
-                  : `No ${filter} transactions found.`}
+                There are no {currentStatus} deposits to display at the moment.
               </p>
             </div>
           </div>

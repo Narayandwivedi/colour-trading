@@ -125,6 +125,7 @@ router.get("/allbets", async (req, res) => {
   }
 });
 
+// DEPRECATED - Use /api/transaction/withdrawals instead
 router.get("/allwithdraw", async (req, res) => {
   try {
     const allwithdraw = await Withdraw.find().sort({ createdAt: -1 }).lean();
@@ -165,7 +166,7 @@ router.put("/approve-withdraw", async (req, res) => {
         .json({ success: false, message: "Invalid withdrawId" });
     }
 
-    const getWithdraw = await Withdraw.findById(withdrawId);
+    const getWithdraw = await Withdraw.findById(withdrawId).populate('userId', 'fullName email mobile');
     if (!getWithdraw) {
       return res
         .status(404)
@@ -175,7 +176,7 @@ router.put("/approve-withdraw", async (req, res) => {
     if (getWithdraw.status === "success" || getWithdraw.status === "rejected") {
       return res.status(400).json({
         success: false,
-        message: "Withdraw request already approved or rejected",
+        message: "Withdraw request already processed",
       });
     }
 
@@ -191,61 +192,97 @@ router.put("/approve-withdraw", async (req, res) => {
 
     return res.json({
       success: true,
-      message: "Withdraw approved successfully",
+      message: "Withdrawal approved successfully",
+      data: {
+        withdrawal: getWithdraw,
+        user: {
+          fullName: getUser.fullName,
+          email: getUser.email,
+          mobile: getUser.mobile
+        }
+      }
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error approving withdrawal:", err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
 router.put("/reject-withdraw", async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
   try {
     const { withdrawId } = req.body;
 
     if (!withdrawId) {
+      await session.abortTransaction();
       return res
         .status(400)
         .json({ success: false, message: "Missing withdrawId" });
     }
 
     if (!mongoose.isValidObjectId(withdrawId)) {
+      await session.abortTransaction();
       return res
         .status(400)
         .json({ success: false, message: "Invalid withdrawId" });
     }
 
-    const getWithdraw = await Withdraw.findById(withdrawId);
+    const getWithdraw = await Withdraw.findById(withdrawId).populate('userId', 'fullName email mobile').session(session);
     if (!getWithdraw) {
+      await session.abortTransaction();
       return res
         .status(404)
         .json({ success: false, message: "Withdraw request not found" });
     }
 
     if (getWithdraw.status === "success" || getWithdraw.status === "rejected") {
+      await session.abortTransaction();
       return res.status(400).json({
         success: false,
-        message: "Withdraw request already approved or rejected",
+        message: "Withdraw request already processed",
       });
     }
 
-    const getUser = await User.findById(getWithdraw.userId);
+    const getUser = await User.findById(getWithdraw.userId).session(session);
     if (!getUser) {
+      await session.abortTransaction();
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
     }
 
+    // Restore user balance when rejecting withdrawal
+    getUser.balance += getWithdraw.amount;
+    getUser.withdrawableBalance += getWithdraw.amount;
+    await getUser.save({ session });
+
     getWithdraw.status = "rejected";
-    await getWithdraw.save();
+    await getWithdraw.save({ session });
+
+    await session.commitTransaction();
 
     return res.json({
       success: true,
-      message: "Withdraw rejected successfully",
+      message: "Withdrawal rejected successfully and balance restored",
+      data: {
+        withdrawal: getWithdraw,
+        user: {
+          fullName: getUser.fullName,
+          email: getUser.email,
+          mobile: getUser.mobile,
+          newBalance: getUser.balance,
+          newWithdrawableBalance: getUser.withdrawableBalance
+        }
+      }
     });
   } catch (err) {
-    console.error(err);
+    await session.abortTransaction();
+    console.error("Error rejecting withdrawal:", err);
     return res.status(500).json({ success: false, message: "Server error" });
+  } finally {
+    session.endSession();
   }
 });
 

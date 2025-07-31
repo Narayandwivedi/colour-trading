@@ -7,7 +7,7 @@ const betSchema = new mongoose.Schema({
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "userModel"
+        ref: "user"
     },
     betColour: {
         type: String,  // Fixed: was "String" 

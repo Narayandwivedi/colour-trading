@@ -12,6 +12,18 @@ const ManageUser = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 9;
+  
+  // Edit user modal states
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    fullName: '',
+    email: '',
+    balance: '',
+    withdrawableBalance: '',
+    password: ''
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
 
   async function fetchAllUsers() {
     try {
@@ -41,6 +53,7 @@ const ManageUser = () => {
   const filteredUsers = users.filter(user => {
     const matchesSearch = (user.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (user.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (user.mobile || '').toString().includes(searchTerm) ||
                          (user.referralCode || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesFilter = filterStatus === 'all' ||
@@ -75,10 +88,18 @@ const ManageUser = () => {
   };
 
   const handleEdit = (userId) => {
-    // Implement edit user functionality
-    console.log('Edit user:', userId);
-    // You can add navigation to edit page or open edit modal
-    // Example: navigate(`/admin/users/edit/${userId}`);
+    const user = users.find(u => u._id === userId);
+    if (user) {
+      setEditingUser(user);
+      setEditFormData({
+        fullName: user.fullName || '',
+        email: user.email || '',
+        balance: user.balance?.toString() || '0',
+        withdrawableBalance: user.withdrawableBalance?.toString() || '0',
+        password: ''
+      });
+      setIsEditModalOpen(true);
+    }
   };
 
   const handleDelete = async (userId) => {
@@ -96,6 +117,95 @@ const ManageUser = () => {
         toast.error(err.response?.data?.message || 'Failed to delete user');
       }
     }
+  };
+
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSaveUser = async () => {
+    if (!editingUser) return;
+
+    try {
+      setIsUpdating(true);
+      
+      // Validate form data
+      if (!editFormData.fullName.trim()) {
+        toast.error('Full name is required');
+        return;
+      }
+      
+      if (!editFormData.email.trim()) {
+        toast.error('Email is required');
+        return;
+      }
+      
+      const balanceNum = parseFloat(editFormData.balance);
+      const withdrawableBalanceNum = parseFloat(editFormData.withdrawableBalance);
+      
+      if (isNaN(balanceNum) || balanceNum < 0) {
+        toast.error('Balance must be a valid non-negative number');
+        return;
+      }
+      
+      if (isNaN(withdrawableBalanceNum) || withdrawableBalanceNum < 0) {
+        toast.error('Withdrawable balance must be a valid non-negative number');
+        return;
+      }
+
+      // Validate password if provided
+      if (editFormData.password && editFormData.password.length < 6) {
+        toast.error('Password must be at least 6 characters long');
+        return;
+      }
+
+      const requestData = {
+        fullName: editFormData.fullName.trim(),
+        email: editFormData.email.trim(),
+        balance: balanceNum,
+        withdrawableBalance: withdrawableBalanceNum
+      };
+
+      // Only include password if it's not empty
+      if (editFormData.password.trim()) {
+        requestData.password = editFormData.password.trim();
+      }
+
+      const { data } = await axios.put(`${BACKEND_URL}/api/users/edit/${editingUser._id}`, requestData);
+
+      if (data.success) {
+        toast.success(data.message || 'User updated successfully');
+        if (data.changes && data.changes.length > 0) {
+          console.log('Changes made:', data.changes);
+        }
+        setIsEditModalOpen(false);
+        setEditingUser(null);
+        fetchAllUsers(); // Refresh the user list
+      } else {
+        toast.error(data.message || 'Failed to update user');
+      }
+    } catch (err) {
+      console.error('Error updating user:', err);
+      toast.error(err.response?.data?.message || 'Failed to update user');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingUser(null);
+    setEditFormData({
+      fullName: '',
+      email: '',
+      balance: '',
+      withdrawableBalance: '',
+      password: ''
+    });
   };
 
   if (loading) {
@@ -174,7 +284,7 @@ const ManageUser = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
                 <input
                   type="text"
-                  placeholder="Search by name, email, or referral code..."
+                  placeholder="Search by name, email, mobile, or referral code..."
                   className="w-full pl-8 sm:pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -216,6 +326,7 @@ const ManageUser = () => {
                   <div className="ml-2 sm:ml-3">
                     <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">{user.fullName || 'Unknown User'}</h3>
                     <p className="text-xs text-gray-500 truncate">{user.email || 'No email'}</p>
+                    <p className="text-xs text-gray-400 truncate">📱 {user.mobile || 'No mobile'}</p>
                   </div>
                 </div>
                 <div className="flex space-x-1">
@@ -391,6 +502,156 @@ const ManageUser = () => {
           </div>
         )}
       </div>
+
+      {/* Edit User Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-4 border-b">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Edit User
+                </h3>
+                <button
+                  onClick={handleCloseEditModal}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="mt-4 space-y-4">
+                {/* User ID Display */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    User ID
+                  </label>
+                  <div className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-md font-mono">
+                    {editingUser?._id}
+                  </div>
+                </div>
+
+                {/* Full Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={editFormData.fullName}
+                    onChange={handleEditFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter full name"
+                    required
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={editFormData.email}
+                    onChange={handleEditFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter email address"
+                    required
+                  />
+                </div>
+
+                {/* Balance */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Balance (₹)
+                  </label>
+                  <input
+                    type="number"
+                    name="balance"
+                    value={editFormData.balance}
+                    onChange={handleEditFormChange}
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter balance amount"
+                  />
+                </div>
+
+                {/* Withdrawable Balance */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Withdrawable Balance (₹)
+                  </label>
+                  <input
+                    type="number"
+                    name="withdrawableBalance"
+                    value={editFormData.withdrawableBalance}
+                    onChange={handleEditFormChange}
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter withdrawable balance"
+                  />
+                </div>
+
+                {/* New Password */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    New Password <span className="text-gray-500 text-xs">(Leave blank to keep current)</span>
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={editFormData.password}
+                    onChange={handleEditFormChange}
+                    minLength="6"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter new password (minimum 6 characters)"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Only fill this field if you want to reset the user's password
+                  </p>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end pt-4 border-t mt-6 space-x-3">
+                <button
+                  onClick={handleCloseEditModal}
+                  disabled={isUpdating}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveUser}
+                  disabled={isUpdating}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center"
+                >
+                  {isUpdating ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

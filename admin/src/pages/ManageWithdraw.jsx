@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { CheckCircle, Clock, XCircle, User, Calendar, Hash, DollarSign, Eye, CreditCard, ArrowUpCircle } from "lucide-react";
+import { CheckCircle, Clock, XCircle, User, Calendar, Hash, DollarSign, Eye, CreditCard, ArrowUpCircle, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 
 const ManageWithdraw = () => {
-  const [allWithdraw, setAllWithdraw] = useState(null);
+  const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all");
+  const [currentStatus, setCurrentStatus] = useState("pending"); // Default to pending
+  const [processingIds, setProcessingIds] = useState(new Set()); // Track processing withdrawals
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalWithdrawals: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit: 20
+  });
 
   const {BACKEND_URL} = useContext(AppContext);
 
@@ -76,6 +85,8 @@ const ManageWithdraw = () => {
 
   const handleApprove = async (withdrawId) => {
     try {
+      // Add to processing set
+      setProcessingIds(prev => new Set(prev).add(withdrawId));
       
       const { data } = await axios.put(
         `${BACKEND_URL}/api/admin/approve-withdraw`,
@@ -87,17 +98,28 @@ const ManageWithdraw = () => {
       if (data.success) {
         toast.success(data.message || "Withdrawal approved successfully");
         // Refresh withdrawals after approval
-        console.log(data);
-        
-        fetchWithdraw();
+        await fetchWithdrawals(currentStatus, pagination.currentPage);
+      } else {
+        toast.error(data.message || "Failed to approve withdrawal");
       }
     } catch (err) {
+      console.error("Error approving withdrawal:", err);
       toast.error(err.response?.data?.message || "Failed to approve withdrawal");
+    } finally {
+      // Remove from processing set
+      setProcessingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(withdrawId);
+        return newSet;
+      });
     }
   };
 
   const handleReject = async (withdrawId) => {
     try {
+      // Add to processing set
+      setProcessingIds(prev => new Set(prev).add(withdrawId));
+      
       const { data } = await axios.put(
         `${BACKEND_URL}/api/admin/reject-withdraw`,
         {
@@ -108,53 +130,63 @@ const ManageWithdraw = () => {
       if (data.success) {
         toast.success(data.message || "Withdrawal rejected successfully");
         // Refresh withdrawals after rejection
-        fetchWithdraw();
+        await fetchWithdrawals(currentStatus, pagination.currentPage);
+      } else {
+        toast.error(data.message || "Failed to reject withdrawal");
       }
     } catch (err) {
+      console.error("Error rejecting withdrawal:", err);
       toast.error(err.response?.data?.message || "Failed to reject withdrawal");
+    } finally {
+      // Remove from processing set
+      setProcessingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(withdrawId);
+        return newSet;
+      });
     }
   };
 
-  const fetchWithdraw = async () => {
+  const fetchWithdrawals = async (status = currentStatus, page = 1) => {
     try {
-      const { data } = await axios.get(`${BACKEND_URL}/api/admin/allwithdraw`);
+      setLoading(true);
+      const { data } = await axios.get(
+        `${BACKEND_URL}/api/transaction/withdrawals?status=${status}&page=${page}&limit=${pagination.limit}`
+      );
+      
       if (data.success) {
-        setAllWithdraw(data.allwithdraw);
-        console.log("Withdrawals fetched successfully");
+        setWithdrawals(data.data.withdrawals);
+        setPagination(data.data.pagination);
+      } else {
+        toast.error(data.message || "Failed to fetch withdrawals");
+        setWithdrawals([]);
       }
     } catch (err) {
-      toast.error("Unable to fetch withdrawals");
-      setAllWithdraw([]);
+      console.error("Error fetching withdrawals:", err);
+      toast.error(err.response?.data?.message || "Unable to fetch withdrawals");
+      setWithdrawals([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleStatusChange = (newStatus) => {
+    setCurrentStatus(newStatus);
+    fetchWithdrawals(newStatus, 1);
+  };
+
+  const handlePageChange = (newPage) => {
+    fetchWithdrawals(currentStatus, newPage);
+  };
+
   useEffect(() => {
-    fetchWithdraw();
+    fetchWithdrawals();
   }, []);
 
-  const filteredWithdrawals = allWithdraw ? 
-    allWithdraw.filter(withdrawal => 
-      filter === "all" || withdrawal.status === filter
-    ) : [];
-
-  const getStatusCounts = () => {
-    if (!allWithdraw) return { all: 0, success: 0, pending: 0, rejected: 0 };
-    
-    return allWithdraw.reduce((acc, withdrawal) => {
-      acc.all++;
-      acc[withdrawal.status] = (acc[withdrawal.status] || 0) + 1;
-      return acc;
-    }, { all: 0, success: 0, pending: 0, rejected: 0 });
-  };
-
   const getTotalAmount = () => {
-    if (!filteredWithdrawals.length) return 0;
-    return filteredWithdrawals.reduce((total, withdrawal) => total + withdrawal.amount, 0);
+    if (!withdrawals.length) return 0;
+    return withdrawals.reduce((total, withdrawal) => total + withdrawal.amount, 0);
   };
-
-  const statusCounts = getStatusCounts();
 
   if (loading) {
     return (
@@ -181,24 +213,30 @@ const ManageWithdraw = () => {
 
         {/* Stats Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-600 mb-1">
-                {filteredWithdrawals.length}
+                {withdrawals.length}
               </div>
-              <div className="text-gray-600 text-sm">Total Requests</div>
+              <div className="text-gray-600 text-sm">Current Page</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-1">
+                {pagination.totalWithdrawals}
+              </div>
+              <div className="text-gray-600 text-sm">Total {currentStatus}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600 mb-1">
                 {formatAmount(getTotalAmount())}
               </div>
-              <div className="text-gray-600 text-sm">Total Amount</div>
+              <div className="text-gray-600 text-sm">Page Amount</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-amber-600 mb-1">
-                {statusCounts.pending || 0}
+                {pagination.currentPage}/{pagination.totalPages}
               </div>
-              <div className="text-gray-600 text-sm">Pending Approval</div>
+              <div className="text-gray-600 text-sm">Page Info</div>
             </div>
           </div>
         </div>
@@ -207,55 +245,59 @@ const ManageWithdraw = () => {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex flex-wrap gap-4 justify-center">
             {[
-              { key: "all", label: "All Withdrawals", count: statusCounts.all },
-              { key: "success", label: "Approved", count: statusCounts.success },
-              { key: "pending", label: "Pending", count: statusCounts.pending },
-              { key: "rejected", label: "Rejected", count: statusCounts.rejected }
-            ].map(({ key, label, count }) => (
+              { key: "pending", label: "Pending", icon: Clock },
+              { key: "success", label: "Approved", icon: CheckCircle },
+              { key: "rejected", label: "Rejected", icon: XCircle }
+            ].map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
-                onClick={() => setFilter(key)}
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-                  filter === key
+                onClick={() => handleStatusChange(key)}
+                className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
+                  currentStatus === key
                     ? "bg-purple-600 text-white shadow-lg shadow-purple-200"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
+                <Icon size={16} />
                 {label}
-                <span className="ml-2 px-2 py-1 text-xs rounded-full bg-white bg-opacity-20">
-                  {count}
-                </span>
               </button>
             ))}
+            <button
+              onClick={() => fetchWithdrawals(currentStatus, pagination.currentPage)}
+              className="px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200"
+            >
+              <RefreshCw size={16} />
+              Refresh
+            </button>
           </div>
         </div>
 
         {/* Withdrawals Grid */}
-        {filteredWithdrawals.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredWithdrawals.map((withdrawal) => {
+        {withdrawals.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+              {withdrawals.map((withdrawal) => {
               const statusConfig = getStatusConfig(withdrawal.status);
               const StatusIcon = statusConfig.icon;
 
               return (
                 <div
                   key={withdrawal._id}
-                  className={`${statusConfig.bgColor} ${statusConfig.borderColor} ${statusConfig.shadowColor} border-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
+                  className={`${statusConfig.bgColor} ${statusConfig.borderColor} ${statusConfig.shadowColor} border-2 rounded-xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 min-h-[280px] flex flex-col max-w-sm`}
                 >
                   {/* Status Badge */}
-                  <div className="flex items-center justify-between mb-4">
-                    <span className={`${statusConfig.badgeColor} px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex items-center gap-1`}>
-                      <StatusIcon size={14} />
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`${statusConfig.badgeColor} px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex items-center gap-1`}>
+                      <StatusIcon size={12} />
                       {withdrawal.status}
                     </span>
-                    <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded-lg flex items-center gap-1">
-                      <CreditCard size={12} />
-                      {withdrawal.paymentMethod?.toUpperCase() || 'UPI'}
+                    <div className="text-xs text-gray-500 bg-white px-2 py-0.5 rounded">
+                      {withdrawal._id.slice(-6)}
                     </div>
                   </div>
 
                   {/* Withdrawal Details */}
-                  <div className="space-y-3 mb-4">
+                  <div className="space-y-3 mb-4 flex-grow">
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar size={16} className="text-gray-500" />
                       <span className="text-gray-700">{formatDate(withdrawal.createdAt)}</span>
@@ -263,21 +305,83 @@ const ManageWithdraw = () => {
 
                     <div className="flex items-center gap-2 text-sm">
                       <User size={16} className="text-gray-500" />
-                      <span className="text-gray-700 font-mono text-xs bg-white px-2 py-1 rounded">
-                        {withdrawal.userId}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-gray-700 font-medium">
+                          {withdrawal.userId?.fullName || 'N/A'}
+                        </span>
+                        <span className="text-gray-500 text-xs">
+                          {withdrawal.userId?.email || withdrawal.userId?.mobile || 'No contact info'}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm">
-                      <Hash size={16} className="text-gray-500" />
-                      <span className="text-gray-700 font-mono text-xs bg-white px-2 py-1 rounded">
-                        {withdrawal._id.slice(-8)}
-                      </span>
+                    {/* Payment Details */}
+                    <div className="flex items-start gap-2 text-sm">
+                      <CreditCard size={16} className="text-gray-500 mt-0.5" />
+                      <div className="flex flex-col w-full">
+                        {withdrawal.paymentMethod === 'upi' && withdrawal.userId?.upiId?.upi ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-gray-700 font-medium">UPI:</span>
+                              <span className="text-blue-600 font-mono text-xs bg-blue-50 px-2 py-1 rounded">
+                                {withdrawal.userId.upiId.upi}
+                              </span>
+                            </div>
+                            {withdrawal.userId.upiId.accountHolderName && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-500 text-xs">Holder:</span>
+                                <span className="text-gray-700 text-xs font-medium">
+                                  {withdrawal.userId.upiId.accountHolderName}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ) : withdrawal.paymentMethod === 'bank' && withdrawal.userId?.bankAccount ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-gray-700 font-medium">Bank:</span>
+                              <span className="text-green-600 text-xs bg-green-50 px-2 py-1 rounded">
+                                {withdrawal.userId.bankAccount.bankName || 'N/A'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs">
+                              <div className="flex items-center gap-1">
+                                <span className="text-gray-500">A/C:</span>
+                                <span className="text-gray-700 font-mono">
+                                  {withdrawal.userId.bankAccount.accountNumber || 'N/A'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="text-gray-500">IFSC:</span>
+                                <span className="text-gray-700 font-mono">
+                                  {withdrawal.userId.bankAccount.ifscCode || 'N/A'}
+                                </span>
+                              </div>
+                            </div>
+                            {withdrawal.userId.bankAccount.accountHolderName && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-500 text-xs">Holder:</span>
+                                <span className="text-gray-700 text-xs font-medium">
+                                  {withdrawal.userId.bankAccount.accountHolderName}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-700 font-medium">
+                            {withdrawal.paymentMethod?.toUpperCase() || 'UPI'} - No details available
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <DollarSign size={16} className="text-gray-500" />
-                      <span className="text-xl font-bold text-gray-800">
+
+                    <div className="flex items-center justify-between bg-white bg-opacity-50 rounded-lg p-2 mt-2">
+                      <div className="flex items-center gap-1.5">
+                        <DollarSign size={16} className="text-gray-600" />
+                        <span className="text-gray-600 font-medium text-sm">Amount</span>
+                      </div>
+                      <span className="text-lg font-bold text-gray-800">
                         {formatAmount(withdrawal.amount)}
                       </span>
                     </div>
@@ -285,29 +389,104 @@ const ManageWithdraw = () => {
 
                   {/* Action Buttons for Pending Withdrawals */}
                   {withdrawal.status === "pending" && (
-                    <div className="space-y-3 pt-4 border-t border-amber-200">
-                      <div className="flex gap-2">
+                    <div className="pt-3 border-t border-amber-200 mt-auto">
+                      <div className="flex gap-1.5">
                         <button
                           onClick={() => handleApprove(withdrawal._id)}
-                          className="flex-1 bg-green-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium flex items-center justify-center gap-1"
+                          disabled={processingIds.has(withdrawal._id)}
+                          className={`flex-1 text-white text-xs px-2 py-1.5 rounded-md transition-colors duration-200 font-medium flex items-center justify-center gap-1 ${
+                            processingIds.has(withdrawal._id)
+                              ? "bg-green-400 cursor-not-allowed"
+                              : "bg-green-600 hover:bg-green-700"
+                          }`}
                         >
-                          <CheckCircle size={16} />
-                          Approve
+                          {processingIds.has(withdrawal._id) ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                              <span className="hidden sm:inline">Processing...</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle size={12} />
+                              <span className="hidden sm:inline">Approve</span>
+                              <span className="sm:hidden">✓</span>
+                            </>
+                          )}
                         </button>
                         <button
                           onClick={() => handleReject(withdrawal._id)}
-                          className="flex-1 bg-red-500 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium flex items-center justify-center gap-1"
+                          disabled={processingIds.has(withdrawal._id)}
+                          className={`flex-1 text-white text-xs px-2 py-1.5 rounded-md transition-colors duration-200 font-medium flex items-center justify-center gap-1 ${
+                            processingIds.has(withdrawal._id)
+                              ? "bg-red-400 cursor-not-allowed"
+                              : "bg-red-500 hover:bg-red-600"
+                          }`}
                         >
-                          <XCircle size={16} />
-                          Reject
+                          {processingIds.has(withdrawal._id) ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                              <span className="hidden sm:inline">Processing...</span>
+                            </>
+                          ) : (
+                            <>
+                              <XCircle size={12} />
+                              <span className="hidden sm:inline">Reject</span>
+                              <span className="sm:hidden">✗</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
                   )}
                 </div>
               );
-            })}
-          </div>
+              })}
+            </div>
+
+            {/* Pagination Controls */}
+            {pagination.totalPages > 1 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mt-8">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    Showing page {pagination.currentPage} of {pagination.totalPages} 
+                    ({pagination.totalWithdrawals} total {currentStatus} withdrawals)
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage - 1)}
+                      disabled={!pagination.hasPrevPage}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                        pagination.hasPrevPage
+                          ? "bg-purple-600 text-white hover:bg-purple-700"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                    >
+                      <ChevronLeft size={16} />
+                      Previous
+                    </button>
+                    
+                    <span className="px-4 py-2 bg-gray-100 rounded-lg text-sm font-medium">
+                      {pagination.currentPage}
+                    </span>
+                    
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage + 1)}
+                      disabled={!pagination.hasNextPage}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                        pagination.hasNextPage
+                          ? "bg-purple-600 text-white hover:bg-purple-700"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                    >
+                      Next
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-16">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 max-w-md mx-auto">
@@ -316,9 +495,7 @@ const ManageWithdraw = () => {
               </div>
               <h3 className="text-xl font-semibold text-gray-700 mb-2">No withdrawals found</h3>
               <p className="text-gray-500">
-                {filter === "all" 
-                  ? "There are no withdrawal requests to display." 
-                  : `No ${filter} withdrawal requests found.`}
+                {`No ${currentStatus} withdrawal requests found.`}
               </p>
             </div>
           </div>

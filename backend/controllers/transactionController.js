@@ -38,12 +38,132 @@ async function createTransaction(req, res) {
   }
 }
 
-async function rejectTransaction(req, res) {
-  const { transactionId } = req.body;
-  console.log(transactionId);
-  return res.json({ success: true });
+async function approveTransaction(req, res) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
+  try {
+    const { transactionId } = req.body;
+    
+    if (!transactionId) {
+      return res.status(400).json({
+        success: false,
+        message: "Transaction ID is required"
+      });
+    }
+    
+    if (!mongoose.isValidObjectId(transactionId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid transaction ID"
+      });
+    }
+    
+    // Find transaction with session
+    const transaction = await transactionModel.findById(transactionId).session(session);
+    if (!transaction) {
+      await session.abortTransaction();
+      return res.status(404).json({
+        success: false,
+        message: "Transaction not found"
+      });
+    }
+    
+    if (transaction.status !== 'pending') {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: "Transaction already processed"
+      });
+    }
+    
+    // Find user with session
+    const user = await userModel.findById(transaction.userId).session(session);
+    if (!user) {
+      await session.abortTransaction();
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+    
+    // Update transaction status
+    transaction.status = 'success';
+    await transaction.save({ session });
+    
+    // Update user balance
+    user.balance += transaction.amount;
+    user.withdrawableBalance += transaction.amount;
+    await user.save({ session });
+    
+    await session.commitTransaction();
+    
+    return res.json({
+      success: true,
+      message: "Transaction approved successfully"
+    });
+    
+  } catch (err) {
+    await session.abortTransaction();
+    return res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  } finally {
+    session.endSession();
+  }
 }
 
+async function rejectTransaction(req, res) {
+  try {
+    const { transactionId } = req.body;
+    
+    if (!transactionId) {
+      return res.status(400).json({
+        success: false,
+        message: "Transaction ID is required"
+      });
+    }
+    
+    if (!mongoose.isValidObjectId(transactionId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid transaction ID"
+      });
+    }
+    
+    const transaction = await transactionModel.findById(transactionId);
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: "Transaction not found"
+      });
+    }
+    
+    if (transaction.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: "Transaction already processed"
+      });
+    }
+    
+    transaction.status = 'rejected';
+    await transaction.save();
+    
+    return res.json({
+      success: true,
+      message: "Transaction rejected successfully"
+    });
+    
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+}
+
+// DEPRECATED - Use getDepositsByStatus instead
 async function getAllTransaction(req, res) {
   try {
     const allTransaction = await transactionModel
@@ -58,6 +178,82 @@ async function getAllTransaction(req, res) {
     return res.json({ success: true, allTransaction });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+// Get deposits by status with pagination
+async function getDepositsByStatus(req, res) {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    
+    // Validate status
+    const validStatuses = ['pending', 'success', 'rejected'];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid status required: pending, success, or rejected'
+      });
+    }
+    
+    // Convert page and limit to numbers
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    
+    // Validate pagination parameters
+    if (pageNum < 1 || limitNum < 1 || limitNum > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid pagination parameters. Page must be >= 1, limit must be between 1-100"
+      });
+    }
+    
+    // Calculate skip value for pagination
+    const skip = (pageNum - 1) * limitNum;
+    
+    // Build filter - only get deposits
+    const filter = {
+      type: 'deposit',
+      status: status
+    };
+    
+    // Get total count for pagination info
+    const totalDeposits = await transactionModel.countDocuments(filter);
+    
+    // Fetch deposits with pagination and populate user info
+    const deposits = await transactionModel
+      .find(filter)
+      .populate('userId', 'fullName email mobile')
+      .lean()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+    
+    // Calculate pagination info
+    const totalPages = Math.ceil(totalDeposits / limitNum);
+    const hasNextPage = pageNum < totalPages;
+    const hasPrevPage = pageNum > 1;
+    
+    return res.json({
+      success: true,
+      data: {
+        deposits,
+        pagination: {
+          currentPage: pageNum,
+          totalPages,
+          totalDeposits,
+          hasNextPage,
+          hasPrevPage,
+          limit: limitNum,
+          status
+        }
+      }
+    });
+    
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 }
 
@@ -165,10 +361,16 @@ async function createWithdrawal(req, res) {
     await session.commitTransaction();
     session.endSession();
 
+    // Populate the created withdrawal with user details
+    const populatedWithdrawal = await withdraw
+      .findById(newWithdrawal[0]._id)
+      .populate('userId', 'fullName email mobile upiId bankAccount')
+      .lean();
+
     return res.status(200).json({
       success: true,
       message: "withdrawal request successful",
-      withdrawalId: newWithdrawal[0]._id,
+      withdrawal: populatedWithdrawal,
     });
   } catch (err) {
     // If any error occurs, abort the transaction
@@ -178,6 +380,7 @@ async function createWithdrawal(req, res) {
   }
 }
 
+// DEPRECATED - Use getWithdrawalsByStatus instead
 async function getAllWithDrawal(req, res) {
   try {
     const withdrawals = await withdraw
@@ -191,6 +394,81 @@ async function getAllWithDrawal(req, res) {
     return res.json({ success: true, withdrawals });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+// Get withdrawals by status with pagination
+async function getWithdrawalsByStatus(req, res) {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    
+    // Validate status
+    const validStatuses = ['pending', 'success', 'rejected'];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid status required: pending, success, or rejected'
+      });
+    }
+    
+    // Convert page and limit to numbers
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    
+    // Validate pagination parameters
+    if (pageNum < 1 || limitNum < 1 || limitNum > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid pagination parameters. Page must be >= 1, limit must be between 1-100"
+      });
+    }
+    
+    // Calculate skip value for pagination
+    const skip = (pageNum - 1) * limitNum;
+    
+    // Build filter
+    const filter = {
+      status: status
+    };
+    
+    // Get total count for pagination info
+    const totalWithdrawals = await withdraw.countDocuments(filter);
+    
+    // Fetch withdrawals with pagination and populate user info
+    const withdrawals = await withdraw
+      .find(filter)
+      .populate('userId', 'fullName email mobile upiId bankAccount')
+      .lean()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+    
+    // Calculate pagination info
+    const totalPages = Math.ceil(totalWithdrawals / limitNum);
+    const hasNextPage = pageNum < totalPages;
+    const hasPrevPage = pageNum > 1;
+    
+    return res.json({
+      success: true,
+      data: {
+        withdrawals,
+        pagination: {
+          currentPage: pageNum,
+          totalPages,
+          totalWithdrawals,
+          hasNextPage,
+          hasPrevPage,
+          limit: limitNum,
+          status
+        }
+      }
+    });
+    
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 }
 
@@ -292,11 +570,14 @@ const sendDepositAlert = async () => {
 module.exports = {
   createTransaction,
   getAllTransaction,
+  getDepositsByStatus,
+  approveTransaction,
+  rejectTransaction,
   createWithdrawal,
   getAllWithDrawal,
+  getWithdrawalsByStatus,
   getWithdrawalHistory,
   getDepositHistory,
-  rejectTransaction,
 };
 
 
