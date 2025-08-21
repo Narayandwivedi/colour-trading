@@ -8,8 +8,9 @@ const chatMessageSchema = new mongoose.Schema({
   },
   message: {
     type: String,
-    required: true,
-    trim: true
+    required: false,
+    trim: true,
+    default: ''
   },
   category: {
     type: String,

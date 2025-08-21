@@ -8,13 +8,13 @@ router.post('/send', auth, async (req, res) => {
   try {
     const { message, category, attachment, attachmentType } = req.body;
     
-    if (!message) {
-      return res.status(400).json({ message: 'Message is required' });
+    if (!message && !attachment) {
+      return res.status(400).json({ message: 'Message or attachment is required' });
     }
 
     const chatMessage = new ChatMessage({
       userId: req.userId,
-      message,
+      message: message || '',
       category: category || 'Deposit Related', // Default to 'Deposit Related' if no category provided
       attachment: attachment || null,
       attachmentType: attachmentType || null
@@ -114,6 +114,24 @@ router.patch('/mark-read/:id', auth, async (req, res) => {
   } catch (error) {
     console.error('Error marking message as read:', error);
     res.status(500).json({ message: 'Failed to mark message as read' });
+  }
+});
+
+// Mark all messages from a user as read (admin)
+router.patch('/mark-user-read/:userId', auth, async (req, res) => {
+  try {
+    const result = await ChatMessage.updateMany(
+      { userId: req.params.userId, isRead: false },
+      { isRead: true }
+    );
+
+    res.json({ 
+      message: 'All user messages marked as read', 
+      modifiedCount: result.modifiedCount 
+    });
+  } catch (error) {
+    console.error('Error marking user messages as read:', error);
+    res.status(500).json({ message: 'Failed to mark user messages as read' });
   }
 });
 

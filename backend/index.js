@@ -17,6 +17,7 @@ const transactionRoute = require("./routes/transactionRoute.js");
 const betRoute = require("./routes/betRoute.js");
 const adminRoute = require("./routes/adminRoute.js");
 const chatRoute = require("./routes/chatRoute.js");
+const uploadRoute = require("./routes/uploadRoute.js");
 
 // import models
 const game = require("./models/game.js");
@@ -39,6 +40,9 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.json());
+
+// Serve static files from upload directory
+app.use('/images', express.static('upload/images'));
 
 
 // Fetch last 30 closed results for a specific gameType
@@ -143,6 +147,7 @@ app.use("/api/transaction", transactionRoute);
 app.use("/api/bet", betRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/chat", chatRoute);
+app.use("/api/upload", uploadRoute);
 
 
 

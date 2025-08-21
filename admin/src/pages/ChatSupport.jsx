@@ -13,21 +13,23 @@ import {
   CheckCircle,
   AlertCircle,
   Mail,
-  Phone
+  Phone,
+  Paperclip,
+  Download
 } from 'lucide-react';
 
 const ChatSupport = () => {
   const { BACKEND_URL } = useContext(AppContext);
-  const [messages, setMessages] = useState([]);
-  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [selectedConversation, setSelectedConversation] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [filters, setFilters] = useState({
     category: '',
     isRead: '',
     search: ''
   });
-  const [unreadCount, setUnreadCount] = useState(0);
   const [stats, setStats] = useState({
     total: 0,
     unread: 0,
@@ -37,10 +39,59 @@ const ChatSupport = () => {
 
   const categories = ['Deposit Related', 'Withdraw', 'KYC', 'Game Related', 'Other'];
 
+  // Group messages by user and calculate stats
+  const groupMessagesByUser = (messages) => {
+    const userGroups = {};
+    
+    messages.forEach(message => {
+      const userId = message.userId?._id;
+      if (!userId) return;
+      
+      if (!userGroups[userId]) {
+        userGroups[userId] = {
+          user: message.userId,
+          messages: [],
+          unreadCount: 0,
+          lastMessageAt: message.createdAt,
+          hasUnreplied: false
+        };
+      }
+      
+      userGroups[userId].messages.push(message);
+      
+      // Count unread messages for this user
+      if (!message.isRead) {
+        userGroups[userId].unreadCount++;
+      }
+      
+      // Check if user has unreplied messages
+      if (!message.adminReply || message.isAutoReply) {
+        userGroups[userId].hasUnreplied = true;
+      }
+      
+      // Update last message time
+      if (new Date(message.createdAt) > new Date(userGroups[userId].lastMessageAt)) {
+        userGroups[userId].lastMessageAt = message.createdAt;
+      }
+    });
+    
+    // Convert to array and sort by last message time
+    return Object.values(userGroups).sort((a, b) => 
+      new Date(b.lastMessageAt) - new Date(a.lastMessageAt)
+    );
+  };
+
   // Fetch messages with filters
-  const fetchMessages = async () => {
+  const fetchMessages = async (silentRefresh = false) => {
+    // Prevent multiple simultaneous fetches
+    if (loading || isRefreshing) return;
+    
     try {
-      setLoading(true);
+      if (!silentRefresh) {
+        setLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
       const params = new URLSearchParams();
       if (filters.category) params.append('category', filters.category);
       if (filters.isRead !== '') params.append('isRead', filters.isRead);
@@ -56,14 +107,29 @@ const ChatSupport = () => {
         // Apply search filter on frontend
         if (filters.search) {
           filteredMessages = filteredMessages.filter(msg => 
-            msg.message.toLowerCase().includes(filters.search.toLowerCase()) ||
+            msg.message?.toLowerCase().includes(filters.search.toLowerCase()) ||
             msg.userId?.fullName?.toLowerCase().includes(filters.search.toLowerCase()) ||
             msg.userId?.email?.toLowerCase().includes(filters.search.toLowerCase())
           );
         }
 
-        setMessages(filteredMessages);
-        setUnreadCount(data.unreadCount);
+        const groupedConversations = groupMessagesByUser(filteredMessages);
+        
+        // Preserve selected conversation if it still exists
+        const currentSelectedId = selectedConversation?.user._id;
+        if (currentSelectedId) {
+          const updatedSelectedConv = groupedConversations.find(conv => conv.user._id === currentSelectedId);
+          if (updatedSelectedConv) {
+            setSelectedConversation(updatedSelectedConv);
+          }
+        }
+        
+        // Only update if data has actually changed to prevent unnecessary re-renders
+        setConversations(prev => {
+          const hasChanged = JSON.stringify(prev.map(c => ({id: c.user._id, unread: c.unreadCount}))) !== 
+                           JSON.stringify(groupedConversations.map(c => ({id: c.user._id, unread: c.unreadCount})));
+          return hasChanged ? groupedConversations : prev;
+        });
         
         // Calculate stats
         const categoryStats = {};
@@ -71,41 +137,86 @@ const ChatSupport = () => {
           categoryStats[msg.category] = (categoryStats[msg.category] || 0) + 1;
         });
         
-        setStats({
-          total: data.messages.length,
+        const newStats = {
+          total: groupedConversations.length,
           unread: data.unreadCount,
           categories: categoryStats
+        };
+        
+        // Only update stats if changed
+        setStats(prev => {
+          return JSON.stringify(prev) !== JSON.stringify(newStats) ? newStats : prev;
         });
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
-      setLoading(false);
+      if (!silentRefresh) {
+        setLoading(false);
+      } else {
+        setIsRefreshing(false);
+      }
     }
   };
 
-  // Mark message as read
-  const markAsRead = async (messageId) => {
+  // Mark all messages from user as read
+  const markConversationAsRead = async (userId) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/chat/mark-read/${messageId}`, {
+      const conversation = conversations.find(conv => conv.user._id === userId);
+      if (!conversation || conversation.unreadCount === 0) return;
+
+      const originalUnreadCount = conversation.unreadCount;
+      
+      // Update UI immediately for better UX
+      const updatedConversations = conversations.map(conv => {
+        if (conv.user._id === userId) {
+          return {
+            ...conv,
+            unreadCount: 0,
+            messages: conv.messages.map(msg => ({
+              ...msg,
+              isRead: true
+            }))
+          };
+        }
+        return conv;
+      });
+      setConversations(updatedConversations);
+
+      // Update selected conversation if it's the current one
+      if (selectedConversation?.user._id === userId) {
+        const updatedSelectedConv = updatedConversations.find(conv => conv.user._id === userId);
+        setSelectedConversation(updatedSelectedConv);
+      }
+
+      // Update stats immediately
+      setStats(prev => ({
+        ...prev,
+        unread: Math.max(0, prev.unread - originalUnreadCount)
+      }));
+
+      // Update backend with single API call
+      await fetch(`${BACKEND_URL}/api/chat/mark-user-read/${userId}`, {
         method: 'PATCH',
         credentials: 'include'
       });
-
-      if (response.ok) {
-        fetchMessages();
-      }
     } catch (error) {
-      console.error('Error marking message as read:', error);
+      console.error('Error marking conversation as read:', error);
+      // Revert UI changes on error
+      fetchMessages(true);
     }
   };
 
-  // Send reply
+  // Send reply to latest message from user
   const sendReply = async () => {
-    if (!replyText.trim() || !selectedMessage) return;
+    if (!replyText.trim() || !selectedConversation) return;
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/chat/reply/${selectedMessage._id}`, {
+      // Get the latest message from this user
+      const latestMessage = selectedConversation.messages
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+
+      const response = await fetch(`${BACKEND_URL}/api/chat/reply/${latestMessage._id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -118,36 +229,46 @@ const ChatSupport = () => {
 
       if (response.ok) {
         setReplyText('');
-        fetchMessages();
-        // Update selected message
-        const updatedMessage = messages.find(m => m._id === selectedMessage._id);
-        if (updatedMessage) {
-          setSelectedMessage({
-            ...updatedMessage,
-            adminReply: replyText,
-            adminRepliedAt: new Date(),
-            hasRealReply: true
-          });
-        }
+        // Use silent refresh to prevent flickering
+        await fetchMessages(true);
+        
+        // Update selected conversation after silent refresh
+        setTimeout(() => {
+          const updatedConversation = conversations.find(c => c.user._id === selectedConversation.user._id);
+          if (updatedConversation) {
+            setSelectedConversation(updatedConversation);
+          }
+        }, 100);
       }
     } catch (error) {
       console.error('Error sending reply:', error);
     }
   };
 
-  // Auto-refresh messages every 10 seconds
+  // Auto-refresh messages every 30 seconds (reduced frequency to minimize flickering)
   useEffect(() => {
     fetchMessages();
-    const interval = setInterval(fetchMessages, 10000);
+    const interval = setInterval(() => {
+      // Only refresh if no conversation is selected and not currently loading/refreshing
+      if (!selectedConversation && !loading && !isRefreshing) {
+        fetchMessages(true); // Use silent refresh for auto-refresh
+      }
+    }, 30000);
     return () => clearInterval(interval);
   }, [filters]);
 
-  // Focus reply input when message is selected
+  // Focus reply input when conversation is selected and auto-mark as read
   useEffect(() => {
-    if (selectedMessage && replyInputRef.current) {
+    if (selectedConversation && replyInputRef.current) {
       replyInputRef.current.focus();
+      
+      // Auto-mark conversation as read when viewing it
+      if (selectedConversation.unreadCount > 0) {
+        // Mark as read immediately when conversation is selected
+        markConversationAsRead(selectedConversation.user._id);
+      }
     }
-  }, [selectedMessage]);
+  }, [selectedConversation?.user._id]);
 
   const formatDate = (date) => {
     return new Date(date).toLocaleString('en-US', {
@@ -160,18 +281,21 @@ const ChatSupport = () => {
     });
   };
 
-  const getStatusColor = (message) => {
-    if (message.hasRealReply) return 'text-green-600 bg-green-100';
-    if (message.isAutoReply) return 'text-yellow-600 bg-yellow-100';
-    if (message.isRead) return 'text-blue-600 bg-blue-100';
-    return 'text-red-600 bg-red-100';
-  };
-
-  const getStatusText = (message) => {
-    if (message.hasRealReply) return 'Replied';
-    if (message.isAutoReply) return 'Auto-Reply';
-    if (message.isRead) return 'Read';
-    return 'New';
+  const getLastMessagePreview = (conversation) => {
+    const lastMessage = conversation.messages
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+    
+    if (!lastMessage) return '';
+    
+    if (lastMessage.message) {
+      return lastMessage.message.length > 50 
+        ? lastMessage.message.substring(0, 50) + '...'
+        : lastMessage.message;
+    } else if (lastMessage.attachment) {
+      return lastMessage.attachmentType === 'image' ? '📷 Image' : '📎 File';
+    }
+    
+    return '[No content]';
   };
 
   return (
@@ -181,28 +305,28 @@ const ChatSupport = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-xl">
             <div className="text-2xl font-bold">{stats.total}</div>
-            <div className="text-sm opacity-90">Total Messages</div>
+            <div className="text-sm opacity-90">Total Users</div>
           </div>
           <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-xl">
             <div className="text-2xl font-bold">{stats.unread}</div>
-            <div className="text-sm opacity-90">Unread</div>
+            <div className="text-sm opacity-90">Unread Messages</div>
           </div>
           <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-xl">
             <div className="text-2xl font-bold">
-              {messages.filter(m => m.hasRealReply).length}
+              {conversations.filter(c => c.messages.some(m => m.hasRealReply)).length}
             </div>
-            <div className="text-sm opacity-90">Replied</div>
+            <div className="text-sm opacity-90">Replied Users</div>
           </div>
           <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-4 rounded-xl">
             <div className="text-2xl font-bold">
-              {messages.filter(m => m.isAutoReply && !m.hasRealReply).length}
+              {conversations.filter(c => c.hasUnreplied).length}
             </div>
-            <div className="text-sm opacity-90">Auto-Reply</div>
+            <div className="text-sm opacity-90">Need Reply</div>
           </div>
         </div>
       </div>
 
-      {/* Messages List */}
+      {/* User Conversations List */}
       <div className="lg:w-1/2 flex flex-col">
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
@@ -229,15 +353,15 @@ const ChatSupport = () => {
               className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Status</option>
-              <option value="false">Unread</option>
-              <option value="true">Read</option>
+              <option value="false">Has Unread</option>
+              <option value="true">All Read</option>
             </select>
 
             <div className="flex-1 relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search messages..."
+                placeholder="Search users..."
                 value={filters.search}
                 onChange={(e) => setFilters({...filters, search: e.target.value})}
                 className="w-full pl-10 pr-4 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -245,24 +369,30 @@ const ChatSupport = () => {
             </div>
 
             <button
-              onClick={fetchMessages}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={() => fetchMessages(false)}
+              disabled={loading || isRefreshing}
+              className={`p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
               title="Refresh"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 transition-transform ${(loading || isRefreshing) ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
 
-        {/* Messages */}
+        {/* Conversations */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex-1 overflow-hidden">
           <div className="p-4 border-b border-gray-200">
             <h3 className="font-semibold text-gray-800 flex items-center">
               <MessageCircle className="w-5 h-5 mr-2" />
-              Support Messages
-              {unreadCount > 0 && (
+              User Conversations
+              {stats.unread > 0 && (
                 <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                  {unreadCount}
+                  {stats.unread}
+                </span>
+              )}
+              {isRefreshing && (
+                <span className="ml-2 text-gray-400">
+                  <RefreshCw className="w-3 h-3 animate-spin inline" />
                 </span>
               )}
             </h3>
@@ -273,40 +403,50 @@ const ChatSupport = () => {
               <div className="flex items-center justify-center h-32">
                 <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
               </div>
-            ) : messages.length === 0 ? (
+            ) : conversations.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 text-gray-500">
                 <MessageCircle className="w-8 h-8 mb-2" />
-                <p>No messages found</p>
+                <p>No conversations found</p>
               </div>
             ) : (
               <div className="p-2">
-                {messages.map((message) => (
+                {conversations.map((conversation) => (
                   <div
-                    key={message._id}
-                    onClick={() => setSelectedMessage(message)}
+                    key={conversation.user._id}
+                    onClick={() => {
+                      setSelectedConversation(conversation);
+                    }}
                     className={`p-4 border border-gray-100 rounded-lg mb-2 cursor-pointer transition-all hover:shadow-md ${
-                      selectedMessage?._id === message._id ? 'bg-blue-50 border-blue-300' : 
-                      !message.isRead ? 'bg-yellow-50' : 'bg-white hover:bg-gray-50'
+                      selectedConversation?.user._id === conversation.user._id ? 'bg-blue-50 border-blue-300' : 
+                      conversation.unreadCount > 0 ? 'bg-yellow-50' : 'bg-white hover:bg-gray-50'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <User className="w-4 h-4 text-gray-500" />
-                        <span className="font-medium text-sm text-gray-800">
-                          {message.userId?.fullName || 'Unknown User'}
-                        </span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(message)}`}>
-                          {getStatusText(message)}
-                        </span>
+                      <div className="flex items-center space-x-3">
+                        <div className="relative">
+                          <User className="w-8 h-8 text-gray-500 bg-gray-100 rounded-full p-1" />
+                          {conversation.unreadCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                              {conversation.unreadCount}
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <span className="font-medium text-sm text-gray-800">
+                            {conversation.user.fullName || 'Unknown User'}
+                          </span>
+                          <p className="text-xs text-gray-500">{conversation.user.email}</p>
+                        </div>
                       </div>
-                      {!message.isRead && (
+                      
+                      {conversation.unreadCount > 0 && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            markAsRead(message._id);
+                            markConversationAsRead(conversation.user._id);
                           }}
-                          className="text-blue-500 hover:text-blue-700"
-                          title="Mark as read"
+                          className="text-blue-500 hover:text-blue-700 transition-colors"
+                          title="Mark all as read"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
@@ -314,19 +454,16 @@ const ChatSupport = () => {
                     </div>
                     
                     <div className="mb-2">
-                      <span className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full mb-1">
-                        {message.category}
-                      </span>
                       <p className="text-sm text-gray-600 line-clamp-2">
-                        {message.message}
+                        {getLastMessagePreview(conversation)}
                       </p>
                     </div>
                     
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>{message.userId?.email}</span>
+                      <span>{conversation.messages.length} message{conversation.messages.length !== 1 ? 's' : ''}</span>
                       <div className="flex items-center space-x-1">
                         <Clock className="w-3 h-3" />
-                        <span>{formatDate(message.createdAt)}</span>
+                        <span>{formatDate(conversation.lastMessageAt)}</span>
                       </div>
                     </div>
                   </div>
@@ -337,9 +474,9 @@ const ChatSupport = () => {
         </div>
       </div>
 
-      {/* Message Detail & Reply */}
+      {/* Conversation Detail & Reply */}
       <div className="lg:w-1/2 flex flex-col">
-        {selectedMessage ? (
+        {selectedConversation ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex-1 flex flex-col">
             {/* Header */}
             <div className="p-4 border-b border-gray-200">
@@ -347,47 +484,109 @@ const ChatSupport = () => {
                 <div>
                   <h3 className="font-semibold text-gray-800 flex items-center">
                     <User className="w-5 h-5 mr-2" />
-                    {selectedMessage.userId?.fullName || 'Unknown User'}
+                    {selectedConversation.user.fullName || 'Unknown User'}
                   </h3>
-                  <p className="text-sm text-gray-600">{selectedMessage.userId?.email}</p>
+                  <p className="text-sm text-gray-600">{selectedConversation.user.email}</p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedMessage)}`}>
-                  {getStatusText(selectedMessage)}
-                </span>
+                <div className="flex items-center space-x-2">
+                  {selectedConversation.unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                      {selectedConversation.unreadCount} unread
+                    </span>
+                  )}
+                  <span className="text-xs text-gray-500">
+                    {selectedConversation.messages.length} messages
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Message Content */}
-            <div className="flex-1 p-4 overflow-y-auto">
+            {/* Messages */}
+            <div className="flex-1 p-4 overflow-y-auto max-h-96">
               <div className="space-y-4">
-                {/* User Message */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Customer Message</span>
-                    <span className="text-xs text-gray-500">{formatDate(selectedMessage.createdAt)}</span>
-                  </div>
-                  <div className="mb-2">
-                    <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                      {selectedMessage.category}
-                    </span>
-                  </div>
-                  <p className="text-gray-800">{selectedMessage.message}</p>
-                </div>
+                {selectedConversation.messages
+                  .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+                  .map((message) => (
+                    <div key={message._id} className="space-y-4">
+                      {/* User Message */}
+                      <div className={`rounded-lg p-4 ${!message.isRead ? 'bg-yellow-50 border-l-4 border-yellow-400' : 'bg-gray-50'}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm font-medium text-gray-700">Customer Message</span>
+                            {!message.isRead && (
+                              <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                New
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-xs text-gray-500">{formatDate(message.createdAt)}</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                            {message.category}
+                          </span>
+                        </div>
+                        
+                        {message.message ? (
+                          <p className="text-gray-800">{message.message}</p>
+                        ) : (
+                          <p className="text-gray-500 italic">No text message - file attachment only</p>
+                        )}
+                        
+                        {/* Show user attachment */}
+                        {message.attachment && (
+                          <div className="mt-3">
+                            {message.attachmentType === 'image' ? (
+                              <div className="space-y-2">
+                                <img 
+                                  src={`${BACKEND_URL}${message.attachment}`}
+                                  alt="User attachment"
+                                  className="max-w-full h-auto rounded-lg cursor-pointer border border-gray-300 shadow-sm"
+                                  onClick={() => window.open(`${BACKEND_URL}${message.attachment}`, '_blank')}
+                                  style={{ maxHeight: '200px', maxWidth: '300px' }}
+                                />
+                                <p className="text-xs text-gray-500 flex items-center space-x-1">
+                                  <Paperclip className="w-3 h-3" />
+                                  <span>Click to view full size</span>
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="bg-gray-100 border border-gray-200 rounded-lg p-3">
+                                <a 
+                                  href={`${BACKEND_URL}${message.attachment}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 font-medium"
+                                >
+                                  <Download className="w-4 h-4" />
+                                  <span className="text-sm">Download Attachment</span>
+                                </a>
+                                <p className="text-xs text-gray-500 mt-1 flex items-center space-x-1">
+                                  <Paperclip className="w-3 h-3" />
+                                  <span>User uploaded file</span>
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
 
-                {/* Admin Reply */}
-                {selectedMessage.adminReply && (
-                  <div className={`rounded-lg p-4 ${selectedMessage.isAutoReply ? 'bg-yellow-50 border-l-4 border-yellow-400' : 'bg-green-50 border-l-4 border-green-400'}`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">
-                        {selectedMessage.isAutoReply ? 'Auto Reply' : 'Admin Reply'}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {formatDate(selectedMessage.adminRepliedAt)}
-                      </span>
+                      {/* Admin Reply */}
+                      {message.adminReply && (
+                        <div className={`rounded-lg p-4 ${message.isAutoReply ? 'bg-yellow-50 border-l-4 border-yellow-400' : 'bg-green-50 border-l-4 border-green-400'}`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-gray-700">
+                              {message.isAutoReply ? 'Auto Reply' : 'Admin Reply'}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {formatDate(message.adminRepliedAt)}
+                            </span>
+                          </div>
+                          <p className="text-gray-800">{message.adminReply}</p>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-gray-800">{selectedMessage.adminReply}</p>
-                  </div>
-                )}
+                  ))}
               </div>
             </div>
 
@@ -438,8 +637,8 @@ const ChatSupport = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex-1 flex items-center justify-center">
             <div className="text-center text-gray-500">
               <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-medium mb-2">Select a message</h3>
-              <p className="text-sm">Choose a message from the list to view details and reply</p>
+              <h3 className="text-lg font-medium mb-2">Select a conversation</h3>
+              <p className="text-sm">Choose a user from the list to view their messages and reply</p>
             </div>
           </div>
         )}
