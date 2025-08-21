@@ -9,6 +9,8 @@ import ManageBets from "./pages/ManageBets";
 import AllBets from "./pages/AllBets";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ChatSupport from "./pages/ChatSupport";
+import ChatNotification from "./components/ChatNotification";
 
 function App() {
   const location = useLocation();
@@ -18,6 +20,7 @@ function App() {
     { path: "/manageusers", label: "Users", icon: "👥", description: "Manage users" },
     { path: "/withdraw", label: "Withdrawals", icon: "💸", description: "Manage withdraw" },
     { path: "/transaction", label: "Deposit", icon: "💳", description: "Manage Deposits" },
+    { path: "/chat", label: "Chat Support", icon: "💬", description: "Manage customer support" },
     { path: "/livebet", label: "Live Bets", icon: "🎲", description: "Live Bets" },
     { path: "/managebet", label: "Manage Bets", icon: "🎯", description: "Manage Bets" },
     { path: "/allbets", label: "See All Bets", icon: "📊", description: "Manage Bets" },
@@ -71,6 +74,9 @@ function App() {
                         {item.description}
                       </div>
                     </div>
+                    {item.path === '/chat' && !isActive(item.path) && (
+                      <ChatNotification />
+                    )}
                     {isActive(item.path) && (
                       <div className="w-2 h-2 bg-white rounded-full"></div>
                     )}
@@ -130,6 +136,7 @@ function App() {
                 <Route path="/transaction" element={<ProtectedRoute><Transaction/></ProtectedRoute>}/>
                 <Route path="/manageusers" element={<ProtectedRoute><ManageUser/></ProtectedRoute>}/>
                 <Route path="/withdraw" element={<ProtectedRoute><ManageWithdraw/></ProtectedRoute>}/>
+                <Route path="/chat" element={<ProtectedRoute><ChatSupport/></ProtectedRoute>}/>
                 <Route path="/livebet" element={<ProtectedRoute><LiveBets/></ProtectedRoute>}/>
                 <Route path="/managebet" element={<ProtectedRoute><ManageBets/></ProtectedRoute>}/>
                 <Route path="/allbets" element={<ProtectedRoute><AllBets/></ProtectedRoute>}/>

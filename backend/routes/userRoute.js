@@ -14,7 +14,8 @@ const {
   generateResetPassOTP,
   submitResetPassOTP,
   handelAdminLogin,
-  editUser
+  editUser,
+  handleGoogleAuth
 } = require("../controllers/userController.js");
 
 const limiter = rateLimit({
@@ -45,6 +46,7 @@ router.get("/isloggedin", isloggedin);
 router.post("/logout", handleUserLogout);
 router.post("/signup", handelUserSignup);
 router.post("/login",limiter, handelUserLogin);
+router.post("/google", handleGoogleAuth);
 router.post("/get-otp",otpLimiter, generateResetPassOTP);
 router.post("/submit-otp",otpLimiter, submitResetPassOTP);
 router.post("/addbank", handleAddBank);

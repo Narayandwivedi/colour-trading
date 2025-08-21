@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { AppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
+import GoogleLogin from "./GoogleLogin";
 
 const Login = () => {
   const [state, setState] = useState("login");
@@ -238,6 +239,21 @@ const Login = () => {
                 ? "Create your account to start winning"
                 : "Sign in to continue your journey"}
             </p>
+          </div>
+
+          {/* Google Sign-in */}
+          <div className="mb-4">
+            <GoogleLogin />
+          </div>
+
+          {/* Divider */}
+          <div className="relative mb-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-cyan-600/30"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-gradient-to-br from-teal-800/80 via-cyan-800/80 to-emerald-800/80 text-cyan-200 font-medium">OR</span>
+            </div>
           </div>
 
           {/* Full name - only for signup */}

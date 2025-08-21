@@ -5,6 +5,9 @@ const userModel = require("../models/user.js");
 const transactionModel = require("../models/transcationModel.js");
 const transporter = require("../config/nodemailer.js");
 const axios = require("axios");
+const { OAuth2Client } = require('google-auth-library');
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 function generateReferralCode() {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -837,6 +840,142 @@ const editUser = async (req, res) => {
   }
 };
 
+// Google OAuth Handler
+const handleGoogleAuth = async (req, res) => {
+  try {
+    const { credential, referedBy } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        success: false,
+        message: "Google credential is required"
+      });
+    }
+
+    // Verify Google token
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const {
+      sub: googleId,
+      email,
+      name: fullName,
+      picture: profilePicture,
+      email_verified
+    } = payload;
+
+    if (!email_verified) {
+      return res.status(400).json({
+        success: false,
+        message: "Google email not verified"
+      });
+    }
+
+    // Check if user exists
+    let user = await userModel.findOne({ 
+      $or: [
+        { email: email },
+        { googleId: googleId }
+      ]
+    });
+
+    if (user) {
+      // User exists, update Google info if needed
+      if (!user.googleId) {
+        user.googleId = googleId;
+        user.profilePicture = profilePicture;
+        user.authProvider = 'google';
+        user.isEmailVerified = true;
+        await user.save();
+      }
+    } else {
+      // Handle referral validation
+      let validReferer = null;
+      if (referedBy) {
+        validReferer = await userModel.findOne({ referralCode: referedBy });
+        if (validReferer) {
+          validReferer.totalReferal += 1;
+          await validReferer.save();
+        }
+      }
+      
+      // Create new user
+      const referralCode = generateReferralCode();
+      
+      const newUserData = {
+        fullName,
+        email,
+        googleId,
+        profilePicture,
+        isEmailVerified: email_verified,
+        referralCode,
+        authProvider: 'google',
+      };
+
+      // Add referral data if valid referral code was provided
+      if (referedBy && validReferer) {
+        newUserData.referedBy = referedBy;
+        newUserData.balance = 20;
+      }
+
+      user = new userModel(newUserData);
+      await user.save();
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Set cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: "None",
+      secure: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // Prepare user data for response
+    const userObj = user.toObject();
+    delete userObj.password;
+    delete userObj.googleId;
+    delete userObj.resetOtp;
+    delete userObj.otpExpiresAt;
+
+    // Mask sensitive information
+    if (userObj.isBankAdded && userObj.bankAccount) {
+      userObj.accountNumber = maskString(userObj.bankAccount.accountNumber, 4);
+      delete userObj.bankAccount;
+    }
+
+    if (userObj.isUpiAdded && userObj.upiId) {
+      userObj.upi = maskUpiId(userObj.upiId.upi);
+      delete userObj.upiId;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Google authentication successful',
+      userData: userObj
+    });
+
+  } catch (error) {
+    console.error('Google authentication error:', error.message);
+    
+    return res.status(400).json({
+      success: false,
+      message: 'Google authentication failed',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   handelUserSignup,
   handelUserLogin,
@@ -849,4 +988,5 @@ module.exports = {
   submitResetPassOTP,
   handelAdminLogin,
   editUser,
+  handleGoogleAuth,
 };

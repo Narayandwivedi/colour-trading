@@ -20,9 +20,8 @@ export const AppContextProvider = (props) => {
   const [loading, setLoading] = useState(true)
   const [activeBets, setActiveBets] = useState([]);
 
-  // const BACKEND_URL = `http://82.112.231.55:8080`;
-  // const BACKEND_URL = `http://localhost:8080`;
-  const BACKEND_URL = `https://api.winnersclubs.fun`;
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://api.winnersclubs.fun';
+  // const BACKEND_URL = 'http://localhost:8080';
   
   
   
@@ -37,8 +36,7 @@ const checkLogin = async () => {
     if (res.data.isLoggedIn) {
       setUserData(res.data.user);
       setBalance(res.data.user.balance)
-      setWithdrawableBalance(res.data.user.withdrawableBalance
-)
+      setWithdrawableBalance(res.data.user.withdrawableBalance)
     } else {
       setUserData(null);
     }
@@ -48,6 +46,9 @@ const checkLogin = async () => {
     setLoading(false); // ✅ done checking
   }
 };
+
+// Rename checkLogin to checkAuthStatus for consistency with GoogleLogin component
+const checkAuthStatus = checkLogin;
 
   useEffect(() => {
     checkLogin();
@@ -74,6 +75,7 @@ const checkLogin = async () => {
 
     // Auth values
     checkLogin,
+    checkAuthStatus,
   };
 
   return (

@@ -15,7 +15,8 @@ console.log("server");
 const userRoute = require("./routes/userRoute.js");
 const transactionRoute = require("./routes/transactionRoute.js");
 const betRoute = require("./routes/betRoute.js");
-const adminRoute = require("./routes/adminRoute.js")
+const adminRoute = require("./routes/adminRoute.js");
+const chatRoute = require("./routes/chatRoute.js");
 
 // import models
 const game = require("./models/game.js");
@@ -138,7 +139,8 @@ app.post('/restart-server', (req, res) => {
 app.use("/api/users", userRoute);
 app.use("/api/transaction", transactionRoute);
 app.use("/api/bet", betRoute);
-app.use("/api/admin",adminRoute)
+app.use("/api/admin", adminRoute);
+app.use("/api/chat", chatRoute);
 
 
 

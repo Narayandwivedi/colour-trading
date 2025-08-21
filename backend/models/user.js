@@ -14,13 +14,36 @@ const userSchema = new mongoose.Schema({
 
   mobile:{
     type:Number,
-    required:true,
-    unique:true
+    unique: true,
+    sparse: true,
+    required: function() {
+      return this.authProvider !== 'google';
+    },
   },
 
   password: {
     type: String,
-    required: true,
+    required: function() {
+      return !this.googleId;
+    },
+  },
+
+  // Google OAuth fields
+  googleId: {
+    type: String,
+    sparse: true,
+  },
+  profilePicture: {
+    type: String,
+  },
+  authProvider: {
+    type: String,
+    enum: ["local", "google"],
+    default: "local",
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false,
   },
 
   role: {
