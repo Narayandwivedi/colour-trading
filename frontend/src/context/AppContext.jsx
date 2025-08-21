@@ -20,7 +20,7 @@ export const AppContextProvider = (props) => {
   const [loading, setLoading] = useState(true)
   const [activeBets, setActiveBets] = useState([]);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://api.winnersclubs.fun';
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://api.winners11.in';
   // const BACKEND_URL = 'http://localhost:8080';
   
   

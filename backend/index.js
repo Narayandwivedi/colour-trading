@@ -28,8 +28,9 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://winnersclubs.fun",
-      "https://api.winnersclubs.fun",
+      "https://winners11.in",
+      "https://www.winners11.in",
+      "https://api.winners11.in",
       "https://colour-trading-admin.vercel.app"
     ],
     credentials: true,
