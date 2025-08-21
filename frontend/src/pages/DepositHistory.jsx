@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
-import { CreditCard, Gift, TrendingUp, Calendar, Hash, Smartphone, Building2 } from "lucide-react";
+import { CreditCard, Gift, TrendingUp, Calendar, Hash, Smartphone, Building2, Copy } from "lucide-react";
 import Navbar from "../components/Navbar";
 import BottomNav from "../components/BottomNav";
 
@@ -65,129 +65,118 @@ function TransactionCard({ id, status, amount, paymentMethod, createdAt, type, u
   const isCompleted = status === "completed" || status === "success";
 
   return (
-    <div className={`bg-white rounded-2xl shadow-lg border overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] ${
-      isReferral ? 'border-purple-200 ring-2 ring-purple-100' : 'border-gray-200'
+    <div className={`bg-white rounded-xl shadow-md border overflow-hidden hover:shadow-lg transition-all duration-200 ${
+      isReferral ? 'border-purple-200' : 'border-gray-200'
     }`}>
       {/* Header with status indicator */}
       <div className={cardStyle.gradient}>
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center space-x-3">
-            <div className="bg-white bg-opacity-20 p-2 rounded-lg">
-              <Hash className="w-5 h-5 text-white" />
-            </div>
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center space-x-2">
             <div>
               <span className="text-white text-sm font-medium">
-                {isReferral ? 'Referral ID' : 'Transaction ID'}
+                {isReferral ? 'Referral Bonus' : 'Deposit Transaction'}
               </span>
-              <div className="bg-white px-3 py-1 mt-1 rounded-lg text-gray-800 text-xs font-mono">
-                #{id?.slice(-8) || 'N/A'}
-              </div>
             </div>
           </div>
-          <div className="text-white text-2xl">
-            {isReferral ? <Gift className="w-8 h-8" /> : <CreditCard className="w-8 h-8" />}
+          <div className="text-white">
+            {isReferral ? <Gift className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
           </div>
         </div>
       </div>
 
       {/* Card content */}
-      <div className="p-6 space-y-4">
-        {/* Transaction Type Badge */}
+      <div className="p-4 space-y-3">
+        {/* Amount - Most important, show first */}
         <div className="flex items-center justify-between">
-          <span className="text-gray-600 text-sm font-medium">Transaction Type</span>
-          <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg border ${
-            isReferral ? 'bg-purple-50 border-purple-200' : 'bg-teal-50 border-teal-200'
-          }`}>
-            {isReferral ? <Gift className="w-4 h-4 text-purple-600" /> : <TrendingUp className="w-4 h-4 text-teal-600" />}
-            <span className={`font-semibold text-sm ${
-              isReferral ? 'text-purple-600' : 'text-teal-600'
-            }`}>
-              {isReferral ? 'Referral Bonus' : 'Deposit'}
-            </span>
-          </div>
-        </div>
-
-        {/* Amount */}
-        <div className="flex items-center justify-between">
-          <span className="text-gray-600 text-sm font-medium">
-            {isReferral ? 'Bonus Amount' : 'Deposit Amount'}
+          <span className="text-gray-600 text-xs font-medium">
+            {isReferral ? 'Bonus Amount' : 'Amount'}
           </span>
           <div className="flex items-baseline space-x-1">
-            <span className="text-gray-500 text-lg font-medium">₹</span>
-            <span className={`font-bold text-2xl ${
+            <span className="text-gray-500 text-sm">₹</span>
+            <span className={`font-bold text-lg ${
               isReferral ? 'text-purple-600' : 'text-gray-800'
-            } `}>
+            }`}>
               {amount || 0}
             </span>
           </div>
         </div>
 
-        {/* UTR for deposits */}
-        {!isReferral && utr && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600 text-sm font-medium">UTR Number</span>
-            <span className="bg-gray-100 px-3 py-1 rounded-lg text-gray-800 font-mono text-sm">
-              {utr}
-            </span>
-          </div>
-        )}
-
-        {/* Payment Method for deposits */}
-        {!isReferral && paymentMethod && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600 text-sm font-medium">Payment Method</span>
-            <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-teal-50 border border-teal-200">
-              <span className="text-teal-600">{getPaymentMethodIcon(paymentMethod)}</span>
-              <span className="text-teal-600 font-semibold text-sm">
-                {paymentMethod === 'upi' ? 'UPI' : paymentMethod === 'bank' ? 'Bank Transfer' : paymentMethod || 'N/A'}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Referral message for referral bonuses */}
-        {isReferral && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600 text-sm font-medium">Earned From</span>
-            <div className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-purple-50 border border-purple-200">
-              <span className="text-lg">👥</span>
-              <span className="text-purple-600 font-semibold text-sm">
-                Friend Referral
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Status */}
+        {/* Type and Status in one row */}
         <div className="flex items-center justify-between">
-          <span className="text-gray-600 text-sm font-medium">Status</span>
-          <div className={`flex items-center space-x-2 px-3 py-2 rounded-xl ${statusStyle.bg} ${statusStyle.border} border`}>
-            <span className="text-lg">{statusStyle.icon}</span>
-            <span className={`font-bold text-sm uppercase ${statusStyle.color}`}>
-              {status || 'Unknown'}
+          <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs ${
+            isReferral ? 'bg-purple-50 text-purple-600' : 'bg-teal-50 text-teal-600'
+          }`}>
+            {isReferral ? <Gift className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+            <span className="font-medium">
+              {isReferral ? 'Referral' : 'Deposit'}
             </span>
+          </div>
+          <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs ${statusStyle.bg} ${statusStyle.color}`}>
+            <span>{statusStyle.icon}</span>
+            <span className="font-medium uppercase">{status || 'Unknown'}</span>
           </div>
         </div>
 
-        {/* Date if available */}
-        {createdAt && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600 text-sm font-medium">Date & Time</span>
-            <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
-              <Calendar className="w-4 h-4 text-gray-600" />
-              <span className="text-gray-800 font-medium text-sm">
+        {/* Payment Method and Date in one row for deposits */}
+        {!isReferral && (
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center space-x-1">
+              <span className="text-gray-500">Via:</span>
+              <div className="flex items-center space-x-1 text-teal-600">
+                {getPaymentMethodIcon(paymentMethod)}
+                <span className="font-medium">
+                  {paymentMethod === 'upi' ? 'UPI' : paymentMethod === 'bank' ? 'Bank' : paymentMethod || 'N/A'}
+                </span>
+              </div>
+            </div>
+            {createdAt && (
+              <div className="flex items-center space-x-1 text-gray-500">
+                <Calendar className="w-3 h-3" />
+                <span>
+                  {new Date(createdAt).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short'
+                  })}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Date for referrals */}
+        {isReferral && createdAt && (
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-gray-500">Friend Referral Bonus</span>
+            <div className="flex items-center space-x-1 text-gray-500">
+              <Calendar className="w-3 h-3" />
+              <span>
                 {new Date(createdAt).toLocaleDateString('en-GB', {
                   day: '2-digit',
-                  month: 'short',
-                  year: 'numeric'
-                })} • {new Date(createdAt).toLocaleTimeString('en-GB', {
-                  hour: '2-digit',
-                  minute: '2-digit'
+                  month: 'short'
                 })}
               </span>
             </div>
           </div>
         )}
+
+        {/* UTR if available */}
+        {!isReferral && utr && (
+          <div className="text-xs text-gray-500 text-center bg-gray-50 py-1 px-2 rounded font-mono">
+            UTR: {utr}
+          </div>
+        )}
+
+        {/* Transaction ID */}
+        <div className="flex items-center justify-between text-xs text-gray-500 bg-gray-50 py-1 px-2 rounded font-mono">
+          <span>#{id || 'N/A'}</span>
+          <Copy 
+            className="w-3 h-3 cursor-pointer hover:text-gray-700 transition-colors" 
+            onClick={() => {
+              navigator.clipboard.writeText(id || '');
+              toast.success('Transaction ID copied!');
+            }}
+          />
+        </div>
       </div>
 
       {/* Bottom accent line */}
@@ -349,7 +338,7 @@ const DepositHistory = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {filteredTransactions
               .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
               .map((transaction) => (

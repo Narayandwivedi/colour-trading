@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
-import { ArrowUpRight, Hash, Calendar, Smartphone, Building2, Banknote } from "lucide-react";
+import { ArrowUpRight, Hash, Calendar, Smartphone, Building2, Banknote, Copy } from "lucide-react";
 import Navbar from "../components/Navbar";
 import BottomNav from "../components/BottomNav";
 
@@ -51,79 +51,73 @@ function WithdrawalCard({ id, status, amount, paymentMethod, createdAt }) {
   const isCompleted = status === "completed" || status === "success";
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
+    <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200">
       {/* Header with status indicator */}
       <div className={statusStyle.gradient}>
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center space-x-3">
-            <div className="bg-white bg-opacity-20 p-2 rounded-lg">
-              <Hash className="w-5 h-5 text-white" />
-            </div>
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center space-x-2">
             <div>
-              <span className="text-white text-sm font-medium">Withdrawal ID</span>
-              <div className="bg-white px-3 py-1 mt-1 rounded-lg text-gray-800 text-xs font-mono">
-                #{id?.slice(-8) || 'N/A'}
-              </div>
+              <span className="text-white text-sm font-medium">Withdrawal Transaction</span>
             </div>
           </div>
           <div className="text-white">
-            <ArrowUpRight className="w-8 h-8" />
+            <ArrowUpRight className="w-5 h-5" />
           </div>
         </div>
       </div>
 
       {/* Card content */}
-      <div className="p-6 space-y-4">
-        {/* Amount */}
+      <div className="p-4 space-y-3">
+        {/* Amount - Most important */}
         <div className="flex items-center justify-between">
-          <span className="text-gray-600 text-sm font-medium">Withdrawal Amount</span>
-          <div className="flex items-center space-x-1">
+          <span className="text-gray-600 text-xs font-medium">Amount</span>
+          <div className="flex items-baseline space-x-1">
             <span className="text-gray-500 text-sm">₹</span>
-            <span className="text-gray-800 font-bold text-xl">{amount || 0}</span>
+            <span className="text-gray-800 font-bold text-lg">{amount || 0}</span>
           </div>
         </div>
 
-        {/* Payment Method */}
+        {/* Method and Status in one row */}
         <div className="flex items-center justify-between">
-          <span className="text-gray-600 text-sm font-medium">Payment Method</span>
-          <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-orange-50 border border-orange-200">
-            <span className="text-orange-600">{getPaymentMethodIcon(paymentMethod)}</span>
-            <span className="text-orange-600 font-semibold text-sm">
-              {paymentMethod === 'upi' ? 'UPI' : paymentMethod === 'bank' ? 'Bank Transfer' : paymentMethod || 'N/A'}
+          <div className="flex items-center space-x-1 px-2 py-1 rounded text-xs bg-orange-50 text-orange-600">
+            {getPaymentMethodIcon(paymentMethod)}
+            <span className="font-medium">
+              {paymentMethod === 'upi' ? 'UPI' : paymentMethod === 'bank' ? 'Bank' : paymentMethod || 'N/A'}
             </span>
           </div>
-        </div>
-
-        {/* Status */}
-        <div className="flex items-center justify-between">
-          <span className="text-gray-600 text-sm font-medium">Status</span>
-          <div className={`flex items-center space-x-2 px-3 py-2 rounded-xl ${statusStyle.bg} ${statusStyle.border} border`}>
-            <span className="text-lg">{statusStyle.icon}</span>
-            <span className={`font-bold text-sm uppercase ${statusStyle.color}`}>
-              {status || 'Unknown'}
-            </span>
+          <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs ${statusStyle.bg} ${statusStyle.color}`}>
+            <span>{statusStyle.icon}</span>
+            <span className="font-medium uppercase">{status || 'Unknown'}</span>
           </div>
         </div>
 
-        {/* Date if available */}
+        {/* Date */}
         {createdAt && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600 text-sm font-medium">Date & Time</span>
-            <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
-              <Calendar className="w-4 h-4 text-gray-600" />
-              <span className="text-gray-800 font-medium text-sm">
-                {new Date(createdAt).toLocaleDateString('en-GB', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric'
-                })} • {new Date(createdAt).toLocaleTimeString('en-GB', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </span>
-            </div>
+          <div className="flex items-center justify-center text-xs text-gray-500">
+            <Calendar className="w-3 h-3 mr-1" />
+            <span>
+              {new Date(createdAt).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short'
+              })} • {new Date(createdAt).toLocaleTimeString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </span>
           </div>
         )}
+
+        {/* Transaction ID */}
+        <div className="flex items-center justify-between text-xs text-gray-500 bg-gray-50 py-1 px-2 rounded font-mono">
+          <span>#{id || 'N/A'}</span>
+          <Copy 
+            className="w-3 h-3 cursor-pointer hover:text-gray-700 transition-colors" 
+            onClick={() => {
+              navigator.clipboard.writeText(id || '');
+              toast.success('Transaction ID copied!');
+            }}
+          />
+        </div>
       </div>
 
       {/* Bottom accent line */}
@@ -208,7 +202,7 @@ const WithdrawalHistory = () => {
             <p className="text-gray-500 text-sm">Your withdrawal history will appear here</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {withdrawHistory.map((item) => (
               <WithdrawalCard
                 key={item._id}
