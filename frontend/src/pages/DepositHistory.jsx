@@ -2,6 +2,9 @@ import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
+import { CreditCard, Gift, TrendingUp, Calendar, Hash, Smartphone, Building2 } from "lucide-react";
+import Navbar from "../components/Navbar";
+import BottomNav from "../components/BottomNav";
 
 // TransactionCard component that handles both deposits and referrals
 function TransactionCard({ id, status, amount, paymentMethod, createdAt, type, utr }) {
@@ -50,9 +53,9 @@ function TransactionCard({ id, status, amount, paymentMethod, createdAt, type, u
 
   const getPaymentMethodIcon = (method) => {
     switch(method?.toLowerCase()) {
-      case 'upi': return '📱';
-      case 'bank': case 'bank_transfer': return '🏦';
-      default: return '💰';
+      case 'upi': return <Smartphone className="w-5 h-5" />;
+      case 'bank': case 'bank_transfer': return <Building2 className="w-5 h-5" />;
+      default: return <CreditCard className="w-5 h-5" />;
     }
   };
 
@@ -62,19 +65,27 @@ function TransactionCard({ id, status, amount, paymentMethod, createdAt, type, u
   const isCompleted = status === "completed" || status === "success";
 
   return (
-    <div className={`bg-white rounded-3xl shadow-lg border overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
-      isReferral ? 'border-purple-200 ring-2 ring-purple-100' : 'border-gray-100'
+    <div className={`bg-white rounded-2xl shadow-lg border overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] ${
+      isReferral ? 'border-purple-200 ring-2 ring-purple-100' : 'border-gray-200'
     }`}>
       {/* Header with status indicator */}
       <div className={cardStyle.gradient}>
         <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex flex-col items-center space-x-2">
-            <span className="text-white text-sm font-medium">
-              {isReferral ? 'Referral ID' : 'Order ID'}
-            </span>
-            <span className="bg-white px-2 py-1 mt-1 rounded-lg text-black text-xs font-mono">
-              {id || 'N/A'}
-            </span>
+          <div className="flex items-center space-x-3">
+            <div className="bg-white bg-opacity-20 p-2 rounded-lg">
+              <Hash className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <span className="text-white text-sm font-medium">
+                {isReferral ? 'Referral ID' : 'Transaction ID'}
+              </span>
+              <div className="bg-white px-3 py-1 mt-1 rounded-lg text-gray-800 text-xs font-mono">
+                #{id?.slice(-8) || 'N/A'}
+              </div>
+            </div>
+          </div>
+          <div className="text-white text-2xl">
+            {isReferral ? <Gift className="w-8 h-8" /> : <CreditCard className="w-8 h-8" />}
           </div>
         </div>
       </div>
@@ -84,16 +95,14 @@ function TransactionCard({ id, status, amount, paymentMethod, createdAt, type, u
         {/* Transaction Type Badge */}
         <div className="flex items-center justify-between">
           <span className="text-gray-600 text-sm font-medium">Transaction Type</span>
-          <div className={`flex items-center space-x-2 px-3 py-2 rounded-xl border ${
-            isReferral ? 'bg-purple-50 border-purple-200' : 'bg-blue-50 border-blue-200'
+          <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg border ${
+            isReferral ? 'bg-purple-50 border-purple-200' : 'bg-teal-50 border-teal-200'
           }`}>
-            <span className="text-lg">
-              {isReferral ? '🎁' : '💰'}
-            </span>
-            <span className={`font-semibold text-sm uppercase ${
-              isReferral ? 'text-purple-600' : 'text-blue-600'
+            {isReferral ? <Gift className="w-4 h-4 text-purple-600" /> : <TrendingUp className="w-4 h-4 text-teal-600" />}
+            <span className={`font-semibold text-sm ${
+              isReferral ? 'text-purple-600' : 'text-teal-600'
             }`}>
-              {isReferral ? 'Referral' : 'Deposit'}
+              {isReferral ? 'Referral Bonus' : 'Deposit'}
             </span>
           </div>
         </div>
@@ -127,10 +136,10 @@ function TransactionCard({ id, status, amount, paymentMethod, createdAt, type, u
         {!isReferral && paymentMethod && (
           <div className="flex items-center justify-between">
             <span className="text-gray-600 text-sm font-medium">Payment Method</span>
-            <div className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200">
-              <span className="text-lg">{getPaymentMethodIcon(paymentMethod)}</span>
-              <span className="text-blue-600 font-semibold text-sm uppercase">
-                {paymentMethod || 'N/A'}
+            <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-teal-50 border border-teal-200">
+              <span className="text-teal-600">{getPaymentMethodIcon(paymentMethod)}</span>
+              <span className="text-teal-600 font-semibold text-sm">
+                {paymentMethod === 'upi' ? 'UPI' : paymentMethod === 'bank' ? 'Bank Transfer' : paymentMethod || 'N/A'}
               </span>
             </div>
           </div>
@@ -163,10 +172,20 @@ function TransactionCard({ id, status, amount, paymentMethod, createdAt, type, u
         {/* Date if available */}
         {createdAt && (
           <div className="flex items-center justify-between">
-            <span className="text-gray-600 text-sm font-medium">Date</span>
-            <span className="bg-gray-100 px-3 py-1 rounded-lg text-gray-800 font-medium text-sm">
-              {new Date(createdAt).toLocaleDateString('en-GB').replace(/\//g, '-')}
-            </span>
+            <span className="text-gray-600 text-sm font-medium">Date & Time</span>
+            <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
+              <Calendar className="w-4 h-4 text-gray-600" />
+              <span className="text-gray-800 font-medium text-sm">
+                {new Date(createdAt).toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric'
+                })} • {new Date(createdAt).toLocaleTimeString('en-GB', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+            </div>
           </div>
         )}
       </div>
@@ -236,31 +255,37 @@ const DepositHistory = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 px-4">
-        <div className="pt-8 pb-6">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <p className="mt-2 text-gray-600">Loading your transaction history...</p>
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-teal-50 to-emerald-50 px-4 pb-20">
+          <div className="pt-8 pb-6">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+              <p className="mt-2 text-gray-600">Loading your transaction history...</p>
+            </div>
           </div>
         </div>
-      </div>
+        <BottomNav />
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* Enhanced Header */}
-      <div className="px-4 pt-8 pb-6">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl mb-4">
-            <span className="text-white text-2xl">💰</span>
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-teal-50 to-emerald-50 pb-20">
+        {/* Enhanced Header */}
+        <div className="px-4 pt-6 pb-6">
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-teal-500 to-emerald-600 rounded-2xl mb-4">
+              <CreditCard className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+              Transaction History
+            </h1>
+            <p className="text-gray-600 text-sm">Track your deposits and referral bonuses</p>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Transaction History
-          </h1>
-          <p className="text-gray-600 text-sm">Track your deposits and referral bonuses</p>
         </div>
-      </div>
 
      
       {/* Filter Buttons */}
@@ -271,7 +296,7 @@ const DepositHistory = () => {
               onClick={() => setFilter('all')}
               className={`flex-1 py-2 px-4 rounded-xl text-sm font-medium transition-all ${
                 filter === 'all' 
-                  ? 'bg-blue-500 text-white shadow-sm' 
+                  ? 'bg-teal-500 text-white shadow-sm' 
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -281,7 +306,7 @@ const DepositHistory = () => {
               onClick={() => setFilter('deposits')}
               className={`flex-1 py-2 px-4 rounded-xl text-sm font-medium transition-all ${
                 filter === 'deposits' 
-                  ? 'bg-green-500 text-white shadow-sm' 
+                  ? 'bg-emerald-500 text-white shadow-sm' 
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -306,9 +331,11 @@ const DepositHistory = () => {
         {filteredTransactions.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-gray-400 text-3xl">
-                {filter === 'referrals' ? '🎁' : filter === 'deposits' ? '💰' : '📊'}
-              </span>
+              <div className="text-gray-400">
+                {filter === 'referrals' ? <Gift className="w-12 h-12" /> : 
+                 filter === 'deposits' ? <CreditCard className="w-12 h-12" /> : 
+                 <TrendingUp className="w-12 h-12" />}
+              </div>
             </div>
             <h3 className="text-gray-600 font-medium mb-2">
               {filter === 'referrals' ? 'No Referral Bonuses Yet' : 
@@ -340,7 +367,9 @@ const DepositHistory = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+      <BottomNav />
+    </>
   );
 };
 

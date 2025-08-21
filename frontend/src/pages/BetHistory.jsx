@@ -2,6 +2,9 @@ import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
+import { Target, Trophy, Coins, Hash, Calendar, TrendingUp, TrendingDown } from "lucide-react";
+import Navbar from "../components/Navbar";
+import BottomNav from "../components/BottomNav";
 
 // Card component with enhanced mobile design
 function BetCard({ Period, Bet, Amount, Result, status, payout, orderId }) {
@@ -49,7 +52,7 @@ function BetCard({ Period, Bet, Amount, Result, status, payout, orderId }) {
   const isWon = status === "won";
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
       {/* Header with status indicator */}
       <div
         className={`px-6 py-4 ${
@@ -59,18 +62,28 @@ function BetCard({ Period, Bet, Amount, Result, status, payout, orderId }) {
         }`}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="text-white text-sm font-medium">Period</span>
-            <span className="bg-white bg-opacity-20 px-2 py-1 rounded-lg text-white text-xs font-mono">
-              {Period}
-            </span>
+          <div className="flex items-center space-x-3">
+            <div className="bg-white bg-opacity-20 p-2 rounded-lg">
+              <Hash className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <span className="text-white text-sm font-medium">Period</span>
+              <div className="bg-white px-3 py-1 mt-1 rounded-lg text-gray-800 text-xs font-mono">
+                #{Period}
+              </div>
+            </div>
           </div>
-          <div
-            className={`px-3 py-1 rounded-full text-xs font-semibold ${
-              isWon ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-            }`}
-          >
-            {isWon ? "✅ WON" : "❌ LOST"}
+          <div className="flex items-center space-x-2">
+            <div className="text-white">
+              {isWon ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
+            </div>
+            <div
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                isWon ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+              }`}
+            >
+              {isWon ? "WON" : "LOST"}
+            </div>
           </div>
         </div>
       </div>
@@ -95,19 +108,28 @@ function BetCard({ Period, Bet, Amount, Result, status, payout, orderId }) {
         {/* Amount */}
         <div className="flex items-center justify-between">
           <span className="text-gray-600 text-sm font-medium">Bet Amount</span>
-          <div className="flex items-center space-x-1">
-            <span className="text-gray-500 text-sm">₹</span>
-            <span className="text-gray-800 font-bold text-lg">{Amount}</span>
+          <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
+            <Coins className="w-4 h-4 text-gray-600" />
+            <div className="flex items-center space-x-1">
+              <span className="text-gray-500 text-sm">₹</span>
+              <span className="text-gray-800 font-bold text-lg">{Amount}</span>
+            </div>
           </div>
         </div>
 
         {/* payout */}
-
         <div className="flex items-center justify-between">
-          <span className="text-gray-600 text-sm font-medium">win amount</span>
-          <div className="flex items-center space-x-1">
-            <span className="text-gray-500 text-sm">₹</span>
-            <span className="text-gray-800 font-bold text-lg">{payout}</span>
+          <span className="text-gray-600 text-sm font-medium">Win Amount</span>
+          <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg border ${
+            isWon ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+          }`}>
+            <Trophy className={`w-4 h-4 ${isWon ? 'text-green-600' : 'text-red-600'}`} />
+            <div className="flex items-center space-x-1">
+              <span className="text-gray-500 text-sm">₹</span>
+              <span className={`font-bold text-lg ${isWon ? 'text-green-600' : 'text-red-600'}`}>
+                {payout || 0}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -153,9 +175,10 @@ function BetCard({ Period, Bet, Amount, Result, status, payout, orderId }) {
 </div>
         {/* order id */}
         <div className="flex items-center justify-between">
-          <span className="text-gray-600 text-sm font-medium">order id</span>
-          <div className="flex items-center space-x-1">
-            <span className="text-gray-600 font-medium text-sm">{orderId}</span>
+          <span className="text-gray-600 text-sm font-medium">Order ID</span>
+          <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
+            <Hash className="w-4 h-4 text-gray-600" />
+            <span className="text-gray-800 font-mono text-sm">#{orderId?.slice(-8) || 'N/A'}</span>
           </div>
         </div>
       </div>
@@ -200,38 +223,44 @@ const BetHistory = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 px-4">
-        <div className="pt-8 pb-6">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <p className="mt-2 text-gray-600">Loading your bet history...</p>
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 px-4 pb-20">
+          <div className="pt-8 pb-6">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+              <p className="mt-2 text-gray-600">Loading your bet history...</p>
+            </div>
           </div>
         </div>
-      </div>
+        <BottomNav />
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* Enhanced Header */}
-      <div className="px-4 pt-8 pb-6">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4">
-            <span className="text-white text-2xl">🎯</span>
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 pb-20">
+        {/* Enhanced Header */}
+        <div className="px-4 pt-6 pb-6">
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl mb-4">
+              <Target className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Bet History
+            </h1>
+            <p className="text-gray-600 text-sm">Your complete betting journey</p>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Bet History
-          </h1>
-          <p className="text-gray-600 text-sm">Your complete betting journey</p>
         </div>
-      </div>
 
       {/* Bet Cards */}
       <div className="px-4 pb-8">
         {allbets.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-gray-400 text-3xl">📊</span>
+              <Target className="w-12 h-12 text-gray-400" />
             </div>
             <h3 className="text-gray-600 font-medium mb-2">No Bets Yet</h3>
             <p className="text-gray-500 text-sm">
@@ -255,7 +284,9 @@ const BetHistory = () => {
           </div>
         )}
       </div>
-    </div>
+      </div>
+      <BottomNav />
+    </>
   );
 };
 

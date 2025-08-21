@@ -28,6 +28,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
+      "http://localhost:3000",
       "https://winners11.in",
       "https://www.winners11.in",
       "https://api.winners11.in",
@@ -144,28 +145,6 @@ app.use("/api/admin", adminRoute);
 app.use("/api/chat", chatRoute);
 
 
-
-
-
-const restartServer = () => {
-  console.log(`Scheduled server restart at ${new Date().toISOString()}`);
-  exec('pm2 restart project-backend', (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Restart Error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.error(`Restart Stderr: ${stderr}`);
-    }
-    console.log(`Restart Stdout: ${stdout}`);
-    console.log('Server restarted successfully via cron job');
-  });
-};
-
-cron.schedule('0 6 * * *', restartServer, {
-  scheduled: true,
-  timezone: "Asia/Kolkata"
-});
 
 // Global error handling middleware
 app.use((err, req, res, next) => {

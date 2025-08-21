@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {toast} from 'react-toastify'
 import axios from 'axios'
+import { Wallet, Banknote, Building2, IndianRupee, Check, Info, CheckCircle, MoreVertical } from 'lucide-react'
 
 
 const Withdraw = () => {
@@ -73,14 +74,14 @@ const Withdraw = () => {
                     <div className='flex justify-between items-center'>
                         <div className='flex items-center gap-3'>
                             <div className='bg-white/20 p-2 rounded-full'>
-                                <i className="fa-solid fa-wallet text-xl"></i>
+                                <Wallet className="w-5 h-5" />
                             </div>
                             <div>
                                 <p className='text-sm opacity-90'>Total Balance</p>
                                 <h2 className='text-xl font-bold'>₹{balance?.toLocaleString() || '0'}</h2>
                             </div>
                         </div>
-                        <i className="fa-solid fa-ellipsis-vertical opacity-70"></i>
+                        <MoreVertical className="w-5 h-5 opacity-70" />
                     </div>
                 </div>
 
@@ -89,14 +90,14 @@ const Withdraw = () => {
                     <div className='flex justify-between items-center'>
                         <div className='flex items-center gap-3'>
                             <div className='bg-white/20 p-2 rounded-full'>
-                                <i className="fa-solid fa-money-bill-wave text-xl"></i>
+                                <Banknote className="w-5 h-5" />
                             </div>
                             <div>
                                 <p className='text-sm opacity-90'>Withdrawable Balance</p>
                                 <h2 className='text-xl font-bold'>₹{withdrawableBalance?.toLocaleString() || '0'}</h2>
                             </div>
                         </div>
-                        <i className="fa-solid fa-info-circle opacity-70" title="This is the amount you can withdraw immediately"></i>
+                        <Info className="w-5 h-5 opacity-70" title="This is the amount you can withdraw immediately" />
                     </div>
                 </div>
             </div>
@@ -113,7 +114,7 @@ const Withdraw = () => {
                         >
                             <div className='flex flex-col items-center'>
                                 <div className='bg-blue-100 p-3 rounded-full mb-3 text-blue-600'>
-                                    <i className="fa-solid fa-building-columns text-2xl"></i>
+                                    <Building2 className="w-6 h-6" />
                                 </div>
                                 <p className='text-gray-700 font-medium'>Bank Account</p>
                                 <p className='text-xs text-green-600 mt-1'>
@@ -133,7 +134,7 @@ const Withdraw = () => {
                             <div className='bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer hover:border-blue-200'>
                                 <div className='flex flex-col items-center'>
                                     <div className='bg-blue-100 p-3 rounded-full mb-3 text-blue-600'>
-                                        <i className="fa-solid fa-building-columns text-2xl"></i>
+                                        <Building2 className="w-6 h-6" />
                                     </div>
                                     <p className='text-gray-700 font-medium'>Bank Account</p>
                                     <p className='text-xs text-gray-400 mt-1'>Add new account</p>
@@ -150,7 +151,7 @@ const Withdraw = () => {
                         >
                             <div className='flex flex-col items-center'>
                                 <div className='bg-purple-100 p-3 rounded-full mb-3 text-purple-600'>
-                                    <i className="fa-solid fa-indian-rupee-sign text-2xl"></i>
+                                    <IndianRupee className="w-6 h-6" />
                                 </div>
                                 <p className='text-gray-700 font-medium'>UPI ID</p>
                                 <p className='text-xs text-green-600 mt-1'>
@@ -170,7 +171,7 @@ const Withdraw = () => {
                             <div className='bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer hover:border-purple-200'>
                                 <div className='flex flex-col items-center'>
                                     <div className='bg-purple-100 p-3 rounded-full mb-3 text-purple-600'>
-                                        <i className="fa-solid fa-indian-rupee-sign text-2xl"></i>
+                                        <IndianRupee className="w-6 h-6" />
                                     </div>
                                     <p className='text-gray-700 font-medium'>UPI ID</p>
                                     <p className='text-xs text-gray-400 mt-1'>Add new UPI</p>
@@ -194,10 +195,10 @@ const Withdraw = () => {
                             onClick={() => setPaymentMethod('bank')}
                             disabled={!userData.isBankAdded}
                         >
-                            <i className="fa-solid fa-building-columns mr-2"></i>
+                            <Building2 className="w-4 h-4 mr-2" />
                             Bank Transfer
                             {userData.isBankAdded && paymentMethod === 'bank' && (
-                                <i className="fa-solid fa-check ml-2 text-blue-600"></i>
+                                <Check className="w-4 h-4 ml-2 text-blue-600" />
                             )}
                         </button>
                         <button
@@ -206,10 +207,10 @@ const Withdraw = () => {
                             onClick={() => setPaymentMethod('upi')}
                             disabled={!userData.isUpiAdded}
                         >
-                            <i className="fa-solid fa-indian-rupee-sign mr-2"></i>
+                            <IndianRupee className="w-4 h-4 mr-2" />
                             UPI Transfer
                             {userData.isUpiAdded && paymentMethod === 'upi' && (
-                                <i className="fa-solid fa-check ml-2 text-purple-600"></i>
+                                <Check className="w-4 h-4 ml-2 text-purple-600" />
                             )}
                         </button>
                     </div>
@@ -247,28 +248,28 @@ const Withdraw = () => {
             {/* Withdrawal Rules */}
             <div className='bg-white p-5 rounded-xl shadow-sm border border-gray-100'>
                 <h2 className='text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2'>
-                    <i className="fa-solid fa-info-circle text-blue-500"></i>
+                    <Info className="w-5 h-5 text-blue-500" />
                     Withdrawal Rules
                 </h2>
                 <ul className='space-y-3'>
                     <li className='flex items-start gap-2'>
-                        <i className="fa-solid fa-circle-check text-green-500 mt-1 text-xs"></i>
+                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                         <span className='text-gray-600'>Minimum withdrawal amount is ₹300</span>
                     </li>
                     <li className='flex items-start gap-2'>
-                        <i className="fa-solid fa-circle-check text-green-500 mt-1 text-xs"></i>
+                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                         <span className='text-gray-600'>Maximum 3 withdrawals allowed per day</span>
                     </li>
                     <li className='flex items-start gap-2'>
-                        <i className="fa-solid fa-circle-check text-green-500 mt-1 text-xs"></i>
+                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                         <span className='text-gray-600'>Withdrawals processed between 9:00AM to 12:00PM</span>
                     </li>
                     <li className='flex items-start gap-2'>
-                        <i className="fa-solid fa-circle-check text-green-500 mt-1 text-xs"></i>
+                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                         <span className='text-gray-600'>Deposit balance is not withdrawable</span>
                     </li>
                     <li className='flex items-start gap-2'>
-                        <i className="fa-solid fa-circle-check text-green-500 mt-1 text-xs"></i>
+                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                         <span className='text-gray-600'>Please select either Bank Transfer or UPI Transfer method</span>
                     </li>
                 </ul>

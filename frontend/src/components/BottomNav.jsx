@@ -1,28 +1,30 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { Link } from 'react-router-dom'
+import { Home, Share2, User } from 'lucide-react'
 
-const BottomNav = () => {
+const BottomNav = memo(() => {
   return (
-    <div>
-            {/* Bottom Navigation Bar */}
-      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[440px] bg-white shadow-t border-t border-gray-300 flex justify-around items-center py-2 z-50">
-        <Link to="/" className="flex flex-col items-center text-gray-600 hover:text-indigo-600">
-          <i className="fa-solid fa-house text-xl"></i>
-          <span className="text-xs">Home</span>
+    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[440px] bg-white shadow-lg border-t border-gray-200 z-50 safe-area-bottom">
+      <div className="flex justify-around items-center py-2 px-4">
+        <Link to="/" className="flex flex-col items-center space-y-1 text-gray-500 hover:text-blue-600 transition-colors duration-200 touch-target touch-feedback p-2 -m-2 rounded-lg">
+          <Home size={24} />
+          <span className="text-xs font-medium">Home</span>
         </Link>
         
-        <Link to="/refer" className="flex flex-col items-center text-gray-600 hover:text-emerald-600">
-         <i className="fa-solid fa-share-nodes text-xl"></i>
-          <span className="text-xs">Refer&Earn</span>
+        <Link to="/refer" className="flex flex-col items-center space-y-1 text-gray-500 hover:text-emerald-600 transition-colors duration-200 touch-target touch-feedback p-2 -m-2 rounded-lg">
+          <Share2 size={24} />
+          <span className="text-xs font-medium">Refer&Earn</span>
         </Link>
   
-        <Link to="/account" className="flex flex-col items-center text-gray-600 hover:text-rose-600">
-          <i className="fa-solid fa-user text-xl"></i>
-          <span className="text-xs">Account</span>
+        <Link to="/account" className="flex flex-col items-center space-y-1 text-gray-500 hover:text-purple-600 transition-colors duration-200 touch-target touch-feedback p-2 -m-2 rounded-lg">
+          <User size={24} />
+          <span className="text-xs font-medium">Account</span>
         </Link>
       </div>
     </div>
   )
-}
+})
+
+BottomNav.displayName = 'BottomNav'
 
 export default BottomNav

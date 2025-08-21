@@ -3,6 +3,7 @@ import axios from 'axios'
 import {AppContext} from '../context/AppContext'
 import {toast} from 'react-toastify'
 import {useNavigate} from 'react-router-dom'
+import { Mail, Lock, Key } from 'lucide-react'
 
 const ResetPass = () => {
 
@@ -159,7 +160,7 @@ const ResetPass = () => {
               {/* Email Input */}
               <div>
                 <label className="text-gray-700 flex items-center gap-2 mb-3 font-medium text-sm">
-                  <i className="fa-solid fa-envelope text-cyan-500"></i>Email Address
+                  <Mail className="w-4 h-4 text-cyan-500" />Email Address
                 </label>
                 <input
                   placeholder="Enter your email to find account"
@@ -196,7 +197,7 @@ const ResetPass = () => {
               {/* New Password Input */}
               <div>
                 <label className="text-gray-700 flex items-center gap-2 mb-3 font-medium text-sm">
-                  <i className="fa-solid fa-lock text-cyan-500"></i>New Password
+                  <Lock className="w-4 h-4 text-cyan-500" />New Password
                 </label>
                 <input
                   value={newPass}
@@ -210,7 +211,7 @@ const ResetPass = () => {
               {/* OTP Input */}
               <div>
                 <label className="text-gray-700 flex items-center gap-2 mb-3 font-medium text-sm">
-                  <i className="fa-solid fa-key text-cyan-500"></i>OTP Code
+                  <Key className="w-4 h-4 text-cyan-500" />OTP Code
                 </label>
                 <input
                   value={otp}

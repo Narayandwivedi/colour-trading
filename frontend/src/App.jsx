@@ -32,7 +32,7 @@ function App() {
   if (loading) return <div>Loading...</div>; // ✅ wait for checkLogin to finish
 
   return (
-  <div className='max-w-[440px] mx-auto bg-white min-h-screen rounded-lg shadow'>
+  <div className='max-w-[440px] mx-auto bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen relative overflow-hidden'>
     <ToastContainer/>
   <Routes>
     

@@ -3,7 +3,9 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { AppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
+import { User, Mail, Phone, Lock, Gift, Star } from "lucide-react";
 import GoogleLogin from "./GoogleLogin";
+import Navbar from "./Navbar";
 
 const Login = () => {
   const [state, setState] = useState("login");
@@ -131,87 +133,8 @@ const Login = () => {
       <div className="absolute -top-8 -left-8 w-64 h-64 bg-cyan-400/10 blur-3xl rounded-full"></div>
       <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-emerald-400/10 blur-3xl rounded-full"></div>
 
-      {/* Compact aqua-themed navbar */}
-      <nav className="bg-gradient-to-r from-teal-700 via-cyan-700 to-emerald-700 shadow-2xl px-4 py-2 max-w-[440px] mx-auto backdrop-blur-sm border-b border-cyan-600/50">
-        {/* Winner Club Logo */}
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <svg
-              width="40"
-              height="40"
-              viewBox="0 0 48 48"
-              className="drop-shadow-2xl"
-            >
-              {/* Trophy Base */}
-              <circle
-                cx="24"
-                cy="24"
-                r="20"
-                fill="url(#aquaGradient)"
-                stroke="#22D3EE"
-                strokeWidth="2"
-              />
-
-              {/* Trophy Cup */}
-              <path
-                d="M16 18 L32 18 L30 28 L18 28 Z"
-                fill="#67E8F9"
-                stroke="#06B6D4"
-                strokeWidth="1"
-              />
-
-              {/* Trophy Handles */}
-              <path
-                d="M14 20 Q12 20 12 22 Q12 24 14 24"
-                fill="none"
-                stroke="#22D3EE"
-                strokeWidth="2"
-              />
-              <path
-                d="M34 20 Q36 20 36 22 Q36 24 34 24"
-                fill="none"
-                stroke="#22D3EE"
-                strokeWidth="2"
-              />
-
-              {/* Trophy Base */}
-              <rect x="20" y="28" width="8" height="4" fill="#0891B2" rx="1" />
-              <rect x="18" y="32" width="12" height="3" fill="#0E7490" rx="1" />
-
-              {/* Star */}
-              <path
-                d="M24 12 L25.5 16.5 L30 16.5 L26.5 19.5 L28 24 L24 21 L20 24 L21.5 19.5 L18 16.5 L22.5 16.5 Z"
-                fill="#FDE047"
-                stroke="#FACC15"
-                strokeWidth="0.5"
-              />
-
-              <defs>
-                <linearGradient
-                  id="aquaGradient"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="100%"
-                >
-                  <stop offset="0%" stopColor="#22D3EE" />
-                  <stop offset="50%" stopColor="#67E8F9" />
-                  <stop offset="100%" stopColor="#06B6D4" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-
-          <div className="flex flex-col">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-lg">
-              WINNERS
-            </h1>
-            <p className="text-xs font-medium text-cyan-200 -mt-1 tracking-wider">
-              CLUB
-            </p>
-          </div>
-        </div>
-      </nav>
+      {/* Use shared Navbar component */}
+      <Navbar />
 
       {/* Login Form Container */}
       <div className="flex items-center justify-center px-4 py-4 relative z-10 h-[calc(100vh-60px)]">
@@ -219,17 +142,7 @@ const Login = () => {
           {/* Compact Header */}
           <div className="text-center mb-4">
             <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-full mb-2 shadow-xl">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 32 32"
-                className="text-white"
-              >
-                <path
-                  d="M16 4 L20 12 L28 12 L22 18 L24 28 L16 22 L8 28 L10 18 L4 12 L12 12 Z"
-                  fill="currentColor"
-                />
-              </svg>
+              <Star className="w-6 h-6 text-white" />
             </div>
             <h2 className="text-white text-xl font-bold bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent">
               {state === "signup" ? "Join Winner Club" : "Welcome Back"}
@@ -260,7 +173,7 @@ const Login = () => {
           {state === "signup" && (
             <div className="mb-4">
               <label className="text-cyan-200 flex items-center gap-2 mb-2 font-medium text-xs">
-                <i className="fa-solid fa-user text-cyan-400"></i>Full Name
+                <User className="w-4 h-4 text-cyan-400" />Full Name
               </label>
               <input
                 onChange={(e) => setFullName(e.target.value)}
@@ -276,7 +189,7 @@ const Login = () => {
           {state === "signup" && (
             <div className="mb-4">
               <label className="text-cyan-200 flex items-center gap-2 mb-2 font-medium text-xs">
-                <i className="fa-solid fa-envelope text-cyan-400"></i>Email
+                <Mail className="w-4 h-4 text-cyan-400" />Email
               </label>
               <input
                 onChange={(e) => setEmail(e.target.value)}
@@ -292,7 +205,7 @@ const Login = () => {
           {state === "signup" && (
             <div className="mb-4">
               <label className="text-cyan-200 flex items-center gap-2 mb-2 font-medium text-xs">
-                <i className="fa-solid fa-phone text-cyan-400"></i>Mobile Number
+                <Phone className="w-4 h-4 text-cyan-400" />Mobile Number
               </label>
               <input
                 onChange={(e) => {
@@ -318,7 +231,7 @@ const Login = () => {
           {state === "login" && (
             <div className="mb-4">
               <label className="text-cyan-200 flex items-center gap-2 mb-2 font-medium text-xs">
-                <i className="fa-solid fa-user text-cyan-400"></i>Email or Mobile
+                <User className="w-4 h-4 text-cyan-400" />Email or Mobile
               </label>
               <input
                 onChange={(e) => setEmailOrMobile(e.target.value)}
@@ -333,7 +246,7 @@ const Login = () => {
           {/* Password */}
           <div className="mb-3">
             <label className="text-cyan-200 flex items-center gap-2 mb-2 font-medium text-xs">
-              <i className="fa-solid fa-lock text-cyan-400"></i>
+              <Lock className="w-4 h-4 text-cyan-400" />
               {state === "signup" ? "Set Password" : "Password"}
             </label>
             <input
@@ -368,7 +281,7 @@ const Login = () => {
           {state === "signup" && (
             <div className="mb-4">
               <label className="text-cyan-200 flex items-center gap-2 mb-2 font-medium text-xs">
-                <i className="fa-solid fa-gift text-cyan-400"></i>Invite Code (Optional)
+                <Gift className="w-4 h-4 text-cyan-400" />Invite Code (Optional)
               </label>
               <input
                 onChange={(e) => setInviteCode(e.target.value)}

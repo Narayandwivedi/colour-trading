@@ -2,6 +2,7 @@ import { useContext, useState, useEffect, useRef } from "react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { Trophy } from "lucide-react";
 
 // ⏰ Clock UI
 function Watch({ selected }) {
@@ -168,7 +169,7 @@ export default function Game() {
       <div className="game-counter mt-8 grid grid-cols-2 gap-4 text-center">
         <div className="bg-white p-4 rounded-lg shadow">
           <p className="text-gray-500 text-sm flex justify-center items-center gap-2">
-            <i className="fa-solid fa-trophy text-lg text-yellow-500"></i> Period
+            <Trophy className="w-5 h-5 text-yellow-500" /> Period
           </p>
           <p className="text-xl font-semibold text-indigo-700 mt-1">{period}</p>
         </div>
