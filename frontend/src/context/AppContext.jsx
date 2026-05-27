@@ -15,7 +15,13 @@ export const AppContextProvider = (props) => {
   const [userData , setUserData] = useState(null)
   const [period , setPeriod] = useState(null)
   const [periodCreatedAT , setPeriodCreatedAT] = useState(null)
-  const [gameType , setGameType] = useState('30sec')
+  const [gameType , setGameType] = useState(() => {
+    try {
+      return localStorage.getItem('gameType') || '30sec';
+    } catch {
+      return '30sec';
+    }
+  })
   const [finalDepositAmt , setFinalDepositAmt] = useState(100)
   const [loading, setLoading] = useState(true)
   const [activeBets, setActiveBets] = useState(() => {
@@ -96,6 +102,10 @@ export const AppContextProvider = (props) => {
   useEffect(() => {
     localStorage.setItem('activeBets', JSON.stringify(activeBets));
   }, [activeBets]);
+
+  useEffect(() => {
+    localStorage.setItem('gameType', gameType);
+  }, [gameType]);
 
   // 🔐 Check if user is logged in
 const checkLogin = async () => {

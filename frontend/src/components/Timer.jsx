@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useRef } from "react";
+import { useContext, useEffect } from "react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
 import { Trophy } from "lucide-react";
@@ -28,8 +28,6 @@ const getDurationByGameType = (type) => {
 };
 
 export default function Game() {
-  const [selectedTime, setSelectedTime] = useState("30sec");
-
   const {
     timer,
     setTimer,
@@ -97,17 +95,14 @@ export default function Game() {
         {["30sec", "1min", "3min"].map((label) => (
           <div
             key={label}
-            onClick={() => {
-              setSelectedTime(label);
-              setGameType(label);
-            }}
+            onClick={() => setGameType(label)}
             className={`flex flex-col items-center p-3 rounded-xl cursor-pointer transition-all duration-300 
-              ${selectedTime === label
+              ${gameType === label
                 ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white scale-105 shadow-xl"
                 : "bg-white hover:bg-indigo-100"
               }`}
           >
-            <Watch selected={selectedTime === label} />
+            <Watch selected={gameType === label} />
             <p className="text-sm mt-1 font-medium">{label}</p>
           </div>
         ))}
