@@ -145,23 +145,6 @@ function App() {
       {/* Main content */}
       <div className={`${isLoginPage ? 'w-full' : 'flex-1'} overflow-auto ${isLoginPage ? '' : 'pt-14 md:pt-0'}`}>
         <div className={`${isLoginPage ? 'p-4' : 'p-2 md:p-6'}`}>
-          {/* Page Header - Desktop only */}
-          {!isLoginPage && (
-            <div className="hidden md:block mb-6">
-              <div className="flex items-center space-x-3 mb-2">
-                <span className="text-3xl">
-                  {menuItems.find(item => item.path === location.pathname)?.icon || ""}
-                </span>
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {menuItems.find(item => item.path === location.pathname)?.label || "Dashboard"}
-                </h2>
-              </div>
-              <p className="text-gray-600">
-                {menuItems.find(item => item.path === location.pathname)?.description || ""}
-              </p>
-            </div>
-          )}
-
           {/* Content Container */}
           <div className={`${isLoginPage ? '' : 'bg-white rounded-2xl shadow-sm border border-gray-200'}`}>
             <div className={`${isLoginPage ? '' : 'p-1 md:p-6'}`}>

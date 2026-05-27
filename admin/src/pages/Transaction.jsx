@@ -191,27 +191,28 @@ const Transaction = () => {
   }
 
   return (
-    <div className="p-3 sm:p-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-8">
-        <div>
-          <h1 className="text-xl sm:text-4xl font-bold text-gray-800">Deposit Management</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">
-            Monitor and manage deposit requests — {pagination.totalDeposits} total {currentStatus} deposits
-          </p>
+    <div className="p-2 sm:p-3">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <div>
+            <h1 className="text-base sm:text-lg font-bold text-gray-900">Deposit Management</h1>
+            <p className="text-xs sm:text-sm text-gray-500">
+              Monitor and manage deposit requests — {pagination.totalDeposits} total {currentStatus} deposits
+            </p>
+          </div>
+          <button
+            onClick={() => fetchDepositsByStatus(currentStatus, pagination.currentPage)}
+            className="self-start bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1"
+          >
+            <RefreshCw size={12} />
+            Refresh
+          </button>
         </div>
-        <button
-          onClick={() => fetchDepositsByStatus(currentStatus, pagination.currentPage)}
-          className="self-start bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
-        >
-          <RefreshCw size={16} />
-          Refresh
-        </button>
-      </div>
 
-      {/* Status Filter Tabs */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6 mb-4 sm:mb-8">
-        <div className="flex flex-wrap gap-2 sm:gap-4">
+        {/* Status Filter Tabs */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-3 sm:mb-4">
+          <div className="flex flex-wrap items-center gap-2 p-2 sm:p-3">
           {[
             { key: "pending", label: "Pending", activeColor: "bg-amber-600 text-white shadow-lg shadow-amber-200", inactiveColor: "bg-amber-100 text-amber-800 hover:bg-amber-200" },
             { key: "success", label: "Approved", activeColor: "bg-green-600 text-white shadow-lg shadow-green-200", inactiveColor: "bg-green-100 text-green-800 hover:bg-green-200" },
@@ -220,13 +221,13 @@ const Transaction = () => {
             <button
               key={key}
               onClick={() => handleStatusChange(key)}
-              className={`flex-1 sm:flex-none text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-200 ${
+              className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-200 ${
                 currentStatus === key ? activeColor : inactiveColor
               }`}
             >
               {label}
               {currentStatus === key && (
-                <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 text-xs rounded-full bg-white bg-opacity-20">
+                <span className="ml-1 px-1.5 py-0.5 text-[10px] rounded-full bg-white bg-opacity-20">
                   {pagination.totalDeposits}
                 </span>
               )}
@@ -238,7 +239,7 @@ const Transaction = () => {
       {/* Deposits Grid */}
       {deposits.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             {deposits.map((deposit) => {
               const statusConfig = getStatusConfig(deposit.status);
               const StatusIcon = statusConfig.icon;
@@ -246,72 +247,59 @@ const Transaction = () => {
               return (
                 <div
                   key={deposit._id}
-                  className={`${statusConfig.bgColor} ${statusConfig.borderColor} ${statusConfig.shadowColor} border-2 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300`}
+                  className={`${statusConfig.bgColor} ${statusConfig.borderColor} border rounded-lg p-3 shadow-sm`}
                 >
-                    {/* Status Badge */}
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-2">
                       <span
-                        className={`${statusConfig.badgeColor} px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide flex items-center gap-1`}
+                        className={`${statusConfig.badgeColor} px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase flex items-center gap-1`}
                       >
-                        <StatusIcon size={14} />
+                        <StatusIcon size={10} />
                         {deposit.status}
                       </span>
-                      <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded-lg">
+                      <span className="text-[10px] text-gray-500 bg-white px-2 py-0.5 rounded">
                         {deposit.type}
-                      </div>
+                      </span>
                     </div>
 
-                    {/* Deposit Details */}
-                    <div className="space-y-3 mb-4">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar size={16} className="text-gray-500" />
-                        <span className="text-gray-700">
-                          {formatDate(deposit.createdAt)}
-                        </span>
+                    <div className="space-y-1.5 mb-3">
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <Calendar size={12} className="text-gray-400 shrink-0" />
+                        <span className="text-gray-600">{formatDate(deposit.createdAt)}</span>
                       </div>
 
-                      <div className="flex items-center gap-2 text-sm">
-                        <User size={16} className="text-gray-500" />
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <User size={12} className="text-gray-400 shrink-0" />
                         <div>
-                          <div className="text-gray-700 font-medium">
-                            {deposit.userId?.fullName || 'N/A'}
-                          </div>
-                          <div className="text-gray-500 text-xs">
-                            {deposit.userId?.email || 'N/A'}
-                          </div>
+                          <span className="text-gray-700 font-medium">{deposit.userId?.fullName || 'N/A'}</span>
+                          <span className="text-gray-400 ml-1">{deposit.userId?.email || 'N/A'}</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 text-sm">
-                        <Hash size={16} className="text-gray-500" />
-                        <span className="text-gray-700 font-mono text-xs bg-white px-2 py-1 rounded">
-                          UTR: {deposit.UTR}
-                        </span>
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <Hash size={12} className="text-gray-400 shrink-0" />
+                        <span className="text-gray-600 font-mono">UTR: {deposit.UTR}</span>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <DollarSign size={16} className="text-gray-500" />
-                        <span className="text-xl font-bold text-gray-800">
-                          {formatAmount(deposit.amount)}
-                        </span>
+                      <div className="flex items-center gap-1.5">
+                        <DollarSign size={12} className="text-gray-400 shrink-0" />
+                        <span className="text-sm font-bold text-gray-900">{formatAmount(deposit.amount)}</span>
                       </div>
                     </div>
 
-                    {/* Action Buttons for Pending Deposits */}
                     {deposit.status === "pending" && (
-                      <div className="flex gap-2 pt-4 border-t border-amber-200">
+                      <div className="flex gap-1.5 pt-2 border-t border-amber-200">
                         <button
                           onClick={() => handleApprove(deposit._id)}
-                          className="flex-1 bg-green-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium flex items-center justify-center gap-1"
+                          className="flex-1 bg-green-600 text-white text-[10px] px-2 py-1 rounded hover:bg-green-700 font-medium flex items-center justify-center gap-1"
                         >
-                          <CheckCircle size={16} />
+                          <CheckCircle size={10} />
                           Approve
                         </button>
                         <button
                           onClick={() => handleReject(deposit._id)}
-                          className="flex-1 bg-red-500 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium flex items-center justify-center gap-1"
+                          className="flex-1 bg-red-500 text-white text-[10px] px-2 py-1 rounded hover:bg-red-600 font-medium flex items-center justify-center gap-1"
                         >
-                          <XCircle size={16} />
+                          <XCircle size={10} />
                           Reject
                         </button>
                       </div>
@@ -323,56 +311,26 @@ const Transaction = () => {
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:px-6 sm:py-4 mt-4 sm:mt-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
-                    Page {pagination.currentPage} of {pagination.totalPages}
-                    <span className="ml-2 text-gray-500">({pagination.totalDeposits} total)</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] sm:text-xs text-gray-600">
+                    Page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalDeposits} total)
+                  </p>
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => handlePageChange(pagination.currentPage - 1)}
                       disabled={!pagination.hasPrevPage}
-                      className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium ${
-                        pagination.hasPrevPage
-                          ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      }`}
+                      className="px-2 py-1 text-[10px] sm:text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      Previous
+                      Prev
                     </button>
-                    
-                    {/* Page numbers - hidden on mobile */}
-                    <div className="hidden sm:flex items-center gap-1">
-                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                        const pageNum = Math.max(1, pagination.currentPage - 2) + i;
-                        if (pageNum <= pagination.totalPages) {
-                          return (
-                            <button
-                              key={pageNum}
-                              onClick={() => handlePageChange(pageNum)}
-                              className={`w-8 h-8 rounded-lg text-sm font-medium ${
-                                pageNum === pagination.currentPage
-                                  ? 'bg-indigo-600 text-white'
-                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                              }`}
-                            >
-                              {pageNum}
-                            </button>
-                          );
-                        }
-                        return null;
-                      })}
-                    </div>
-                    
+                    <span className="px-2 py-1 text-[10px] sm:text-xs font-medium rounded bg-gray-100 text-gray-700">
+                      {pagination.currentPage}
+                    </span>
                     <button
                       onClick={() => handlePageChange(pagination.currentPage + 1)}
                       disabled={!pagination.hasNextPage}
-                      className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium ${
-                        pagination.hasNextPage
-                          ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      }`}
+                      className="px-2 py-1 text-[10px] sm:text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Next
                     </button>
@@ -382,20 +340,12 @@ const Transaction = () => {
             )}
           </>
         ) : (
-          <div className="text-center py-8 sm:py-16">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-12 max-w-md mx-auto">
-              <div className="text-gray-400 mb-4">
-                <Eye size={36} className="mx-auto" />
-              </div>
-              <h3 className="text-base sm:text-xl font-semibold text-gray-700 mb-2">
-                No {currentStatus} deposits found
-              </h3>
-              <p className="text-sm sm:text-base text-gray-500">
-                There are no {currentStatus} deposits to display at the moment.
-              </p>
-            </div>
+          <div className="text-center py-8">
+            <Eye className="mx-auto h-8 w-8 text-gray-300" />
+            <p className="mt-1 text-xs text-gray-500">No {currentStatus} deposits found.</p>
           </div>
         )}
+      </div>
     </div>
   );
 };

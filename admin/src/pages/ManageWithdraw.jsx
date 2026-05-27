@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { CheckCircle, Clock, XCircle, User, Calendar, Hash, DollarSign, Eye, CreditCard, ArrowUpCircle, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { CheckCircle, Clock, XCircle, User, Calendar, DollarSign, Eye, CreditCard, ArrowUpCircle, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 
@@ -200,41 +200,39 @@ const ManageWithdraw = () => {
   }
 
   return (
-    <div className="p-3 sm:p-6">
-      {/* Header */}
-      <div className="mb-4 sm:mb-8">
-        <div className="flex items-center gap-2 sm:gap-3 mb-2">
-          <ArrowUpCircle className="text-purple-600 shrink-0" size={28} />
-          <h1 className="text-xl sm:text-4xl font-bold text-gray-800">Withdrawal Management</h1>
+    <div className="p-2 sm:p-3">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-3 sm:mb-4">
+          <h1 className="text-base sm:text-lg font-bold text-gray-900">Withdrawal Management</h1>
+          <p className="text-xs sm:text-sm text-gray-500">Monitor and manage all withdrawal requests</p>
         </div>
-        <p className="text-sm sm:text-base text-gray-600">Monitor and manage all withdrawal requests</p>
-      </div>
 
-      {/* Stats Card */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6 mb-4 sm:mb-8">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
-          <div className="text-center">
-            <div className="text-xl sm:text-3xl font-bold text-purple-600">{withdrawals.length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">On Page</div>
+        {/* Stats Card */}
+        <div className="bg-white rounded-lg shadow-sm p-2 sm:p-3 border border-gray-200 mb-3 sm:mb-4">
+        <div className="grid grid-cols-4 gap-2 sm:gap-3">
+          <div className="bg-white rounded-lg p-2 sm:p-3 border border-gray-100">
+            <dt className="text-[10px] sm:text-xs text-gray-500 truncate">On Page</dt>
+            <dd className="text-xs sm:text-sm font-bold text-purple-600">{withdrawals.length}</dd>
           </div>
-          <div className="text-center">
-            <div className="text-xl sm:text-3xl font-bold text-blue-600">{pagination.totalWithdrawals}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Total {currentStatus}</div>
+          <div className="bg-white rounded-lg p-2 sm:p-3 border border-gray-100">
+            <dt className="text-[10px] sm:text-xs text-gray-500 truncate">Total {currentStatus}</dt>
+            <dd className="text-xs sm:text-sm font-bold text-blue-600">{pagination.totalWithdrawals}</dd>
           </div>
-          <div className="text-center">
-            <div className="text-xl sm:text-3xl font-bold text-green-600">{formatAmount(getTotalAmount())}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Page Amt</div>
+          <div className="bg-white rounded-lg p-2 sm:p-3 border border-gray-100">
+            <dt className="text-[10px] sm:text-xs text-gray-500 truncate">Page Amt</dt>
+            <dd className="text-xs sm:text-sm font-bold text-green-600">{formatAmount(getTotalAmount())}</dd>
           </div>
-          <div className="text-center">
-            <div className="text-xl sm:text-3xl font-bold text-amber-600">{pagination.currentPage}/{pagination.totalPages}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Page</div>
+          <div className="bg-white rounded-lg p-2 sm:p-3 border border-gray-100">
+            <dt className="text-[10px] sm:text-xs text-gray-500 truncate">Page</dt>
+            <dd className="text-xs sm:text-sm font-bold text-amber-600">{pagination.currentPage}/{pagination.totalPages}</dd>
           </div>
         </div>
       </div>
 
       {/* Status Filter Tabs */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6 mb-4 sm:mb-8">
-        <div className="flex flex-wrap gap-2 sm:gap-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-3 sm:mb-4">
+        <div className="flex flex-wrap items-center gap-2 p-2 sm:p-3">
           {[
             { key: "pending", label: "Pending", icon: Clock },
             { key: "success", label: "Approved", icon: CheckCircle },
@@ -243,21 +241,21 @@ const ManageWithdraw = () => {
             <button
               key={key}
               onClick={() => handleStatusChange(key)}
-              className={`flex-1 sm:flex-none text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 ${
+              className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-200 flex items-center gap-1 ${
                 currentStatus === key
-                  ? "bg-purple-600 text-white shadow-lg shadow-purple-200"
+                  ? "bg-purple-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              <Icon size={14} />
+              <Icon size={12} />
               {label}
             </button>
           ))}
           <button
             onClick={() => fetchWithdrawals(currentStatus, pagination.currentPage)}
-            className="flex-1 sm:flex-none text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200"
+            className="text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-200 flex items-center gap-1 bg-blue-100 text-blue-700 hover:bg-blue-200"
           >
-            <RefreshCw size={14} />
+            <RefreshCw size={12} />
             Refresh
           </button>
         </div>
@@ -436,43 +434,30 @@ const ManageWithdraw = () => {
 
             {/* Pagination Controls */}
             {pagination.totalPages > 1 && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6 mt-4 sm:mt-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] sm:text-xs text-gray-600">
                     Page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalWithdrawals} total)
-                  </div>
-                  
-                  <div className="flex items-center justify-center gap-2">
+                  </p>
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => handlePageChange(pagination.currentPage - 1)}
                       disabled={!pagination.hasPrevPage}
-                      className={`flex items-center gap-1 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
-                        pagination.hasPrevPage
-                          ? "bg-purple-600 text-white hover:bg-purple-700"
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      }`}
+                      className="px-2 py-1 text-[10px] sm:text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      <ChevronLeft size={14} />
-                      <span className="hidden sm:inline">Previous</span>
-                      <span className="sm:hidden">Prev</span>
+                      <ChevronLeft size={12} />
+                      <span>Prev</span>
                     </button>
-                    
-                    <span className="px-3 sm:px-4 py-2 bg-gray-100 rounded-lg text-xs sm:text-sm font-medium">
+                    <span className="px-2 py-1 text-[10px] sm:text-xs font-medium rounded bg-gray-100 text-gray-700">
                       {pagination.currentPage}
                     </span>
-                    
                     <button
                       onClick={() => handlePageChange(pagination.currentPage + 1)}
                       disabled={!pagination.hasNextPage}
-                      className={`flex items-center gap-1 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
-                        pagination.hasNextPage
-                          ? "bg-purple-600 text-white hover:bg-purple-700"
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      }`}
+                      className="px-2 py-1 text-[10px] sm:text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      <span className="hidden sm:inline">Next</span>
-                      <span className="sm:hidden">Next</span>
-                      <ChevronRight size={14} />
+                      <span>Next</span>
+                      <ChevronRight size={12} />
                     </button>
                   </div>
                 </div>
@@ -480,18 +465,12 @@ const ManageWithdraw = () => {
             )}
           </>
         ) : (
-          <div className="text-center py-8 sm:py-16">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-12 max-w-md mx-auto">
-              <div className="text-gray-400 mb-4">
-                <ArrowUpCircle size={36} className="mx-auto" />
-              </div>
-              <h3 className="text-base sm:text-xl font-semibold text-gray-700 mb-2">No withdrawals found</h3>
-              <p className="text-sm sm:text-base text-gray-500">
-                {`No ${currentStatus} withdrawal requests found.`}
-              </p>
-            </div>
+          <div className="text-center py-8">
+            <ArrowUpCircle className="mx-auto h-8 w-8 text-gray-300" />
+            <p className="mt-1 text-xs text-gray-500">No {currentStatus} withdrawal requests found.</p>
           </div>
         )}
+      </div>
     </div>
   );
 };

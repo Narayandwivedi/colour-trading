@@ -177,99 +177,76 @@ const ManageBets = () => {
   }, [onWSMessage]);
 
   const BetCard = ({ timeframe, title }) => (
-    <div className="w-full max-w-sm mx-auto bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-      {/* Header - Mobile Optimized */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-3">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-3 py-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-white font-bold text-lg">{title}</h2>
+          <h2 className="text-white font-bold text-sm">{title}</h2>
           <div className="text-right">
-            <p className="text-blue-100 text-xs uppercase tracking-wide">Period</p>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-2 py-1 mt-1">
-              <p className="text-white font-bold text-sm break-all">
-                {periods[timeframe].period || 'Loading...'}
-              </p>
-            </div>
+            <p className="text-blue-100 text-[10px] uppercase">Period</p>
+            <p className="text-white font-bold text-xs">{periods[timeframe].period || 'Loading...'}</p>
           </div>
         </div>
       </div>
-
-      {/* Content */}
-      <div className="p-4 space-y-4">
-        {/* Input Fields */}
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Number (0-9)
-            </label>
-            <input
-              type="number"
-              placeholder="Enter number"
-              value={inputs[timeframe].number}
-              onChange={(e) => handleInputChange(timeframe, 'number', e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              min="0"
-              max="9"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Colour
-            </label>
-            <select
-              value={inputs[timeframe].colour}
-              onChange={(e) => handleInputChange(timeframe, 'colour', e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
-            >
-              <option value="">Select colour</option>
-              <option value="red">🔴 Red</option>
-              <option value="green">🟢 Green</option>
-              <option value="violet">🟣 Violet</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Size
-            </label>
-            <select
-              value={inputs[timeframe].size}
-              onChange={(e) => handleInputChange(timeframe, 'size', e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
-            >
-              <option value="">Select size</option>
-              <option value="small">📏 Small</option>
-              <option value="big">📐 Big</option>
-            </select>
-          </div>
+      <div className="p-3 space-y-2">
+        <div>
+          <label className="block text-[10px] font-medium text-gray-700 mb-0.5">Number (0-9)</label>
+          <input
+            type="number"
+            placeholder="Enter number"
+            value={inputs[timeframe].number}
+            onChange={(e) => handleInputChange(timeframe, 'number', e.target.value)}
+            className="w-full px-2 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
+            min="0"
+            max="9"
+          />
         </div>
-
-        {/* Action Buttons */}
-        <div className="space-y-2 pt-2">
+        <div>
+          <label className="block text-[10px] font-medium text-gray-700 mb-0.5">Colour</label>
+          <select
+            value={inputs[timeframe].colour}
+            onChange={(e) => handleInputChange(timeframe, 'colour', e.target.value)}
+            className="w-full px-2 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs bg-white"
+          >
+            <option value="">Select colour</option>
+            <option value="red">🔴 Red</option>
+            <option value="green">🟢 Green</option>
+            <option value="violet">🟣 Violet</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-[10px] font-medium text-gray-700 mb-0.5">Size</label>
+          <select
+            value={inputs[timeframe].size}
+            onChange={(e) => handleInputChange(timeframe, 'size', e.target.value)}
+            className="w-full px-2 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs bg-white"
+          >
+            <option value="">Select size</option>
+            <option value="small">📏 Small</option>
+            <option value="big">📐 Big</option>
+          </select>
+        </div>
+        <div className="flex gap-2 pt-1">
           <button
             onClick={() => createAdminResult(timeframe)}
             disabled={loading[timeframe]}
-            className={`w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200 ${
+            className={`flex-1 py-1.5 rounded text-xs font-medium transition-all ${
               loading[timeframe]
                 ? 'bg-gray-400 cursor-not-allowed text-gray-600'
-                : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md hover:shadow-lg transform hover:scale-[1.02]'
+                : 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700'
             }`}
           >
             {loading[timeframe] ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+              <div className="flex items-center justify-center gap-1">
+                <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></div>
                 Creating...
               </div>
-            ) : (
-              'Set Result'
-            )}
+            ) : 'Set Result'}
           </button>
-          
           <button
             onClick={() => fetchLatestPeriod(timeframe)}
-            className="w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors border border-gray-300"
+            className="flex-1 py-1.5 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200 border border-gray-300"
           >
-            🔄 Refresh Period
+            🔄 Refresh
           </button>
         </div>
       </div>
@@ -277,20 +254,16 @@ const ManageBets = () => {
   );
 
   return (
-    <div className="bg-gray-50 min-h-full">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-4 py-4 sm:py-6">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-lg sm:text-3xl font-bold text-gray-900">Manage Bets</h1>
-          <p className="text-xs sm:text-base text-gray-600 mt-0.5 sm:mt-2">
-            Control betting results for different time frames
-          </p>
+    <div className="p-2 sm:p-3">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-3 sm:mb-4">
+          <h1 className="text-base sm:text-lg font-bold text-gray-900">Manage Bets</h1>
+          <p className="text-xs sm:text-sm text-gray-500">Control betting results for different time frames</p>
         </div>
-      </div>
 
-      {/* Cards Grid */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
           <BetCard timeframe="30sec" title="30 Sec" />
           <BetCard timeframe="1min" title="1 Min" />
           <BetCard timeframe="3min" title="3 Min" />

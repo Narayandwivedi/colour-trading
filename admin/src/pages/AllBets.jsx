@@ -15,10 +15,13 @@ const AllBets = () => {
     hasPrevPage: false,
     limit: 20
   });
+  const [dateFilter, setDateFilter] = useState('all');
   const [filters, setFilters] = useState({
     status: '',
     period: '',
-    userId: ''
+    userId: '',
+    startDate: '',
+    endDate: ''
   });
 
   const fetchAllBets = async (page = 1) => {
@@ -33,6 +36,8 @@ const AllBets = () => {
       if (filters.status) params.append('status', filters.status);
       if (filters.period) params.append('period', filters.period);
       if (filters.userId) params.append('userId', filters.userId);
+      if (filters.startDate) params.append('startDate', filters.startDate);
+      if (filters.endDate) params.append('endDate', filters.endDate);
 
       const { data } = await axios.get(`${BACKEND_URL}/api/bet/all?${params}`);
       
@@ -66,11 +71,31 @@ const AllBets = () => {
     }));
   };
 
+  const handleDateFilter = (e) => {
+    const val = e.target.value;
+    setDateFilter(val);
+    if (val === 'all') {
+      setFilters(prev => ({ ...prev, startDate: '', endDate: '' }));
+    } else if (val === 'custom') {
+      setFilters(prev => ({ ...prev, startDate: '', endDate: '' }));
+    } else {
+      const days = parseInt(val);
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - days);
+      const fmt = (d) => d.toISOString().split('T')[0];
+      setFilters(prev => ({ ...prev, startDate: fmt(start), endDate: fmt(end) }));
+    }
+  };
+
   const clearFilters = () => {
+    setDateFilter('all');
     setFilters({
       status: '',
       period: '',
-      userId: ''
+      userId: '',
+      startDate: '',
+      endDate: ''
     });
   };
 
@@ -137,67 +162,111 @@ const AllBets = () => {
   }
 
   return (
-    <div className="p-3 sm:p-0 space-y-3 sm:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">All Bets</h1>
-          <p className="text-sm sm:text-base text-gray-600">Total: {pagination.totalBets} bets</p>
+    <div className="p-2 sm:p-3">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <div>
+            <h1 className="text-base sm:text-lg font-bold text-gray-900">All Bets</h1>
+            <p className="text-xs sm:text-sm text-gray-500">Total: {pagination.totalBets} bets</p>
+          </div>
+          <button
+            onClick={() => fetchAllBets(pagination.currentPage)}
+            className="text-xs px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
+            Refresh
+          </button>
         </div>
-        <button
-          onClick={() => fetchAllBets(pagination.currentPage)}
-          className="self-start text-sm px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          Refresh
-        </button>
-      </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select
-              name="status"
-              value={filters.status}
-              onChange={handleFilterChange}
-              className="w-full border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All</option>
-              <option value="pending">Pending</option>
-              <option value="win">Win</option>
-              <option value="lost">Lost</option>
-            </select>
+        {/* Filters */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-3 sm:mb-4">
+          <div className="flex flex-col gap-2 p-2 sm:p-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div>
+              <label className="block text-[10px] font-medium text-gray-700 mb-0.5">Status</label>
+              <select
+                name="status"
+                value={filters.status}
+                onChange={handleFilterChange}
+                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="win">Win</option>
+                <option value="lost">Lost</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-medium text-gray-700 mb-0.5">Period</label>
+              <input
+                type="number"
+                name="period"
+                value={filters.period}
+                onChange={handleFilterChange}
+                placeholder="Period"
+                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-medium text-gray-700 mb-0.5">User ID</label>
+              <input
+                type="text"
+                name="userId"
+                value={filters.userId}
+                onChange={handleFilterChange}
+                placeholder="User ID"
+                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={clearFilters}
+                className="w-full px-3 py-1.5 bg-gray-500 text-white rounded hover:bg-gray-600 text-xs"
+              >
+                Clear
+              </button>
+            </div>
           </div>
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Period</label>
-            <input
-              type="number"
-              name="period"
-              value={filters.period}
-              onChange={handleFilterChange}
-              placeholder="Period"
-              className="w-full border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">User ID</label>
-            <input
-              type="text"
-              name="userId"
-              value={filters.userId}
-              onChange={handleFilterChange}
-              placeholder="User ID"
-              className="w-full border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex items-end">
-            <button
-              onClick={clearFilters}
-              className="w-full px-3 py-1.5 sm:py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-xs sm:text-sm"
-            >
-              Clear
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+            <div>
+              <label className="block text-[10px] font-medium text-gray-700 mb-0.5">Date</label>
+              <select
+                value={dateFilter}
+                onChange={handleDateFilter}
+                className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="all">All Time</option>
+                <option value="7">Last 7 Days</option>
+                <option value="30">Last 30 Days</option>
+                <option value="60">Last 60 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="custom">Custom Range</option>
+              </select>
+            </div>
+            {dateFilter === 'custom' && (
+              <>
+                <div>
+                  <label className="block text-[10px] font-medium text-gray-700 mb-0.5">From Date</label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={filters.startDate}
+                    onChange={handleFilterChange}
+                    className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-medium text-gray-700 mb-0.5">To Date</label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    value={filters.endDate}
+                    onChange={handleFilterChange}
+                    className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -304,72 +373,42 @@ const AllBets = () => {
         </div>
 
         {bets.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">📊</div>
-            <h3 className="text-gray-500 text-lg font-medium mb-2">No Bets Found</h3>
-            <p className="text-gray-400">Try adjusting your filters or check back later.</p>
+          <div className="text-center py-8">
+            <p className="text-xs text-gray-500">No Bets Found. Try adjusting your filters.</p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-3">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] sm:text-xs text-gray-600">
+                Page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalBets} total)
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={!pagination.hasPrevPage}
+                  className="px-2 py-1 text-[10px] sm:text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Prev
+                </button>
+                <span className="px-2 py-1 text-[10px] sm:text-xs font-medium rounded bg-gray-100 text-gray-700">
+                  {pagination.currentPage}
+                </span>
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={!pagination.hasNextPage}
+                  className="px-2 py-1 text-[10px] sm:text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
-
-      {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:px-4 sm:py-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
-              Page {pagination.currentPage} of {pagination.totalPages}
-              <span className="ml-2 text-gray-500">({pagination.totalBets} total)</span>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <button
-                onClick={() => handlePageChange(pagination.currentPage - 1)}
-                disabled={!pagination.hasPrevPage}
-                className={`px-3 py-1.5 rounded text-xs sm:text-sm font-medium ${
-                  pagination.hasPrevPage
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                Prev
-              </button>
-              
-              <div className="hidden sm:flex items-center gap-1">
-                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                  const pageNum = Math.max(1, pagination.currentPage - 2) + i;
-                  if (pageNum <= pagination.totalPages) {
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`w-8 h-8 rounded text-sm font-medium ${
-                          pageNum === pagination.currentPage
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  }
-                  return null;
-                })}
-              </div>
-              
-              <button
-                onClick={() => handlePageChange(pagination.currentPage + 1)}
-                disabled={!pagination.hasNextPage}
-                className={`px-3 py-1.5 rounded text-xs sm:text-sm font-medium ${
-                  pagination.hasNextPage
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

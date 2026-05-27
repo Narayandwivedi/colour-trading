@@ -4,16 +4,8 @@ import {
   MessageCircle, 
   Send, 
   User, 
-  Clock, 
-  Eye, 
-  EyeOff, 
-  Filter,
   Search,
   RefreshCw,
-  CheckCircle,
-  AlertCircle,
-  Mail,
-  Phone,
   Paperclip,
   Download
 } from 'lucide-react';
@@ -312,29 +304,29 @@ const ChatSupport = () => {
   };
 
   return (
-    <div className="h-full flex flex-col lg:flex-row gap-3 sm:gap-6">
+    <div className="p-2 sm:p-3 h-full flex flex-col lg:flex-row gap-3 sm:gap-3">
       {/* Stats Cards - Mobile */}
       <div className="lg:hidden">
         <div className="grid grid-cols-4 gap-2">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 sm:p-4 rounded-lg sm:rounded-xl">
-            <div className="text-sm sm:text-2xl font-bold">{stats.total}</div>
-            <div className="text-[10px] sm:text-sm opacity-90 truncate">Users</div>
+          <div className="bg-white rounded-lg shadow-sm p-2 sm:p-3 border border-gray-200">
+            <dt className="text-[10px] sm:text-xs text-gray-500 truncate">Users</dt>
+            <dd className="text-xs sm:text-sm font-bold text-gray-900">{stats.total}</dd>
           </div>
-          <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-2 sm:p-4 rounded-lg sm:rounded-xl">
-            <div className="text-sm sm:text-2xl font-bold">{stats.unread}</div>
-            <div className="text-[10px] sm:text-sm opacity-90 truncate">Unread</div>
+          <div className="bg-white rounded-lg shadow-sm p-2 sm:p-3 border border-gray-200">
+            <dt className="text-[10px] sm:text-xs text-gray-500 truncate">Unread</dt>
+            <dd className="text-xs sm:text-sm font-bold text-red-600">{stats.unread}</dd>
           </div>
-          <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-2 sm:p-4 rounded-lg sm:rounded-xl">
-            <div className="text-sm sm:text-2xl font-bold">
+          <div className="bg-white rounded-lg shadow-sm p-2 sm:p-3 border border-gray-200">
+            <dt className="text-[10px] sm:text-xs text-gray-500 truncate">Replied</dt>
+            <dd className="text-xs sm:text-sm font-bold text-gray-900">
               {conversations.filter(c => c.messages.some(m => m.hasRealReply)).length}
-            </div>
-            <div className="text-[10px] sm:text-sm opacity-90 truncate">Replied</div>
+            </dd>
           </div>
-          <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-2 sm:p-4 rounded-lg sm:rounded-xl">
-            <div className="text-sm sm:text-2xl font-bold">
+          <div className="bg-white rounded-lg shadow-sm p-2 sm:p-3 border border-gray-200">
+            <dt className="text-[10px] sm:text-xs text-gray-500 truncate">Pending</dt>
+            <dd className="text-xs sm:text-sm font-bold text-yellow-600">
               {conversations.filter(c => c.hasUnreplied).length}
-            </div>
-            <div className="text-[10px] sm:text-sm opacity-90 truncate">Pending</div>
+            </dd>
           </div>
         </div>
       </div>
@@ -342,17 +334,16 @@ const ChatSupport = () => {
       {/* User Conversations List */}
       <div className="lg:w-1/2 flex flex-col">
         {/* Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
-          <div className="flex flex-wrap gap-3 items-center">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Filters:</span>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-3">
+          <div className="flex flex-wrap items-center gap-2 p-2 sm:p-3">
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] font-medium text-gray-700">Filters:</span>
             </div>
             
             <select
               value={filters.category}
               onChange={(e) => setFilters({...filters, category: e.target.value})}
-              className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
             >
               <option value="">All Categories</option>
               {categories.map(cat => (
@@ -363,49 +354,44 @@ const ChatSupport = () => {
             <select
               value={filters.isRead}
               onChange={(e) => setFilters({...filters, isRead: e.target.value})}
-              className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
             >
               <option value="">All Status</option>
               <option value="false">Has Unread</option>
               <option value="true">All Read</option>
             </select>
 
-            <div className="flex-1 relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <div className="flex-1 relative min-w-[120px]">
+              <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search users..."
+                placeholder="Search..."
                 value={filters.search}
                 onChange={(e) => setFilters({...filters, search: e.target.value})}
-                className="w-full pl-10 pr-4 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-7 pr-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <button
               onClick={() => fetchMessages(false)}
               disabled={loading || isRefreshing}
-              className={`p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+              className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded disabled:opacity-50"
               title="Refresh"
             >
-              <RefreshCw className={`w-4 h-4 transition-transform ${(loading || isRefreshing) ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3 h-3 ${(loading || isRefreshing) ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
 
         {/* Conversations */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex-1 overflow-hidden">
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 flex items-center">
-              <MessageCircle className="w-5 h-5 mr-2" />
-              User Conversations
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex-1 overflow-hidden">
+          <div className="px-3 py-2 border-b border-gray-200">
+            <h3 className="text-xs font-semibold text-gray-800 flex items-center">
+              <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
+              Conversations
               {stats.unread > 0 && (
-                <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                <span className="ml-1.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
                   {stats.unread}
-                </span>
-              )}
-              {isRefreshing && (
-                <span className="ml-2 text-gray-400">
-                  <RefreshCw className="w-3 h-3 animate-spin inline" />
                 </span>
               )}
             </h3>
@@ -414,70 +400,52 @@ const ChatSupport = () => {
           <div className="overflow-y-auto h-96 lg:h-[calc(100vh-300px)]">
             {loading ? (
               <div className="flex items-center justify-center h-32">
-                <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
+                <RefreshCw className="w-5 h-5 animate-spin text-gray-400" />
               </div>
             ) : conversations.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 text-gray-500">
-                <MessageCircle className="w-8 h-8 mb-2" />
-                <p>No conversations found</p>
+                <MessageCircle className="w-6 h-6 mb-1" />
+                <p className="text-xs">No conversations found</p>
               </div>
             ) : (
-              <div className="p-2">
+              <div className="p-1.5">
                 {conversations.map((conversation) => (
                   <div
                     key={conversation.user._id}
                     onClick={() => {
                       setSelectedConversation(conversation);
                     }}
-                    className={`p-4 border border-gray-100 rounded-lg mb-2 cursor-pointer transition-all hover:shadow-md ${
+                    className={`p-2.5 border border-gray-100 rounded mb-1 cursor-pointer transition-all ${
                       selectedConversation?.user._id === conversation.user._id ? 'bg-blue-50 border-blue-300' : 
                       conversation.unreadCount > 0 ? 'bg-yellow-50' : 'bg-white hover:bg-gray-50'
                     }`}
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center space-x-3">
+                    <div className="flex items-start justify-between mb-1">
+                      <div className="flex items-center gap-2">
                         <div className="relative">
-                          <User className="w-8 h-8 text-gray-500 bg-gray-100 rounded-full p-1" />
+                          <User className="w-6 h-6 text-gray-500 bg-gray-100 rounded-full p-1" />
                           {conversation.unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
                               {conversation.unreadCount}
                             </span>
                           )}
                         </div>
                         <div>
-                          <span className="font-medium text-sm text-gray-800">
+                          <span className="text-xs font-medium text-gray-800">
                             {conversation.user.fullName || 'Unknown User'}
                           </span>
-                          <p className="text-xs text-gray-500">{conversation.user.email}</p>
+                          <p className="text-[10px] text-gray-500">{conversation.user.email}</p>
                         </div>
                       </div>
-                      
-                      {conversation.unreadCount > 0 && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            markConversationAsRead(conversation.user._id);
-                          }}
-                          className="text-blue-500 hover:text-blue-700 transition-colors"
-                          title="Mark all as read"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      )}
                     </div>
                     
-                    <div className="mb-2">
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {getLastMessagePreview(conversation)}
-                      </p>
-                    </div>
+                    <p className="text-[10px] text-gray-600 line-clamp-1 mb-1">
+                      {getLastMessagePreview(conversation)}
+                    </p>
                     
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>{conversation.messages.length} message{conversation.messages.length !== 1 ? 's' : ''}</span>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="w-3 h-3" />
-                        <span>{formatDate(conversation.lastMessageAt)}</span>
-                      </div>
+                    <div className="flex items-center justify-between text-[10px] text-gray-400">
+                      <span>{conversation.messages.length} msg</span>
+                      <span>{formatDate(conversation.lastMessageAt)}</span>
                     </div>
                   </div>
                 ))}
