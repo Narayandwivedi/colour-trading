@@ -380,7 +380,6 @@ const ManageUser = () => {
                 <tr className="border-b border-gray-200 bg-gray-50">
                   <th className="text-left px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">User</th>
                   <th className="text-left px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">ID</th>
-                  <th className="text-left px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Mobile</th>
                   <th className="text-right px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Balance</th>
                   <th className="text-right px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Withdrawable</th>
                   <th className="text-center px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Ref</th>
@@ -400,14 +399,12 @@ const ManageUser = () => {
                         <div className="min-w-0">
                           <p className="text-xs font-medium text-gray-900 truncate max-w-[140px]">{user.fullName || 'Unknown'}</p>
                           <p className="text-[10px] text-gray-500 truncate max-w-[140px]">{user.email || ''}</p>
+                          <p className="text-[10px] text-gray-400">{user.mobile || '-'}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-3 py-2">
                       <span className="text-[10px] font-mono text-gray-500">#{user.userId}</span>
-                    </td>
-                    <td className="px-3 py-2">
-                      <span className="text-xs text-gray-700">{user.mobile || '-'}</span>
                     </td>
                     <td className="px-3 py-2 text-right">
                       <span className="text-xs font-semibold text-gray-900">{formatCurrency(user.balance)}</span>
