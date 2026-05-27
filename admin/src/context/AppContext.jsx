@@ -4,8 +4,8 @@ import axios from "axios";
 export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
-  // const BACKEND_URL = `http://localhost:8080`; 
-    const BACKEND_URL = `https://api.winners11.in`;
+  const BACKEND_URL = `http://localhost:8080`; 
+    // const BACKEND_URL = `https://api.winners11.in`;
 
   const [stats, setStats] = useState("");
   const [userData, setUserData] = useState(null);
