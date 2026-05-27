@@ -22,6 +22,83 @@ export default function Result() {
 
   const resultsPerPage = 40;
 
+  const activeBetsRef = useRef(activeBets);
+  activeBetsRef.current = activeBets;
+  const processedPeriodsRef = useRef(new Set());
+
+  function processResult(msg, bets) {
+    if (!bets || bets.length === 0) return;
+    if (processedPeriodsRef.current.has(msg.period)) return;
+    processedPeriodsRef.current.add(msg.period);
+
+    let totalWinAmount = 0;
+    let hasWon = false;
+    let hasLost = false;
+
+    bets.forEach((bet) => {
+      if (String(bet.period) !== String(msg.period)) return;
+
+      let winAmount = 0;
+      let isWinningBet = false;
+
+      if (bet.selectedBetColour) {
+        if (msg.colour === "violetRed") {
+          if (bet.selectedBetColour === "red") {
+            winAmount = bet.betValue * 1.5;
+            isWinningBet = true;
+          } else if (bet.selectedBetColour === "violet") {
+            winAmount = bet.betValue * 4;
+            isWinningBet = true;
+          }
+        } else if (msg.colour === "violetGreen") {
+          if (bet.selectedBetColour === "green") {
+            winAmount = bet.betValue * 1.5;
+            isWinningBet = true;
+          } else if (bet.selectedBetColour === "violet") {
+            winAmount = bet.betValue * 4;
+            isWinningBet = true;
+          }
+        } else {
+          if (bet.selectedBetColour === msg.colour) {
+            winAmount = bet.betValue * 2;
+            isWinningBet = true;
+          }
+        }
+      }
+
+      if (bet.selectedBetSize && bet.selectedBetSize === msg.size) {
+        winAmount += bet.betValue * 2;
+        isWinningBet = true;
+      }
+
+      if ((bet.selectedBetNumber !== undefined && bet.selectedBetNumber !== null) && bet.selectedBetNumber === msg.number) {
+        winAmount += bet.betValue * 9;
+        isWinningBet = true;
+      }
+
+      if (isWinningBet && winAmount > 0) {
+        totalWinAmount += winAmount;
+        hasWon = true;
+      } else if (!isWinningBet || winAmount === 0) {
+        hasLost = true;
+      }
+    });
+
+    if (hasWon) {
+      setWinAmount(totalWinAmount);
+      setBalance((prevBalance) => prevBalance + totalWinAmount);
+      setShowWinner(true);
+    } else if (hasLost && !hasWon) {
+      setShowLoser(true);
+    }
+
+    if (hasWon || hasLost) {
+      setActiveBets([]);
+    }
+
+    fetchResults(1, true);
+  }
+
   const fetchResults = async (page = 1, isInitialLoad = false) => {
     try {
       setLoading(true);
@@ -88,81 +165,34 @@ export default function Result() {
   useEffect(() => {
     const unsub = onWSMessage((msg) => {
       if (msg.type === 'game:result' && msg.gameType === gameType) {
-        if (activeBets && activeBets.length > 0) {
-          let totalWinAmount = 0;
-          let hasWon = false;
-          let hasLost = false;
-
-          activeBets.forEach((bet) => {
-            let winAmount = 0;
-            let isWinningBet = false;
-
-            if (bet.selectedBetColour) {
-              if (msg.colour === "violetRed") {
-                if (bet.selectedBetColour === "red") {
-                  winAmount = bet.betValue * 1.5;
-                  isWinningBet = true;
-                } else if (bet.selectedBetColour === "violet") {
-                  winAmount = bet.betValue * 4;
-                  isWinningBet = true;
-                } else {
-                  winAmount = 0;
-                  isWinningBet = false;
-                }
-              } else if (msg.colour === "violetGreen") {
-                if (bet.selectedBetColour === "green") {
-                  winAmount = bet.betValue * 1.5;
-                  isWinningBet = true;
-                } else if (bet.selectedBetColour === "violet") {
-                  winAmount = bet.betValue * 4;
-                  isWinningBet = true;
-                } else {
-                  winAmount = 0;
-                  isWinningBet = false;
-                }
-              } else {
-                if (bet.selectedBetColour === msg.colour) {
-                  winAmount = bet.betValue * 2;
-                  isWinningBet = true;
-                }
-              }
-            }
-
-            if (bet.selectedBetSize && bet.selectedBetSize === msg.size) {
-              winAmount += bet.betValue * 2;
-              isWinningBet = true;
-            }
-
-            if ((bet.selectedBetNumber !== undefined && bet.selectedBetNumber !== null) && bet.selectedBetNumber === msg.number) {
-              winAmount += bet.betValue * 9;
-              isWinningBet = true;
-            }
-
-            if (isWinningBet && winAmount > 0) {
-              totalWinAmount += winAmount;
-              hasWon = true;
-            } else if (!isWinningBet || winAmount === 0) {
-              hasLost = true;
-            }
-          });
-
-          if (hasWon) {
-            setWinAmount(totalWinAmount);
-            setBalance((prevBalance) => prevBalance + totalWinAmount);
-            setShowWinner(true);
-          } else if (hasLost && !hasWon) {
-            setShowLoser(true);
-          }
-
-          setActiveBets([]);
-        }
-
-        fetchResults(1, true);
+        processResult(msg, activeBetsRef.current);
       }
     });
 
     return unsub;
-  }, [gameType, activeBets, onWSMessage]);
+  }, [gameType, onWSMessage]);
+
+  // Polling fallback — shows win/loss popup if WebSocket missed the result
+  useEffect(() => {
+    if (!gameType) return;
+
+    const id = setInterval(async () => {
+      const currentBets = activeBetsRef.current;
+      if (!currentBets || currentBets.length === 0) return;
+
+      try {
+        const { data } = await axios.get(
+          `${BACKEND_URL}/api/latest/result/${gameType}?page=1&limit=1`
+        );
+        if (data.success && data.results && data.results.length > 0) {
+          const latest = data.results[0];
+          processResult(latest, currentBets);
+        }
+      } catch (e) {}
+    }, 3000);
+
+    return () => clearInterval(id);
+  }, [gameType]);
 
   return (
     <div className="result-container mb-6 px-2">
