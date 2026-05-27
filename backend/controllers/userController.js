@@ -663,7 +663,7 @@ const sendLoginAlert = async (userName) => {
 const editUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { fullName, email, balance, withdrawableBalance, password } = req.body;
+    const { fullName, email, mobile, balance, withdrawableBalance, password } = req.body;
 
     // Validate userId
     if (!userId || !mongoose.isValidObjectId(userId)) {
@@ -674,7 +674,7 @@ const editUser = async (req, res) => {
     }
 
     // Validate at least one field is provided
-    if (!fullName && !email && balance === undefined && withdrawableBalance === undefined && !password) {
+    if (!fullName && !email && !mobile && balance === undefined && withdrawableBalance === undefined && !password) {
       return res.status(400).json({
         success: false,
         message: "At least one field must be provided to update"
@@ -700,6 +700,20 @@ const editUser = async (req, res) => {
         return res.status(400).json({
           success: false,
           message: "Email already exists"
+        });
+      }
+    }
+
+    // Check if mobile is already taken by another user
+    if (mobile && mobile !== user.mobile) {
+      const existingUser = await userModel.findOne({
+        mobile: mobile.trim(),
+        _id: { $ne: userId }
+      });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "Mobile number already exists"
         });
       }
     }
@@ -739,6 +753,7 @@ const editUser = async (req, res) => {
     const originalValues = {
       fullName: user.fullName,
       email: user.email,
+      mobile: user.mobile,
       balance: user.balance,
       withdrawableBalance: user.withdrawableBalance
     };
@@ -750,6 +765,9 @@ const editUser = async (req, res) => {
     }
     if (email && email.trim().toLowerCase() !== user.email) {
       updateFields.email = email.trim().toLowerCase();
+    }
+    if (mobile && mobile.trim() !== user.mobile) {
+      updateFields.mobile = mobile.trim();
     }
     if (balance !== undefined && Number(balance) !== user.balance) {
       updateFields.balance = Number(balance);
@@ -793,6 +811,9 @@ const editUser = async (req, res) => {
     }
     if (updateFields.email) {
       changes.push(`Email: "${originalValues.email}" → "${updateFields.email}"`);
+    }
+    if (updateFields.mobile) {
+      changes.push(`Mobile: "${originalValues.mobile}" → "${updateFields.mobile}"`);
     }
     if (updateFields.balance !== undefined) {
       changes.push(`Balance: ₹${originalValues.balance} → ₹${updateFields.balance}`);

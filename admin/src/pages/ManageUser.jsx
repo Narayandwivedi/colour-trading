@@ -19,6 +19,7 @@ const ManageUser = () => {
   const [editFormData, setEditFormData] = useState({
     fullName: '',
     email: '',
+    mobile: '',
     balance: '',
     withdrawableBalance: '',
     password: ''
@@ -95,6 +96,7 @@ const ManageUser = () => {
       setEditFormData({
         fullName: user.fullName || '',
         email: user.email || '',
+        mobile: user.mobile || '',
         balance: user.balance?.toString() || '0',
         withdrawableBalance: user.withdrawableBalance?.toString() || '0',
         password: ''
@@ -184,6 +186,7 @@ const ManageUser = () => {
       const requestData = {
         fullName: editFormData.fullName.trim(),
         email: editFormData.email.trim(),
+        mobile: editFormData.mobile.trim(),
         balance: balanceNum,
         withdrawableBalance: withdrawableBalanceNum
       };
@@ -220,6 +223,7 @@ const ManageUser = () => {
     setEditFormData({
       fullName: '',
       email: '',
+      mobile: '',
       balance: '',
       withdrawableBalance: '',
       password: ''
@@ -516,6 +520,10 @@ const ManageUser = () => {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Email *</label>
                 <input type="email" name="email" value={editFormData.email} onChange={handleEditFormChange} className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Mobile</label>
+                <input type="text" name="mobile" value={editFormData.mobile} onChange={handleEditFormChange} className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Balance (₹)</label>
