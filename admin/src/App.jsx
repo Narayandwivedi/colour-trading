@@ -67,25 +67,25 @@ function App() {
             />
           )}
 
-          <div className={`fixed md:static inset-y-0 left-0 z-40 w-72 md:w-80 bg-white shadow-xl border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
+          <div className={`fixed md:static inset-y-0 left-0 z-40 w-72 md:w-64 bg-white shadow-xl border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } md:translate-x-0 md:h-screen overflow-y-auto`}>
             {/* Logo/Header */}
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold">A</span>
+            <div className="p-4 sm:p-5 border-b border-gray-100">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 md:w-9 md:h-9 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg shrink-0">
+                  <span className="text-white font-bold text-sm md:text-base">A</span>
                 </div>
-                <div>
-                  <h1 className="font-bold text-xl text-gray-800">Admin Panel</h1>
-                  <p className="text-sm text-gray-500">Management Dashboard</p>
+                <div className="min-w-0">
+                  <h1 className="font-bold text-sm md:text-base text-gray-800 truncate">Admin Panel</h1>
+                  <p className="text-[10px] md:text-xs text-gray-500 truncate">Management Dashboard</p>
                 </div>
                 {/* Close button - Mobile only */}
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="md:hidden ml-auto p-1 hover:bg-gray-100 rounded-lg"
+                  className="md:hidden ml-auto p-1 hover:bg-gray-100 rounded-lg shrink-0"
                 >
-                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -93,27 +93,27 @@ function App() {
             </div>
             
             {/* Navigation */}
-            <div className="p-4">
-              <div className="flex flex-col gap-2 mt-2">
+            <div className="p-3 md:p-3">
+              <div className="flex flex-col gap-1 md:gap-1">
                 {menuItems.map((item) => (
                   <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}>
-                    <button className={`group flex items-center w-full p-4 rounded-xl transition-all duration-200 ${
+                    <button className={`group flex items-center w-full p-3 md:p-2.5 rounded-lg md:rounded-lg transition-all duration-200 ${
                       isActive(item.path)
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-[1.02]'
-                        : 'text-gray-700 hover:bg-gray-50 hover:shadow-md hover:transform hover:scale-[1.01] bg-gray-50'
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow'
+                        : 'text-gray-700 hover:bg-gray-50 hover:shadow-sm bg-gray-50'
                     }`}>
-                      <span className={`text-xl md:text-2xl mr-3 md:mr-4 transition-transform duration-200 ${
+                      <span className={`text-base md:text-lg mr-2.5 md:mr-3 transition-transform duration-200 ${
                         isActive(item.path) ? 'scale-110' : 'group-hover:scale-110'
                       }`}>
                         {item.icon}
                       </span>
                       <div className="flex-1 text-left">
-                        <div className={`font-semibold text-sm md:text-base ${
+                        <div className={`font-medium text-xs md:text-sm ${
                           isActive(item.path) ? 'text-white' : 'text-gray-800'
                         }`}>
                           {item.label}
                         </div>
-                        <div className={`text-xs md:text-sm hidden md:block ${
+                        <div className={`text-[10px] md:text-xs hidden md:block ${
                           isActive(item.path) ? 'text-blue-100' : 'text-gray-500'
                         }`}>
                           {item.description}
@@ -123,7 +123,7 @@ function App() {
                         <ChatNotification />
                       )}
                       {isActive(item.path) && (
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                       )}
                     </button>
                   </Link>
