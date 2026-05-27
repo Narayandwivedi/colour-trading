@@ -333,9 +333,6 @@ const ManageUser = () => {
                   </div>
                 </div>
                 <div className="flex gap-1 shrink-0">
-                  <button onClick={() => toggleUserStatus(user._id)} disabled={togglingIds.has(user._id)} className={`p-0.5 rounded ${user.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-500 hover:bg-green-50'}`} title={user.isActive ? 'Deactivate' : 'Activate'}>
-                    {togglingIds.has(user._id) ? <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> : user.isActive ? <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg> : <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>}
-                  </button>
                   <button onClick={() => handleEdit(user._id)} className="text-green-600 p-0.5 hover:bg-green-50 rounded" title="Edit"><Edit3 className="w-3 h-3" /></button>
                   <button onClick={() => handleDelete(user._id)} className="text-red-600 p-0.5 hover:bg-red-50 rounded" title="Delete"><Trash2 className="w-3 h-3" /></button>
                 </div>
@@ -362,7 +359,7 @@ const ManageUser = () => {
                   <span className={`px-1.5 py-0.5 rounded-full font-medium ${
                     user.isUpiAdded ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                   }`}>UPI</span>
-                  <span className={`px-1.5 py-0.5 rounded-full font-medium ${
+                  <span onClick={() => toggleUserStatus(user._id)} className={`cursor-pointer px-1.5 py-0.5 rounded-full font-medium ${
                     user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                   }`}>{user.isActive ? 'Active' : 'Banned'}</span>
                 </div>
@@ -422,7 +419,7 @@ const ManageUser = () => {
                       </div>
                     </td>
                     <td className="px-3 py-2 text-center">
-                      <span className={`inline-block px-1.5 py-0.5 text-[10px] font-medium rounded-full ${
+                      <span onClick={() => toggleUserStatus(user._id)} className={`cursor-pointer inline-block px-1.5 py-0.5 text-[10px] font-medium rounded-full ${
                         user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
                         {user.isActive ? 'Active' : 'Banned'}
@@ -430,9 +427,6 @@ const ManageUser = () => {
                     </td>
                     <td className="px-3 py-2 text-right">
                       <div className="flex items-center justify-end gap-0.5">
-                        <button onClick={() => toggleUserStatus(user._id)} disabled={togglingIds.has(user._id)} className={`p-1 rounded ${user.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-500 hover:bg-green-50'}`} title={user.isActive ? 'Deactivate' : 'Activate'}>
-                          {togglingIds.has(user._id) ? <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={user.isActive ? "M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" : "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"}/></svg>}
-                        </button>
                         <button onClick={() => handleEdit(user._id)} className="p-1 text-green-600 hover:bg-green-50 rounded" title="Edit"><Edit3 className="w-3 h-3" /></button>
                         <button onClick={() => handleDelete(user._id)} className="p-1 text-red-600 hover:bg-red-50 rounded" title="Delete"><Trash2 className="w-3 h-3" /></button>
                       </div>
