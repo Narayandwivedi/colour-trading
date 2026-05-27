@@ -35,7 +35,7 @@ app.use(
       "https://winners11.in",
       "https://www.winners11.in",
       "https://api.winners11.in",
-      "https://colour-trading-admin.vercel.app"
+      "https://adm.winners11.in"
     ],
     credentials: true,
   })
