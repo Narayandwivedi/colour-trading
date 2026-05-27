@@ -113,14 +113,14 @@ export default function Game() {
           <p className="text-gray-500 text-sm flex justify-center items-center gap-2">
             <Trophy className="w-5 h-5 text-yellow-500" /> Period
           </p>
-          <p className="text-xl font-semibold text-indigo-700 mt-1">
+          <p className="text-sm sm:text-xl font-semibold text-indigo-700 mt-1">
             {period || "---"}
           </p>
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow">
           <p className="text-gray-500 text-sm">Count Down</p>
-          <p className="text-xl font-semibold text-indigo-700 mt-1">
+          <p className="text-sm sm:text-xl font-semibold text-indigo-700 mt-1">
             {periodCreatedAT ? `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}` : "---"}
           </p>
         </div>

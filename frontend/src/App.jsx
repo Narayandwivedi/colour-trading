@@ -21,6 +21,7 @@ import AddUpi from './pages/AddUpi'
 import Support from './pages/Support'
 import ResetPass from './pages/ResetPass'
 import ChatPage from './pages/ChatPage'
+import { Agentation } from "agentation";
 
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
 
   return (
   <div className='max-w-[440px] mx-auto bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen relative overflow-hidden'>
+    <Agentation />
     <ToastContainer autoClose={600} />
   <Routes>
      <Route path='/' element={<ProtectedRoute><Homepage /></ProtectedRoute>} />
@@ -71,6 +73,7 @@ function App() {
             </div>
           } />
   </Routes>
+  
   </div>
   )
 }
