@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import {toast} from "react-toastify"
 import axios from "axios"
-import {AppContext} from "../context/AppContext"
+import {AuthContext, BACKEND_URL} from "../context/AppContext"
 
 const AddBank = () => {
   const [account, setAccount] = useState("");
@@ -9,7 +9,7 @@ const AddBank = () => {
   const [bankName, setBankName] = useState("");
   const [accountname, setAccountName] = useState("");
 
-  const {BACKEND_URL , userData} = useContext(AppContext)
+  const { userData } = useContext(AuthContext)
   
 
   const submitBankDetails = async () => {

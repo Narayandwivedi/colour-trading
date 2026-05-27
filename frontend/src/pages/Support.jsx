@@ -3,11 +3,11 @@ import Navbar from "../components/Navbar";
 import BottomNav from "../components/BottomNav";
 import { useNavigate } from "react-router-dom";
 import { MessageCircle, Mail, Clock, HelpCircle, Shield, Zap, Users, CheckCircle } from "lucide-react";
-import { AppContext } from "../context/AppContext";
+import { AuthContext } from "../context/AppContext";
 
 export default function CustomerSupportPage() {
   const navigate = useNavigate();
-  const { userData } = useContext(AppContext);
+  const { userData } = useContext(AuthContext);
 
   const handleChatNow = () => {
     navigate('/chat');

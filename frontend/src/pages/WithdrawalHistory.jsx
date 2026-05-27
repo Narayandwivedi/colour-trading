@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-import { AppContext } from "../context/AppContext";
+import { AuthContext, BACKEND_URL } from "../context/AppContext";
 import { toast } from "react-toastify";
 import { ArrowUpRight, Hash, Calendar, Smartphone, Building2, Banknote, Copy } from "lucide-react";
 import Navbar from "../components/Navbar";
@@ -132,7 +132,7 @@ function WithdrawalCard({ id, status, amount, paymentMethod, createdAt }) {
 
 // WithdrawalHistory component with enhanced mobile design
 const WithdrawalHistory = () => {
-  const { BACKEND_URL, userData } = useContext(AppContext);
+  const { userData } = useContext(AuthContext);
   const [withdrawHistory, setWithdrawHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 

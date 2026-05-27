@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import BottomNav from "../../components/BottomNav";
-import { AppContext } from "../../context/AppContext";
+import { AuthContext, BACKEND_URL } from "../../context/AppContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 const Account = () => {
-  const { userData, setUserData, BACKEND_URL } = useContext(AppContext);
+  const { userData, setUserData } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const menuItems = [

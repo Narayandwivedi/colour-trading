@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-import { AppContext } from "../context/AppContext";
+import { AuthContext, BACKEND_URL } from "../context/AppContext";
 import { toast } from "react-toastify";
 import { CreditCard, Gift, TrendingUp, Calendar, Hash, Smartphone, Building2, Copy } from "lucide-react";
 import Navbar from "../components/Navbar";
@@ -192,7 +192,7 @@ function TransactionCard({ id, status, amount, paymentMethod, createdAt, type, u
 
 // Enhanced DepositHistory component
 const DepositHistory = () => {
-  const { userData, BACKEND_URL } = useContext(AppContext);
+  const { userData } = useContext(AuthContext);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all', 'deposits', 'referrals'

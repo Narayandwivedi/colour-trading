@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { MessageCircle, Send, X, ArrowLeft, CreditCard, Banknote, FileCheck, Gamepad2, HelpCircle, Paperclip } from 'lucide-react';
-import { AppContext } from '../context/AppContext';
+import { BACKEND_URL } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -15,7 +15,7 @@ const ChatPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
   
-  const { BACKEND_URL } = useContext(AppContext);
+
   const messagesEndRef = useRef(null);
 
   const categories = [

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { AppContext } from "../context/AppContext";
+import { GameContext, WalletContext, BACKEND_URL } from "../context/AppContext";
 import axios from "axios";
 
 export default function Result() {
@@ -11,15 +11,14 @@ export default function Result() {
   const [loading, setLoading] = useState(false);
 
   const {
-    BACKEND_URL,
     gameType,
     showWinner,
     setShowWinner,
-    setBalance,
     activeBets,
     setActiveBets,
     onWSMessage,
-  } = useContext(AppContext);
+  } = useContext(GameContext);
+  const { setBalance } = useContext(WalletContext);
 
   const resultsPerPage = 10;
 

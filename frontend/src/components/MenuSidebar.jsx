@@ -1,10 +1,10 @@
 import { X, Wallet, Headphones, FileText, LogOut, User, History, CreditCard, TrendingUp } from 'lucide-react'
 import { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AppContext } from '../context/AppContext'
+import { AuthContext, BACKEND_URL } from '../context/AppContext'
 
 const MenuSidebar = ({ isOpen, onClose }) => {
-  const { userData, setUserData } = useContext(AppContext)
+  const { userData, setUserData } = useContext(AuthContext)
   const navigate = useNavigate()
   
   const handleLogout = () => {

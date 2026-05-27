@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { AppContext } from '../context/AppContext'
+import { WalletContext, AuthContext, BACKEND_URL } from '../context/AppContext'
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {toast} from 'react-toastify'
@@ -8,7 +8,8 @@ import { Wallet, Banknote, Building2, IndianRupee, Check, Info, CheckCircle, Mor
 
 
 const Withdraw = () => {
-    const { withdrawableBalance, balance, userData , BACKEND_URL } = useContext(AppContext)
+    const { withdrawableBalance, balance } = useContext(WalletContext)
+    const { userData } = useContext(AuthContext)
     const [amount , setAmount] = useState('')
     const [paymentMethod, setPaymentMethod] = useState('') // 'bank' or 'upi'
     const navigate = useNavigate()

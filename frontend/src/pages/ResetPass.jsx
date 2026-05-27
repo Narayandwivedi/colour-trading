@@ -1,6 +1,6 @@
 import React, {useContext, useState } from 'react'
 import axios from 'axios'
-import {AppContext} from '../context/AppContext'
+import {BACKEND_URL} from '../context/AppContext'
 import {toast} from 'react-toastify'
 import {useNavigate} from 'react-router-dom'
 import { Mail, Lock, Key } from 'lucide-react'
@@ -14,7 +14,7 @@ const ResetPass = () => {
 
     const navigate = useNavigate();
 
-    const {BACKEND_URL} = useContext(AppContext)
+
     
     const getOtp = async()=>{
        try{

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { AppContext } from "../context/AppContext";
+import { AuthContext, BACKEND_URL } from "../context/AppContext";
 import { toast } from "react-toastify";
 import { Target, Trophy, Coins, Hash, Calendar, TrendingUp, TrendingDown, Copy } from "lucide-react";
 import Navbar from "../components/Navbar";
@@ -165,7 +165,7 @@ function BetCard({ Period, Bet, Amount, Result, status, payout, orderId }) {
 
 // BetHistory component with enhanced mobile design
 const BetHistory = () => {
-  const { userData, BACKEND_URL } = useContext(AppContext);
+  const { userData } = useContext(AuthContext);
   const [allbets, setAllBets] = useState([]);
   const [loading, setLoading] = useState(true);
 

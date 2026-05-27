@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppContext } from '../context/AppContext';
+import { AuthContext, BACKEND_URL } from '../context/AppContext';
 import { toast } from 'react-toastify';
 
 const GoogleLogin = () => {
-  const { BACKEND_URL, checkAuthStatus } = useContext(AppContext);
+  const { checkAuthStatus } = useContext(AuthContext);
   const navigate = useNavigate();
   const googleButtonRef = useRef(null);
   const isGoogleLoaded = useRef(false);

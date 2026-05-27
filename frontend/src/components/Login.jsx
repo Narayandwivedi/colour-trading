@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { AppContext } from "../context/AppContext";
+import { AuthContext, WalletContext, BACKEND_URL } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import { User, Mail, Phone, Lock, Gift, Star } from "lucide-react";
 import GoogleLogin from "./GoogleLogin";
@@ -17,7 +17,8 @@ const Login = () => {
   const [inviteCode, setInviteCode] = useState("");
   const navigate = useNavigate();
 
-  const { setBalance, BACKEND_URL, setUserData } = useContext(AppContext);
+  const { setUserData } = useContext(AuthContext);
+  const { setBalance } = useContext(WalletContext);
 
   // Validate Indian mobile number
   const validateMobile = (mobileNumber) => {

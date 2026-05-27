@@ -9,7 +9,7 @@ import Homepage from './pages/Homepage'
 import Mine from "./pages/Mine"
 import Aviator from "./pages/Aviator"
 import ColourTrading from "./pages/ColourTrading"
-import { AppContext } from './context/AppContext'
+import { AuthContext } from './context/AppContext'
 import Refer from './pages/bottomNavPages/Refer'
 import Account from './pages/bottomNavPages/Account'
 import PaymentPage from './pages/PaymentPage'
@@ -26,7 +26,7 @@ import { Agentation } from "agentation";
 
 function App() {
 
-  const { loading } = useContext(AppContext);
+  const { loading } = useContext(AuthContext);
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">

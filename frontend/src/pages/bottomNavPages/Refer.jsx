@@ -1,10 +1,10 @@
 import React, { useState, useContext } from 'react';
 import BottomNav from '../../components/BottomNav';
-import { AppContext } from '../../context/AppContext';
+import { AuthContext, BACKEND_URL } from '../../context/AppContext';
 
 const Refer = () => {
   const [copied, setCopied] = useState(false);
-  const { userData } = useContext(AppContext);
+  const { userData } = useContext(AuthContext);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(userData?.referralCode || '');

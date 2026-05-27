@@ -1,13 +1,14 @@
 import React, { useContext, useState } from 'react';
 import UPIQRCode from '../components/UPIQRCODE';
-import { AppContext } from '../context/AppContext';
+import { AuthContext, WalletContext, BACKEND_URL } from '../context/AppContext';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
 const PaymentPage = () => {
   const [utr, setUtr] = useState('');
   const [error, setError] = useState('');
-  const { finalDepositAmt, setFinalDepositAmt, userData, BACKEND_URL } = useContext(AppContext);
+  const { finalDepositAmt, setFinalDepositAmt } = useContext(WalletContext);
+  const { userData } = useContext(AuthContext);
 
   async function handleAddTransaction() {
     if (!userData) {

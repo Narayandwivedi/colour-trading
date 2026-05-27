@@ -1,9 +1,9 @@
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import { AppContext } from "../context/AppContext";
+import { WalletContext } from "../context/AppContext";
 
 export default function Topbar() {
-  const { balance } = useContext(AppContext);
+  const { balance } = useContext(WalletContext);
   const [isUserPopupOpen, setIsUserPopupOpen] = useState(false);
 
   return (

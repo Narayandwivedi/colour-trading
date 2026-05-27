@@ -1,11 +1,11 @@
 import React, { useContext, useState } from 'react';
 import { ArrowLeft, Trophy, Menu, Headphones } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { AppContext } from '../context/AppContext';
+import { AuthContext, BACKEND_URL } from '../context/AppContext';
 import MenuSidebar from './MenuSidebar';
 
 const Navbar = () => {
-  const { userData } = useContext(AppContext);
+  const { userData } = useContext(AuthContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();

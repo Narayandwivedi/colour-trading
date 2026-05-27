@@ -1,5 +1,5 @@
 import { useContext, useState,useEffect} from "react";
-import { AppContext } from "../context/AppContext";
+import { GameContext, WalletContext, AuthContext, BACKEND_URL } from "../context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -20,24 +20,9 @@ export default function Game() {
   const [isBetPopOpen, setIsBetPopOpen] = useState(false);
 
   const [betInp, setBetInp] = useState(100);
-  const {
-    selectedBetColour,
-    setSelectedBetColour,
-    selectedBetSize ,
-    setSelectedBetSize,
-    selectedBetNumber,
-    setSelectedBetNumber,
-
-    balance,
-    setBalance,
-    userData,
-    period,
-    timer,
-    BACKEND_URL,
-    betAllowed , setBetAllowed,
-    activeBets,
-    setActiveBets
-  } = useContext(AppContext);
+  const { selectedBetColour, setSelectedBetColour, selectedBetSize, setSelectedBetSize, selectedBetNumber, setSelectedBetNumber, period, timer, betAllowed, setBetAllowed, activeBets, setActiveBets } = useContext(GameContext);
+  const { balance, setBalance } = useContext(WalletContext);
+  const { userData } = useContext(AuthContext);
   
   useEffect(() => {
   if (timer <= 5  && betAllowed) {

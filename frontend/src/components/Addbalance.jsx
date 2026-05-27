@@ -1,11 +1,12 @@
 import React, { useContext, useState } from 'react';
-import { AppContext } from '../context/AppContext';
+import { AuthContext, WalletContext, BACKEND_URL } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 const AddBalance = () => {
-  const { userData, BACKEND_URL , finalDepositAmt , setFinalDepositAmt } = useContext(AppContext);
+  const { userData } = useContext(AuthContext);
+  const { finalDepositAmt , setFinalDepositAmt } = useContext(WalletContext);
   const [UTR, setUTR] = useState('');
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [isCustomAmount, setIsCustomAmount] = useState(true);

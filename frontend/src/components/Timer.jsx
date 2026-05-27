@@ -1,9 +1,9 @@
-import { useContext, useEffect } from "react";
-import { AppContext } from "../context/AppContext";
+import { useContext, useEffect, memo } from "react";
+import { GameContext, BACKEND_URL } from "../context/AppContext";
 import axios from "axios";
 import { Trophy } from "lucide-react";
 
-function Watch({ selected }) {
+const Watch = memo(function Watch({ selected }) {
   return (
     <div
       className={`relative h-[44px] w-[44px] rounded-full transition-all duration-300 
@@ -16,7 +16,7 @@ function Watch({ selected }) {
       <div className="absolute top-[8px] left-1/2 w-[2px] h-[14px] bg-white transform -translate-x-1/2 origin-bottom rotate-45"></div>
     </div>
   );
-}
+});
 
 const getDurationByGameType = (type) => {
   switch (type) {
@@ -37,9 +37,8 @@ export default function Game() {
     setPeriodCreatedAT,
     gameType,
     setGameType,
-    BACKEND_URL,
     onWSMessage,
-  } = useContext(AppContext);
+  } = useContext(GameContext);
 
   const minutes = Math.floor(timer / 60);
   const seconds = timer % 60;

@@ -1,13 +1,13 @@
 import axios from "axios";
 import { useState, useContext } from "react";
 import { toast } from "react-toastify";
-import { AppContext } from "../context/AppContext";
+import { AuthContext, BACKEND_URL } from "../context/AppContext";
 import {useNavigate} from 'react-router-dom'
 
 const AddUpi = () => {
   const [upiId, setUpiId] = useState("");
   const [bankingName, setBankingName] = useState("");
-  const {BACKEND_URL , userData} = useContext(AppContext)
+  const { userData } = useContext(AuthContext)
 
   const navigate = useNavigate()
 
