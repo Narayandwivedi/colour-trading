@@ -137,73 +137,116 @@ const AllBets = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-3 sm:p-0 space-y-3 sm:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">All Bets</h1>
-          <p className="text-gray-600">Total: {pagination.totalBets} bets</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">All Bets</h1>
+          <p className="text-sm sm:text-base text-gray-600">Total: {pagination.totalBets} bets</p>
         </div>
         <button
           onClick={() => fetchAllBets(pagination.currentPage)}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          className="self-start text-sm px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
-          🔄 Refresh
+          Refresh
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
               name="status"
               value={filters.status}
               onChange={handleFilterChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Status</option>
+              <option value="">All</option>
               <option value="pending">Pending</option>
               <option value="win">Win</option>
               <option value="lost">Lost</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Period</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Period</label>
             <input
               type="number"
               name="period"
               value={filters.period}
               onChange={handleFilterChange}
-              placeholder="Enter period"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Period"
+              className="w-full border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">User ID</label>
             <input
               type="text"
               name="userId"
               value={filters.userId}
               onChange={handleFilterChange}
-              placeholder="Enter user ID"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="User ID"
+              className="w-full border border-gray-300 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div className="flex items-end">
             <button
               onClick={clearFilters}
-              className="w-full px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
+              className="w-full px-3 py-1.5 sm:py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-xs sm:text-sm"
             >
-              Clear Filters
+              Clear
             </button>
           </div>
         </div>
       </div>
 
-      {/* Bets Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      {/* Mobile: Bet Cards */}
+      <div className="sm:hidden space-y-2">
+        {bets.map((bet) => {
+          const betDisplay = getBetTypeDisplay(bet);
+          return (
+            <div key={bet._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-mono text-gray-600">{bet.period}</span>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusColor(bet.status)}`}>
+                  {bet.status?.toUpperCase()}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-xs font-medium text-white shrink-0">
+                  {(bet.userId?.fullName || 'U').charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{bet.userId?.fullName || 'N/A'}</p>
+                  <p className="text-xs text-gray-500 truncate">{bet.userId?.email || 'N/A'}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <div>
+                  <span className="text-gray-500 text-xs">{betDisplay.category}: </span>
+                  <span className="font-medium">{betDisplay.type}</span>
+                </div>
+                <div className="text-right">
+                  <div className="font-semibold">₹{bet.betAmount}</div>
+                  <div className="text-xs text-gray-500">{bet.payout ? `Payout: ₹${bet.payout}` : '-'}</div>
+                </div>
+              </div>
+              {bet.betResult && (
+                <div className="mt-2 pt-2 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
+                  <span>Result:</span>
+                  <div className="flex items-center">{getResultDisplay(bet.betResult)}</div>
+                  <span className="ml-auto">{formatDate(bet.createdAt)}</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop: Bets Table */}
+      <div className="hidden sm:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
@@ -271,56 +314,59 @@ const AllBets = () => {
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 px-4 py-3">
-          <div className="text-sm text-gray-700">
-            Showing page {pagination.currentPage} of {pagination.totalPages}
-            <span className="ml-2 text-gray-500">({pagination.totalBets} total bets)</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handlePageChange(pagination.currentPage - 1)}
-              disabled={!pagination.hasPrevPage}
-              className={`px-3 py-1 rounded text-sm font-medium ${
-                pagination.hasPrevPage
-                  ? 'bg-blue-500 text-white hover:bg-blue-600'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              Previous
-            </button>
-            
-            {/* Page numbers */}
-            {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-              const pageNum = Math.max(1, pagination.currentPage - 2) + i;
-              if (pageNum <= pagination.totalPages) {
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`px-3 py-1 rounded text-sm font-medium ${
-                      pageNum === pagination.currentPage
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              }
-              return null;
-            })}
-            
-            <button
-              onClick={() => handlePageChange(pagination.currentPage + 1)}
-              disabled={!pagination.hasNextPage}
-              className={`px-3 py-1 rounded text-sm font-medium ${
-                pagination.hasNextPage
-                  ? 'bg-blue-500 text-white hover:bg-blue-600'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              Next
-            </button>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:px-4 sm:py-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
+              Page {pagination.currentPage} of {pagination.totalPages}
+              <span className="ml-2 text-gray-500">({pagination.totalBets} total)</span>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => handlePageChange(pagination.currentPage - 1)}
+                disabled={!pagination.hasPrevPage}
+                className={`px-3 py-1.5 rounded text-xs sm:text-sm font-medium ${
+                  pagination.hasPrevPage
+                    ? 'bg-blue-500 text-white hover:bg-blue-600'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                Prev
+              </button>
+              
+              <div className="hidden sm:flex items-center gap-1">
+                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                  const pageNum = Math.max(1, pagination.currentPage - 2) + i;
+                  if (pageNum <= pagination.totalPages) {
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`w-8 h-8 rounded text-sm font-medium ${
+                          pageNum === pagination.currentPage
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+              
+              <button
+                onClick={() => handlePageChange(pagination.currentPage + 1)}
+                disabled={!pagination.hasNextPage}
+                className={`px-3 py-1.5 rounded text-xs sm:text-sm font-medium ${
+                  pagination.hasNextPage
+                    ? 'bg-blue-500 text-white hover:bg-blue-600'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ChatMessage = require('../models/ChatMessage');
 const auth = require('../middleware/auth');
+const { broadcast } = require('../websocketService');
 
 // Send a chat message (user)
 router.post('/send', auth, async (req, res) => {
@@ -22,6 +23,8 @@ router.post('/send', auth, async (req, res) => {
 
     await chatMessage.save();
     await chatMessage.populate('userId', 'fullName email');
+
+    broadcast('chat:newMessage', { message: chatMessage });
 
     // Check if this is the user's first message
     const existingMessages = await ChatMessage.countDocuments({ userId: req.userId });

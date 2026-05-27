@@ -3,7 +3,7 @@ import { AppContext } from "../context/AppContext";
 import axios from 'axios';
 
 const ManageBets = () => {
-  const { BACKEND_URL } = useContext(AppContext);
+  const { BACKEND_URL, onWSMessage } = useContext(AppContext);
   
   const [periods, setPeriods] = useState({
     '30sec': { period: null, createdAt: null },
@@ -157,6 +157,25 @@ const ManageBets = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // WebSocket listener for live period updates
+  useEffect(() => {
+    const unsub = onWSMessage((msg) => {
+      if (msg.type === 'game:open') {
+        const gt = msg.gameType;
+        if (gt && periods[gt] !== undefined) {
+          setPeriods(prev => ({
+            ...prev,
+            [gt]: {
+              period: msg.period,
+              createdAt: msg.createdAt
+            }
+          }));
+        }
+      }
+    });
+    return unsub;
+  }, [onWSMessage]);
+
   const BetCard = ({ timeframe, title }) => (
     <div className="w-full max-w-sm mx-auto bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
       {/* Header - Mobile Optimized */}
@@ -258,25 +277,23 @@ const ManageBets = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50 min-h-full">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200 px-4 py-6">
+      <div className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-4 py-4 sm:py-6">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Manage Bets
-          </h1>
-          <p className="text-gray-600 text-sm md:text-base">
+          <h1 className="text-lg sm:text-3xl font-bold text-gray-900">Manage Bets</h1>
+          <p className="text-xs sm:text-base text-gray-600 mt-0.5 sm:mt-2">
             Control betting results for different time frames
           </p>
         </div>
       </div>
 
       {/* Cards Grid */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <BetCard timeframe="30sec" title="30 Second" />
-          <BetCard timeframe="1min" title="1 Minute" />
-          <BetCard timeframe="3min" title="3 Minutes" />
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+          <BetCard timeframe="30sec" title="30 Sec" />
+          <BetCard timeframe="1min" title="1 Min" />
+          <BetCard timeframe="3min" title="3 Min" />
         </div>
       </div>
     </div>

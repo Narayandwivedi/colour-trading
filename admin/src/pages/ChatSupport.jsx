@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 const ChatSupport = () => {
-  const { BACKEND_URL } = useContext(AppContext);
+  const { BACKEND_URL, onWSMessage } = useContext(AppContext);
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [replyText, setReplyText] = useState('');
@@ -36,6 +36,7 @@ const ChatSupport = () => {
     categories: {}
   });
   const replyInputRef = useRef(null);
+  const fetchMessagesRef = useRef(null);
 
   const categories = ['Deposit Related', 'Withdraw', 'KYC', 'Game Related', 'Other'];
 
@@ -80,6 +81,9 @@ const ChatSupport = () => {
       new Date(b.lastMessageAt) - new Date(a.lastMessageAt)
     );
   };
+
+  // Keep ref in sync with latest fetchMessages
+  useEffect(() => { fetchMessagesRef.current = fetchMessages; });
 
   // Fetch messages with filters
   const fetchMessages = async (silentRefresh = false) => {
@@ -245,17 +249,26 @@ const ChatSupport = () => {
     }
   };
 
-  // Auto-refresh messages every 30 seconds (reduced frequency to minimize flickering)
+  // Auto-refresh messages every 30 seconds (fallback)
   useEffect(() => {
     fetchMessages();
     const interval = setInterval(() => {
-      // Only refresh if no conversation is selected and not currently loading/refreshing
       if (!selectedConversation && !loading && !isRefreshing) {
-        fetchMessages(true); // Use silent refresh for auto-refresh
+        fetchMessages(true);
       }
     }, 30000);
     return () => clearInterval(interval);
   }, [filters]);
+
+  // WebSocket: live update when a new chat message arrives
+  useEffect(() => {
+    const unsub = onWSMessage((msg) => {
+      if (msg.type === 'chat:newMessage') {
+        fetchMessagesRef.current?.(true);
+      }
+    });
+    return unsub;
+  }, [onWSMessage]);
 
   // Focus reply input when conversation is selected and auto-mark as read
   useEffect(() => {
@@ -299,29 +312,29 @@ const ChatSupport = () => {
   };
 
   return (
-    <div className="h-full flex flex-col lg:flex-row gap-6">
-      {/* Stats Cards */}
-      <div className="lg:hidden mb-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-xl">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <div className="text-sm opacity-90">Total Users</div>
+    <div className="h-full flex flex-col lg:flex-row gap-3 sm:gap-6">
+      {/* Stats Cards - Mobile */}
+      <div className="lg:hidden">
+        <div className="grid grid-cols-4 gap-2">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 sm:p-4 rounded-lg sm:rounded-xl">
+            <div className="text-sm sm:text-2xl font-bold">{stats.total}</div>
+            <div className="text-[10px] sm:text-sm opacity-90 truncate">Users</div>
           </div>
-          <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-xl">
-            <div className="text-2xl font-bold">{stats.unread}</div>
-            <div className="text-sm opacity-90">Unread Messages</div>
+          <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-2 sm:p-4 rounded-lg sm:rounded-xl">
+            <div className="text-sm sm:text-2xl font-bold">{stats.unread}</div>
+            <div className="text-[10px] sm:text-sm opacity-90 truncate">Unread</div>
           </div>
-          <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-xl">
-            <div className="text-2xl font-bold">
+          <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-2 sm:p-4 rounded-lg sm:rounded-xl">
+            <div className="text-sm sm:text-2xl font-bold">
               {conversations.filter(c => c.messages.some(m => m.hasRealReply)).length}
             </div>
-            <div className="text-sm opacity-90">Replied Users</div>
+            <div className="text-[10px] sm:text-sm opacity-90 truncate">Replied</div>
           </div>
-          <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-4 rounded-xl">
-            <div className="text-2xl font-bold">
+          <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-2 sm:p-4 rounded-lg sm:rounded-xl">
+            <div className="text-sm sm:text-2xl font-bold">
               {conversations.filter(c => c.hasUnreplied).length}
             </div>
-            <div className="text-sm opacity-90">Need Reply</div>
+            <div className="text-[10px] sm:text-sm opacity-90 truncate">Pending</div>
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { useState } from "react"
 import Homepage from "./pages/Homepage"
 import { Routes, Route, Link, useLocation } from "react-router-dom"
 import Transaction from "./pages/Transaction"
@@ -14,6 +15,7 @@ import ChatNotification from "./components/ChatNotification";
 
 function App() {
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const menuItems = [
     { path: "/", label: "Dashboard", icon: "📊", description: "User statistics" },
@@ -31,93 +33,137 @@ function App() {
 
   return (
     <div className={`flex ${isLoginPage ? 'justify-center items-center' : 'flex-col md:flex-row'} bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen`}>
-      {/* Sidebar/Topbar - Hidden on login page */}
+      {/* Mobile Navbar */}
       {!isLoginPage && (
-        <div className="w-full md:w-80 md:h-screen bg-white shadow-xl border-r border-gray-200">
-          {/* Logo/Header - Desktop only */}
-          <div className="hidden md:block p-6 border-b border-gray-100">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold">A</span>
+        <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between h-14 px-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 -ml-2 hover:bg-gray-100 rounded-lg"
+            >
+              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xs">A</span>
               </div>
-              <div>
-                <h1 className="font-bold text-xl text-gray-800">Admin Panel</h1>
-                <p className="text-sm text-gray-500">Management Dashboard</p>
-              </div>
+              <span className="font-semibold text-gray-800 text-sm">Admin Panel</span>
             </div>
-          </div>
-          
-          {/* Navigation */}
-          <div className="p-4">
-            <div className="flex flex-col gap-2 mt-2">
-              {menuItems.map((item) => (
-                <Link key={item.path} to={item.path}>
-                  <button className={`group flex items-center w-full p-4 rounded-xl transition-all duration-200 ${
-                    isActive(item.path)
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-[1.02]'
-                      : 'text-gray-700 hover:bg-gray-50 hover:shadow-md hover:transform hover:scale-[1.01] bg-gray-50'
-                  }`}>
-                    <span className={`text-xl md:text-2xl mr-3 md:mr-4 transition-transform duration-200 ${
-                      isActive(item.path) ? 'scale-110' : 'group-hover:scale-110'
-                    }`}>
-                      {item.icon}
-                    </span>
-                    <div className="flex-1 text-left">
-                      <div className={`font-semibold text-sm md:text-base ${
-                        isActive(item.path) ? 'text-white' : 'text-gray-800'
-                      }`}>
-                        {item.label}
-                      </div>
-                      <div className={`text-xs md:text-sm hidden md:block ${
-                        isActive(item.path) ? 'text-blue-100' : 'text-gray-500'
-                      }`}>
-                        {item.description}
-                      </div>
-                    </div>
-                    {item.path === '/chat' && !isActive(item.path) && (
-                      <ChatNotification />
-                    )}
-                    {isActive(item.path) && (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    )}
-                  </button>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Footer - Desktop only */}
-          <div className="hidden md:block absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-gray-50 md:relative md:mt-auto">
-            <div className="text-center text-sm text-gray-500">
-              <p className="font-medium">Admin Dashboard v2.0</p>
-              <p>© 2025 Your Company</p>
-            </div>
+            <div className="w-10" />
           </div>
         </div>
       )}
+
+      {/* Sidebar */}
+      {!isLoginPage && (
+        <>
+          {/* Backdrop - Mobile only */}
+          {sidebarOpen && (
+            <div
+              className="md:hidden fixed inset-0 bg-black/50 z-40"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+
+          <div className={`fixed md:static inset-y-0 left-0 z-40 w-72 md:w-80 bg-white shadow-xl border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } md:translate-x-0 md:h-screen overflow-y-auto`}>
+            {/* Logo/Header */}
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold">A</span>
+                </div>
+                <div>
+                  <h1 className="font-bold text-xl text-gray-800">Admin Panel</h1>
+                  <p className="text-sm text-gray-500">Management Dashboard</p>
+                </div>
+                {/* Close button - Mobile only */}
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="md:hidden ml-auto p-1 hover:bg-gray-100 rounded-lg"
+                >
+                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            {/* Navigation */}
+            <div className="p-4">
+              <div className="flex flex-col gap-2 mt-2">
+                {menuItems.map((item) => (
+                  <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}>
+                    <button className={`group flex items-center w-full p-4 rounded-xl transition-all duration-200 ${
+                      isActive(item.path)
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-[1.02]'
+                        : 'text-gray-700 hover:bg-gray-50 hover:shadow-md hover:transform hover:scale-[1.01] bg-gray-50'
+                    }`}>
+                      <span className={`text-xl md:text-2xl mr-3 md:mr-4 transition-transform duration-200 ${
+                        isActive(item.path) ? 'scale-110' : 'group-hover:scale-110'
+                      }`}>
+                        {item.icon}
+                      </span>
+                      <div className="flex-1 text-left">
+                        <div className={`font-semibold text-sm md:text-base ${
+                          isActive(item.path) ? 'text-white' : 'text-gray-800'
+                        }`}>
+                          {item.label}
+                        </div>
+                        <div className={`text-xs md:text-sm hidden md:block ${
+                          isActive(item.path) ? 'text-blue-100' : 'text-gray-500'
+                        }`}>
+                          {item.description}
+                        </div>
+                      </div>
+                      {item.path === '/chat' && !isActive(item.path) && (
+                        <ChatNotification />
+                      )}
+                      {isActive(item.path) && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
+                    </button>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-100 bg-gray-50">
+              <div className="text-center text-sm text-gray-500">
+                <p className="font-medium">Admin Dashboard v2.0</p>
+                <p>© 2025 Your Company</p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
       
       {/* Main content */}
-      <div className={`${isLoginPage ? 'w-full' : 'flex-1'} overflow-auto`}>
-        <div className={`${isLoginPage ? 'p-4' : 'p-1 md:p-6'}`}>
-          {/* Page Header - Desktop only and not on login page */}
+      <div className={`${isLoginPage ? 'w-full' : 'flex-1'} overflow-auto ${isLoginPage ? '' : 'pt-14 md:pt-0'}`}>
+        <div className={`${isLoginPage ? 'p-4' : 'p-2 md:p-6'}`}>
+          {/* Page Header - Desktop only */}
           {!isLoginPage && (
             <div className="hidden md:block mb-6">
               <div className="flex items-center space-x-3 mb-2">
                 <span className="text-3xl">
-                  {menuItems.find(item => item.path === location.pathname)?.icon || "📊"}
+                  {menuItems.find(item => item.path === location.pathname)?.icon || ""}
                 </span>
                 <h2 className="text-2xl font-bold text-gray-800">
                   {menuItems.find(item => item.path === location.pathname)?.label || "Dashboard"}
                 </h2>
               </div>
               <p className="text-gray-600">
-                {menuItems.find(item => item.path === location.pathname)?.description || "Welcome to your admin panel"}
+                {menuItems.find(item => item.path === location.pathname)?.description || ""}
               </p>
             </div>
           )}
 
           {/* Content Container */}
-          <div className={`${isLoginPage ? '' : 'bg-white rounded-2xl shadow-sm border border-gray-200'} min-h-[calc(100vh-8rem)] md:min-h-[calc(100vh-12rem)]`}>
+          <div className={`${isLoginPage ? '' : 'bg-white rounded-2xl shadow-sm border border-gray-200'}`}>
             <div className={`${isLoginPage ? '' : 'p-1 md:p-6'}`}>
               <ToastContainer 
                 position="top-right"

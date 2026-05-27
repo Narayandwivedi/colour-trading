@@ -73,7 +73,7 @@ const Card = ({
                       ? "scale-105 shadow-2xl"
                       : "shadow-lg hover:shadow-xl"
                   }
-                  min-w-[280px] h-[160px] p-6`}
+                  p-4 sm:p-6`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -193,23 +193,20 @@ async function handleServerRestart() {
 }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-8">
+    <div className="p-3 sm:p-6">
       {/* Header */}
-      <div className="mb-8">
-        {/* heading */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2"> Dashboard Overview</h1>
-          <p className="text-gray-600">Welcome back! Here's what's happening with your platform today.</p>
+      <div className="mb-4 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-900">Dashboard Overview</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">Welcome back! Here's what's happening with your platform today.</p>
+          </div>
+          <button onClick={handleServerRestart} className="self-start bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-lg transition-colors">Restart VPS</button>
         </div>
-
-        {/* restart button */}
-
-        <button onClick={handleServerRestart} className="bg-red-500 text-white px-3 py-2 rounded-md mt-10">Restart vps</button>
-
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-8">
         {cardData.map((card, index) => (
           <Card
             key={index}
@@ -218,17 +215,16 @@ async function handleServerRestart() {
             icon={card.icon}
             color={card.color}
             trend={card.trend}
-            // trendValue={card.trendValue}
           />
         ))}
       </div>
 
-      {/* Additional section for more content */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+      {/* Additional section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
           Recent Activity
         </h2>
-        <p className="text-gray-600">
+        <p className="text-sm sm:text-base text-gray-600">
           Your recent activity and analytics will appear here...
         </p>
       </div>

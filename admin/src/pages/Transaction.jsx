@@ -181,76 +181,73 @@ const Transaction = () => {
 
   if (loading && deposits.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="flex items-center justify-center p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading deposits...</p>
+          <p className="text-base text-gray-600">Loading deposits...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              Deposit Management
-            </h1>
-            <p className="text-gray-600">
-              Monitor and manage deposit requests - {pagination.totalDeposits} total {currentStatus} deposits
-            </p>
-          </div>
-          <button
-            onClick={() => fetchDepositsByStatus(currentStatus, pagination.currentPage)}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
-          >
-            <RefreshCw size={16} />
-            Refresh
-          </button>
+    <div className="p-3 sm:p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-8">
+        <div>
+          <h1 className="text-xl sm:text-4xl font-bold text-gray-800">Deposit Management</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
+            Monitor and manage deposit requests — {pagination.totalDeposits} total {currentStatus} deposits
+          </p>
         </div>
+        <button
+          onClick={() => fetchDepositsByStatus(currentStatus, pagination.currentPage)}
+          className="self-start bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+        >
+          <RefreshCw size={16} />
+          Refresh
+        </button>
+      </div>
 
-        {/* Status Filter Tabs */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex flex-wrap gap-4 justify-center">
-            {[
-              { key: "pending", label: "Pending Deposits", activeColor: "bg-amber-600 text-white shadow-lg shadow-amber-200", inactiveColor: "bg-amber-100 text-amber-800 hover:bg-amber-200" },
-              { key: "success", label: "Approved Deposits", activeColor: "bg-green-600 text-white shadow-lg shadow-green-200", inactiveColor: "bg-green-100 text-green-800 hover:bg-green-200" },
-              { key: "rejected", label: "Rejected Deposits", activeColor: "bg-red-600 text-white shadow-lg shadow-red-200", inactiveColor: "bg-red-100 text-red-800 hover:bg-red-200" },
-            ].map(({ key, label, activeColor, inactiveColor }) => (
-              <button
-                key={key}
-                onClick={() => handleStatusChange(key)}
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-                  currentStatus === key ? activeColor : inactiveColor
-                }`}
-              >
-                {label}
-                {currentStatus === key && (
-                  <span className="ml-2 px-2 py-1 text-xs rounded-full bg-white bg-opacity-20">
-                    {pagination.totalDeposits}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
+      {/* Status Filter Tabs */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6 mb-4 sm:mb-8">
+        <div className="flex flex-wrap gap-2 sm:gap-4">
+          {[
+            { key: "pending", label: "Pending", activeColor: "bg-amber-600 text-white shadow-lg shadow-amber-200", inactiveColor: "bg-amber-100 text-amber-800 hover:bg-amber-200" },
+            { key: "success", label: "Approved", activeColor: "bg-green-600 text-white shadow-lg shadow-green-200", inactiveColor: "bg-green-100 text-green-800 hover:bg-green-200" },
+            { key: "rejected", label: "Rejected", activeColor: "bg-red-600 text-white shadow-lg shadow-red-200", inactiveColor: "bg-red-100 text-red-800 hover:bg-red-200" },
+          ].map(({ key, label, activeColor, inactiveColor }) => (
+            <button
+              key={key}
+              onClick={() => handleStatusChange(key)}
+              className={`flex-1 sm:flex-none text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-200 ${
+                currentStatus === key ? activeColor : inactiveColor
+              }`}
+            >
+              {label}
+              {currentStatus === key && (
+                <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 text-xs rounded-full bg-white bg-opacity-20">
+                  {pagination.totalDeposits}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Deposits Grid */}
-        {deposits.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {deposits.map((deposit) => {
-                const statusConfig = getStatusConfig(deposit.status);
-                const StatusIcon = statusConfig.icon;
+      {/* Deposits Grid */}
+      {deposits.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+            {deposits.map((deposit) => {
+              const statusConfig = getStatusConfig(deposit.status);
+              const StatusIcon = statusConfig.icon;
 
-                return (
-                  <div
-                    key={deposit._id}
-                    className={`${statusConfig.bgColor} ${statusConfig.borderColor} ${statusConfig.shadowColor} border-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
-                  >
+              return (
+                <div
+                  key={deposit._id}
+                  className={`${statusConfig.bgColor} ${statusConfig.borderColor} ${statusConfig.shadowColor} border-2 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300`}
+                >
                     {/* Status Badge */}
                     <div className="flex items-center justify-between mb-4">
                       <span
@@ -326,78 +323,79 @@ const Transaction = () => {
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-200 px-6 py-4 mt-8">
-                <div className="text-sm text-gray-700">
-                  Showing page {pagination.currentPage} of {pagination.totalPages}
-                  <span className="ml-2 text-gray-500">
-                    ({pagination.totalDeposits} total {currentStatus} deposits)
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => handlePageChange(pagination.currentPage - 1)}
-                    disabled={!pagination.hasPrevPage}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                      pagination.hasPrevPage
-                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    Previous
-                  </button>
-                  
-                  {/* Page numbers */}
-                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                    const pageNum = Math.max(1, pagination.currentPage - 2) + i;
-                    if (pageNum <= pagination.totalPages) {
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                            pageNum === pagination.currentPage
-                              ? 'bg-indigo-600 text-white'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    }
-                    return null;
-                  })}
-                  
-                  <button
-                    onClick={() => handlePageChange(pagination.currentPage + 1)}
-                    disabled={!pagination.hasNextPage}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                      pagination.hasNextPage
-                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    Next
-                  </button>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:px-6 sm:py-4 mt-4 sm:mt-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
+                    Page {pagination.currentPage} of {pagination.totalPages}
+                    <span className="ml-2 text-gray-500">({pagination.totalDeposits} total)</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage - 1)}
+                      disabled={!pagination.hasPrevPage}
+                      className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium ${
+                        pagination.hasPrevPage
+                          ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      Previous
+                    </button>
+                    
+                    {/* Page numbers - hidden on mobile */}
+                    <div className="hidden sm:flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                        const pageNum = Math.max(1, pagination.currentPage - 2) + i;
+                        if (pageNum <= pagination.totalPages) {
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => handlePageChange(pageNum)}
+                              className={`w-8 h-8 rounded-lg text-sm font-medium ${
+                                pageNum === pagination.currentPage
+                                  ? 'bg-indigo-600 text-white'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+                    
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage + 1)}
+                      disabled={!pagination.hasNextPage}
+                      className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium ${
+                        pagination.hasNextPage
+                          ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      Next
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
           </>
         ) : (
-          <div className="text-center py-16">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 max-w-md mx-auto">
+          <div className="text-center py-8 sm:py-16">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-12 max-w-md mx-auto">
               <div className="text-gray-400 mb-4">
-                <Eye size={48} className="mx-auto" />
+                <Eye size={36} className="mx-auto" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              <h3 className="text-base sm:text-xl font-semibold text-gray-700 mb-2">
                 No {currentStatus} deposits found
               </h3>
-              <p className="text-gray-500">
+              <p className="text-sm sm:text-base text-gray-500">
                 There are no {currentStatus} deposits to display at the moment.
               </p>
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 };

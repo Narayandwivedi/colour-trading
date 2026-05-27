@@ -190,92 +190,83 @@ const ManageWithdraw = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 flex items-center justify-center">
+      <div className="flex items-center justify-center p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading withdrawals...</p>
+          <p className="text-base text-gray-600">Loading withdrawals...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <ArrowUpCircle className="text-purple-600" size={48} />
-            <h1 className="text-4xl font-bold text-gray-800">Withdrawal Management</h1>
-          </div>
-          <p className="text-gray-600">Monitor and manage all withdrawal requests</p>
+    <div className="p-3 sm:p-6">
+      {/* Header */}
+      <div className="mb-4 sm:mb-8">
+        <div className="flex items-center gap-2 sm:gap-3 mb-2">
+          <ArrowUpCircle className="text-purple-600 shrink-0" size={28} />
+          <h1 className="text-xl sm:text-4xl font-bold text-gray-800">Withdrawal Management</h1>
         </div>
+        <p className="text-sm sm:text-base text-gray-600">Monitor and manage all withdrawal requests</p>
+      </div>
 
-        {/* Stats Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-1">
-                {withdrawals.length}
-              </div>
-              <div className="text-gray-600 text-sm">Current Page</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-1">
-                {pagination.totalWithdrawals}
-              </div>
-              <div className="text-gray-600 text-sm">Total {currentStatus}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-1">
-                {formatAmount(getTotalAmount())}
-              </div>
-              <div className="text-gray-600 text-sm">Page Amount</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-amber-600 mb-1">
-                {pagination.currentPage}/{pagination.totalPages}
-              </div>
-              <div className="text-gray-600 text-sm">Page Info</div>
-            </div>
+      {/* Stats Card */}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6 mb-4 sm:mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
+          <div className="text-center">
+            <div className="text-xl sm:text-3xl font-bold text-purple-600">{withdrawals.length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">On Page</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xl sm:text-3xl font-bold text-blue-600">{pagination.totalWithdrawals}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Total {currentStatus}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xl sm:text-3xl font-bold text-green-600">{formatAmount(getTotalAmount())}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Page Amt</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xl sm:text-3xl font-bold text-amber-600">{pagination.currentPage}/{pagination.totalPages}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Page</div>
           </div>
         </div>
+      </div>
 
-        {/* Status Filter Tabs */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex flex-wrap gap-4 justify-center">
-            {[
-              { key: "pending", label: "Pending", icon: Clock },
-              { key: "success", label: "Approved", icon: CheckCircle },
-              { key: "rejected", label: "Rejected", icon: XCircle }
-            ].map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => handleStatusChange(key)}
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                  currentStatus === key
-                    ? "bg-purple-600 text-white shadow-lg shadow-purple-200"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                <Icon size={16} />
-                {label}
-              </button>
-            ))}
+      {/* Status Filter Tabs */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6 mb-4 sm:mb-8">
+        <div className="flex flex-wrap gap-2 sm:gap-4">
+          {[
+            { key: "pending", label: "Pending", icon: Clock },
+            { key: "success", label: "Approved", icon: CheckCircle },
+            { key: "rejected", label: "Rejected", icon: XCircle }
+          ].map(({ key, label, icon: Icon }) => (
             <button
-              onClick={() => fetchWithdrawals(currentStatus, pagination.currentPage)}
-              className="px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200"
+              key={key}
+              onClick={() => handleStatusChange(key)}
+              className={`flex-1 sm:flex-none text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 ${
+                currentStatus === key
+                  ? "bg-purple-600 text-white shadow-lg shadow-purple-200"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
             >
-              <RefreshCw size={16} />
-              Refresh
+              <Icon size={14} />
+              {label}
             </button>
-          </div>
+          ))}
+          <button
+            onClick={() => fetchWithdrawals(currentStatus, pagination.currentPage)}
+            className="flex-1 sm:flex-none text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200"
+          >
+            <RefreshCw size={14} />
+            Refresh
+          </button>
         </div>
+      </div>
 
         {/* Withdrawals Grid */}
         {withdrawals.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
               {withdrawals.map((withdrawal) => {
               const statusConfig = getStatusConfig(withdrawal.status);
               const StatusIcon = statusConfig.icon;
@@ -445,42 +436,43 @@ const ManageWithdraw = () => {
 
             {/* Pagination Controls */}
             {pagination.totalPages > 1 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mt-8">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
-                    Showing page {pagination.currentPage} of {pagination.totalPages} 
-                    ({pagination.totalWithdrawals} total {currentStatus} withdrawals)
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6 mt-4 sm:mt-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
+                    Page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalWithdrawals} total)
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center gap-2">
                     <button
                       onClick={() => handlePageChange(pagination.currentPage - 1)}
                       disabled={!pagination.hasPrevPage}
-                      className={`flex items-center gap-1 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-1 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
                         pagination.hasPrevPage
                           ? "bg-purple-600 text-white hover:bg-purple-700"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       }`}
                     >
-                      <ChevronLeft size={16} />
-                      Previous
+                      <ChevronLeft size={14} />
+                      <span className="hidden sm:inline">Previous</span>
+                      <span className="sm:hidden">Prev</span>
                     </button>
                     
-                    <span className="px-4 py-2 bg-gray-100 rounded-lg text-sm font-medium">
+                    <span className="px-3 sm:px-4 py-2 bg-gray-100 rounded-lg text-xs sm:text-sm font-medium">
                       {pagination.currentPage}
                     </span>
                     
                     <button
                       onClick={() => handlePageChange(pagination.currentPage + 1)}
                       disabled={!pagination.hasNextPage}
-                      className={`flex items-center gap-1 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-1 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
                         pagination.hasNextPage
                           ? "bg-purple-600 text-white hover:bg-purple-700"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       }`}
                     >
-                      Next
-                      <ChevronRight size={16} />
+                      <span className="hidden sm:inline">Next</span>
+                      <span className="sm:hidden">Next</span>
+                      <ChevronRight size={14} />
                     </button>
                   </div>
                 </div>
@@ -488,19 +480,18 @@ const ManageWithdraw = () => {
             )}
           </>
         ) : (
-          <div className="text-center py-16">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 max-w-md mx-auto">
+          <div className="text-center py-8 sm:py-16">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-12 max-w-md mx-auto">
               <div className="text-gray-400 mb-4">
-                <ArrowUpCircle size={48} className="mx-auto" />
+                <ArrowUpCircle size={36} className="mx-auto" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No withdrawals found</h3>
-              <p className="text-gray-500">
+              <h3 className="text-base sm:text-xl font-semibold text-gray-700 mb-2">No withdrawals found</h3>
+              <p className="text-sm sm:text-base text-gray-500">
                 {`No ${currentStatus} withdrawal requests found.`}
               </p>
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 };

@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import axios from "axios";
 import { AppContext } from "../context/AppContext";
 import { Clock, TrendingUp, Circle, Square, Users, DollarSign, RefreshCw } from "lucide-react";
 
 const LiveBets = () => {
-  const { BACKEND_URL } = useContext(AppContext);
+  const { BACKEND_URL, onWSMessage } = useContext(AppContext);
   const [bets, setBets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  async function fetchBets() {
+  const fetchBets = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await axios.get(`${BACKEND_URL}/api/admin/latestBets`);
@@ -23,14 +23,24 @@ const LiveBets = () => {
     } finally {
       setLoading(false);
     }
-  }
+  }, [BACKEND_URL]);
 
   useEffect(() => {
     fetchBets();
-    // Auto-refresh every 5 seconds
-    const interval = setInterval(fetchBets, 5000);
+    // Auto-refresh every 15 seconds (fallback)
+    const interval = setInterval(fetchBets, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchBets]);
+
+  // WebSocket: refresh bets when a game result is announced
+  useEffect(() => {
+    const unsub = onWSMessage((msg) => {
+      if (msg.type === 'game:result') {
+        fetchBets();
+      }
+    });
+    return unsub;
+  }, [onWSMessage, fetchBets]);
 
   const getBetTypeIcon = (bet) => {
     if (bet.betColour) return <Circle className="w-4 h-4" />;
@@ -66,103 +76,139 @@ const LiveBets = () => {
   const pendingBets = bets.filter(bet => bet.status === 'pending').length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-slate-200">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="p-3 sm:p-6">
+      {/* Header */}
+      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 border border-slate-200">
+        <div className="flex flex-row items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-3xl font-bold text-slate-800 flex items-center gap-2 sm:gap-3">
+              <TrendingUp className="w-5 h-5 sm:w-8 sm:h-8 text-blue-500 shrink-0" />
+              <span className="truncate">Live Bets</span>
+            </h1>
+            <p className="text-xs sm:text-base text-slate-600 mt-0.5 sm:mt-1">Real-time betting activity</p>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+            {lastUpdated && (
+              <div className="hidden sm:flex items-center gap-2 text-slate-500 text-sm">
+                <Clock className="w-4 h-4" />
+                Updated: {lastUpdated}
+              </div>
+            )}
+            <button
+              onClick={fetchBets}
+              disabled={loading}
+              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${loading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-3 sm:grid-cols-3 gap-2 sm:gap-6 mb-4 sm:mb-6">
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md p-3 sm:p-6 border border-slate-200">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-                <TrendingUp className="w-8 h-8 text-blue-500" />
-                Live Bets Tracker
-              </h1>
-              <p className="text-slate-600 mt-1">Real-time betting activity monitoring</p>
+              <p className="text-gray-500 text-[10px] sm:text-sm font-medium">Total Bets</p>
+              <p className="text-sm sm:text-2xl font-bold text-slate-800">{totalBets}</p>
             </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={fetchBets}
-                disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
-              {lastUpdated && (
-                <div className="flex items-center gap-2 text-slate-500 text-sm">
-                  <Clock className="w-4 h-4" />
-                  Last updated: {lastUpdated}
+            <div className="bg-blue-100 p-1.5 sm:p-3 rounded-lg">
+              <Users className="w-3.5 h-3.5 sm:w-6 sm:h-6 text-blue-600" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md p-3 sm:p-6 border border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 text-[10px] sm:text-sm font-medium">Amount</p>
+              <p className="text-sm sm:text-2xl font-bold text-slate-800">₹{totalAmount}</p>
+            </div>
+            <div className="bg-green-100 p-1.5 sm:p-3 rounded-lg">
+              <DollarSign className="w-3.5 h-3.5 sm:w-6 sm:h-6 text-green-600" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md p-3 sm:p-6 border border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 text-[10px] sm:text-sm font-medium">Pending</p>
+              <p className="text-sm sm:text-2xl font-bold text-slate-800">{pendingBets}</p>
+            </div>
+            <div className="bg-yellow-100 p-1.5 sm:p-3 rounded-lg">
+              <Clock className="w-3.5 h-3.5 sm:w-6 sm:h-6 text-yellow-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section Header */}
+      <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+        <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-slate-200 bg-slate-50">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm sm:text-xl font-semibold text-slate-800">Recent Bets</h2>
+            {lastUpdated && (
+              <div className="flex sm:hidden items-center gap-1 text-slate-400 text-[10px]">
+                <Clock className="w-3 h-3" />
+                {lastUpdated}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {loading && bets.length === 0 ? (
+          <div className="flex items-center justify-center py-8 sm:py-12">
+            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-500"></div>
+            <span className="ml-2 sm:ml-3 text-xs sm:text-base text-slate-600">Loading bets...</span>
+          </div>
+        ) : bets.length === 0 ? (
+          <div className="text-center py-8 sm:py-12 text-slate-500">
+            <TrendingUp className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-50" />
+            <p className="text-xs sm:text-base">No bets found</p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile: Bet Cards */}
+            <div className="sm:hidden divide-y divide-slate-100">
+              {bets.map((bet) => (
+                <div key={bet._id} className="p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-mono text-xs text-slate-500 truncate max-w-[120px]">{bet.userId}</div>
+                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border capitalize ${getStatusColor(bet.status)}`}>
+                      {bet.status}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="min-w-0">
+                      <div className="text-slate-600 font-mono">{bet.period}</div>
+                      <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border mt-1 ${getBetTypeColor(bet)}`}>
+                        {getBetTypeIcon(bet)}
+                        {getBetTypeText(bet)}
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="font-semibold text-slate-800">₹{bet.betAmount}</div>
+                      <div className="text-[10px] text-slate-400">{new Date(bet.createdAt).toLocaleString()}</div>
+                    </div>
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
-          </div>
-        </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium">Total Bets</p>
-                <p className="text-2xl font-bold text-slate-800">{totalBets}</p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium">Total Amount</p>
-                <p className="text-2xl font-bold text-slate-800">₹{totalAmount}</p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-lg">
-                <DollarSign className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium">Pending Bets</p>
-                <p className="text-2xl font-bold text-slate-800">{pendingBets}</p>
-              </div>
-              <div className="bg-yellow-100 p-3 rounded-lg">
-                <Clock className="w-6 h-6 text-yellow-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bets Table */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
-            <h2 className="text-xl font-semibold text-slate-800">Recent Bets</h2>
-          </div>
-          
-          {loading && bets.length === 0 ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-              <span className="ml-3 text-slate-600">Loading bets...</span>
-            </div>
-          ) : bets.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">
-              <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No bets found</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
+            {/* Desktop: Bet Table */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="text-left py-3 px-6 font-semibold text-slate-700">userId</th>
-                    <th className="text-left py-3 px-6 font-semibold text-slate-700">Period</th>
-                    <th className="text-left py-3 px-6 font-semibold text-slate-700">Bet Type</th>
-                    <th className="text-left py-3 px-6 font-semibold text-slate-700">Amount</th>
-                    <th className="text-left py-3 px-6 font-semibold text-slate-700">Status</th>
-                    <th className="text-left py-3 px-6 font-semibold text-slate-700">Time</th>
+                    <th className="text-left py-3 px-6 font-semibold text-slate-700 text-sm">userId</th>
+                    <th className="text-left py-3 px-6 font-semibold text-slate-700 text-sm">Period</th>
+                    <th className="text-left py-3 px-6 font-semibold text-slate-700 text-sm">Bet Type</th>
+                    <th className="text-left py-3 px-6 font-semibold text-slate-700 text-sm">Amount</th>
+                    <th className="text-left py-3 px-6 font-semibold text-slate-700 text-sm">Status</th>
+                    <th className="text-left py-3 px-6 font-semibold text-slate-700 text-sm">Time</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -173,18 +219,11 @@ const LiveBets = () => {
                         index % 2 === 0 ? 'bg-white' : 'bg-slate-25'
                       }`}
                     >
-
-                       <td className="py-4 px-6">
-                        <div className="font-mono text-sm text-slate-600">
-                          {(bet.userId)}
-                        </div>
-                      </td>
-                      
-
                       <td className="py-4 px-6">
-                        <div className="font-mono text-sm text-slate-600">
-                          {(bet.period)}
-                        </div>
+                        <div className="font-mono text-sm text-slate-600">{bet.userId}</div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="font-mono text-sm text-slate-600">{bet.period}</div>
                       </td>
                       <td className="py-4 px-6">
                         <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border ${getBetTypeColor(bet)}`}>
@@ -208,8 +247,8 @@ const LiveBets = () => {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
