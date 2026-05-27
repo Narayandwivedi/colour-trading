@@ -113,7 +113,7 @@ export default function Game() {
   return (
     <div className="Game-container relative mt-8 p-4 text-gray-700 mb-8 bg-gray-100">
       {/* Colour Buttons */}
-      <div className="game-selection mt-8 text-white flex gap-2 justify-center">
+      <div className="game-selection mt-3 text-white flex gap-2 justify-center">
         {COLOURS.map((colour) => (
           <button
             key={colour.name}

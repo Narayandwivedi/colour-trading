@@ -39,7 +39,7 @@ function App() {
 
   return (
   <div className='max-w-[440px] mx-auto bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen relative overflow-hidden'>
-    {/* <Agentation /> */}
+    <Agentation />
     <ToastContainer autoClose={600} />
   <Routes>
      <Route path='/' element={<ProtectedRoute><Homepage /></ProtectedRoute>} />
