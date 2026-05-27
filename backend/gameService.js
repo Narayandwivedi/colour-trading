@@ -399,6 +399,34 @@ function startAllGameSchedulers() {
   });
 }
 
-// Initialize
-startAllGameSchedulers();
-console.log("Game engine started - using node-cron with guaranteed execution");
+// Initialize period counters from database on startup
+async function initializePeriodCounters() {
+  try {
+    for (const gameType of Object.keys(GAME_TYPES)) {
+      const lastGame = await game.findOne({ gameType }).sort({ createdAt: -1 });
+      if (lastGame && lastGame.period) {
+        const periodStr = String(lastGame.period);
+        const prefixLength = 10; // YYYYMMDDHH = 10 chars
+        const typeCode = GAME_TYPES[gameType].typeCode;
+        const counterStr = periodStr.substring(prefixLength + typeCode.length);
+        const lastCounter = parseInt(counterStr, 10);
+        if (!isNaN(lastCounter)) {
+          periodCounters[gameType] = lastCounter + 1;
+          if (periodCounters[gameType] > 999) {
+            periodCounters[gameType] = 1;
+          }
+          console.log(`[${gameType}] Resumed from period ${lastGame.period}, next counter: ${periodCounters[gameType]}`);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Failed to initialize period counters:", error);
+  }
+}
+
+// Initialize and start
+(async () => {
+  await initializePeriodCounters();
+  startAllGameSchedulers();
+  console.log("Game engine started - using node-cron with guaranteed execution");
+})();
