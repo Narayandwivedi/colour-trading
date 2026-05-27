@@ -115,7 +115,7 @@ export default function Game() {
   }, [gameType]);
 
   return (
-    <div className="Game-container mt-3 p-4 text-gray-700 mb-8 bg-gradient-to-br from-gray-50 to-gray-200 rounded-lg shadow-md">
+    <div className="Game-container mt-3 p-4 text-gray-700 mb-3 bg-gradient-to-br from-gray-50 to-gray-200 rounded-lg shadow-md">
       <div className="game-options flex justify-between px-4 mb-6">
         {["30sec", "1min", "3min"].map((label) => (
           <div
