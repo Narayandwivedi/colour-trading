@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState, useContext } from "react";
 import {toast} from "react-toastify"
 import axios from "axios"
-import { useContext } from "react";
 import {AppContext} from "../context/AppContext"
 
 const AddBank = () => {
@@ -33,7 +32,7 @@ const AddBank = () => {
       }
 
     }catch(err){
-      if(err.response.data.message){
+      if(err.response?.data?.message){
         toast.error(err.response.data.message)}
         else{
           toast.error("some error while adding bank account try again")

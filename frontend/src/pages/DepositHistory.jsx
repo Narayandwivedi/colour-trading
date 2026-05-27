@@ -207,7 +207,6 @@ const DepositHistory = () => {
         }
       );
       if (data.success) {
-        console.log(data);
         setTransactions(data.depositHistory);
       }
     } catch (err) {

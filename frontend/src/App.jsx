@@ -1,5 +1,4 @@
-import { useContext, useState } from 'react'
-import './App.css'
+import { useContext } from 'react'
 import Addbalance from './components/Addbalance'
 import { Routes, Route } from 'react-router-dom'
 import Withdraw from './components/Withdraw'
@@ -12,7 +11,6 @@ import Aviator from "./pages/Aviator"
 import ColourTrading from "./pages/ColourTrading"
 import { AppContext } from './context/AppContext'
 import Refer from './pages/bottomNavPages/Refer'
-import Wallet from './pages/bottomNavPages/Wallet'
 import Account from './pages/bottomNavPages/Account'
 import PaymentPage from './pages/PaymentPage'
 import BetHistory from "./pages/BetHistory"
@@ -29,21 +27,25 @@ function App() {
 
   const { loading } = useContext(AppContext);
 
-  if (loading) return <div>Loading...</div>; // ✅ wait for checkLogin to finish
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-500 mx-auto mb-4"></div>
+        <p className="text-gray-500 font-medium">Loading...</p>
+      </div>
+    </div>
+  );
 
   return (
   <div className='max-w-[440px] mx-auto bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen relative overflow-hidden'>
     <ToastContainer autoClose={600} />
   <Routes>
-    
      <Route path='/' element={<ProtectedRoute><Homepage /></ProtectedRoute>} />
       <Route path='/support' element={<Support />} />
-
     <Route path='/colourtrading' element={<ProtectedRoute><ColourTrading/></ProtectedRoute>}/>
-    <Route path='/mine' element={<Mine/>}/>
-    <Route path='/aviator' element={<Aviator/>}/>
+    <Route path='/mine' element={<ProtectedRoute><Mine/></ProtectedRoute>}/>
+    <Route path='/aviator' element={<ProtectedRoute><Aviator/></ProtectedRoute>}/>
     <Route path='/refer' element={<ProtectedRoute><Refer /></ProtectedRoute>} />
-          {/* <Route path='/wallet' element={<Wallet />} /> */}
           <Route path='/account' element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path='/deposit' element={<ProtectedRoute><Addbalance /></ProtectedRoute>} />
           <Route path='/payment' element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
@@ -56,8 +58,18 @@ function App() {
           <Route path='/addupi' element={<ProtectedRoute><AddUpi /></ProtectedRoute>} />
           <Route path='/chat' element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path='/reset-pass' element={<ResetPass/>} />
-
-    
+          <Route path='*' element={
+            <div className="flex items-center justify-center min-h-screen px-4">
+              <div className="text-center">
+                <div className="text-6xl mb-4">404</div>
+                <h2 className="text-xl font-bold text-gray-800 mb-2">Page not found</h2>
+                <p className="text-gray-600 mb-6">The page you're looking for doesn't exist.</p>
+                <a href="/" className="inline-block bg-gradient-to-r from-teal-500 to-teal-600 text-white font-medium px-6 py-3 rounded-xl hover:from-teal-600 hover:to-teal-700 transition-all">
+                  Go Home
+                </a>
+              </div>
+            </div>
+          } />
   </Routes>
   </div>
   )

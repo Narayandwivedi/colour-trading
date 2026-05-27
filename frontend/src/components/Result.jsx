@@ -6,24 +6,22 @@ export default function Result() {
   const [results, setResults] = useState([]);
   const [winAmount, setWinAmount] = useState(null);
   const [showLoser, setShowLoser] = useState(false);
-  const [latestPeriod, setLatestPeriod] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
-  const intervalRef = useRef(null);
 
   const {
     BACKEND_URL,
     gameType,
-    timer,
     showWinner,
     setShowWinner,
     setBalance,
     activeBets,
     setActiveBets,
+    onWSMessage,
   } = useContext(AppContext);
 
-  const resultsPerPage = 10; // You can adjust this
+  const resultsPerPage = 10;
 
   const fetchResults = async (page = 1, isInitialLoad = false) => {
     try {
@@ -33,103 +31,12 @@ export default function Result() {
       );
 
       if (isInitialLoad) {
-        const latest = data.results[0];
-        if (latest && latest.period !== latestPeriod) {
-
-          if (activeBets && activeBets.length > 0) {
-            let totalWinAmount = 0;
-            let hasWon = false;
-            let hasLost = false;
-
-            // Check each bet against the result
-            activeBets.forEach((bet) => {
-              let winAmount = 0;
-              let isWinningBet = false;
-
-              // Handle color bets with special violet logic
-              if (bet.selectedBetColour) {
-                if (latest.colour === "violetRed") {
-                  if (bet.selectedBetColour === "red") {
-                    // Red bet wins with 1.5x payout on violetRed
-                    winAmount = bet.betValue * 1.5;
-                    isWinningBet = true;
-                  } else if (bet.selectedBetColour === "violet") {
-                    // Violet bet wins with 4x payout on violetRed
-                    winAmount = bet.betValue * 4;
-                    isWinningBet = true;
-                  } else {
-                    // Green bet (or any other) loses on violetRed
-                    winAmount = 0;
-                    isWinningBet = false;
-                  }
-                } else if (latest.colour === "violetGreen") {
-                  if (bet.selectedBetColour === "green") {
-                    // Green bet wins with 1.5x payout on violetGreen
-                    winAmount = bet.betValue * 1.5;
-                    isWinningBet = true;
-                  } else if (bet.selectedBetColour === "violet") {
-                    // Violet bet wins with 4x payout on violetGreen
-                    winAmount = bet.betValue * 4;
-                    isWinningBet = true;
-                  } else {
-                    // Red bet (or any other) loses on violetGreen
-                    winAmount = 0;
-                    isWinningBet = false;
-                  }
-                } else {
-                  // Normal color matching (non-violet results)
-                  if (bet.selectedBetColour === latest.colour) {
-                    winAmount = bet.betValue * 2; // Normal payout
-                    isWinningBet = true;
-                  }
-                }
-              }
-
-              // Handle size bets (unchanged logic)
-              if (bet.selectedBetSize && bet.selectedBetSize === latest.size) {
-                winAmount += bet.betValue * 2; // Add size bet winnings
-                isWinningBet = true;
-              }
-
-               if((bet.selectedBetNumber!==undefined && bet.selectedBetNumber!==null)&& bet.selectedBetNumber===latest.number){
-                winAmount+=bet.betValue*9
-                isWinningBet = true
-              }
-
-              // Add to total if won
-              if (isWinningBet && winAmount > 0) {
-                totalWinAmount += winAmount;
-                hasWon = true;
-              } else if (!isWinningBet || winAmount === 0) {
-                hasLost = true;
-              }
-            });
-
-            // Update balance and show appropriate message
-            if (hasWon) {
-              setWinAmount(totalWinAmount);
-              setBalance((prevBalance) => prevBalance + totalWinAmount);
-              setShowWinner(true);
-            } else if (hasLost && !hasWon) {
-              // Only show loser if no bets won
-              setShowLoser(true);
-            }
-
-            // Clear all active bets after processing
-            setActiveBets([]);
-          }
-
-          setLatestPeriod(latest.period);
-        }
+        setResults(data.results);
+      } else {
+        setResults(data.results);
       }
 
-      setResults(data.results);
       setPagination(data.pagination);
-
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
     } catch (err) {
       console.log("Error fetching results:", err.message);
     } finally {
@@ -144,37 +51,30 @@ export default function Result() {
     }
   };
 
-  // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pages = [];
     const totalPages = pagination.totalPages || 1;
     const current = currentPage;
 
-    // Always show first page
     pages.push(1);
 
-    // Add pages around current page
     let start = Math.max(2, current - 1);
     let end = Math.min(totalPages - 1, current + 1);
 
-    // Add ellipsis after first page if needed
     if (start > 2) {
       pages.push("...");
     }
 
-    // Add middle pages
     for (let i = start; i <= end; i++) {
       if (i !== 1 && i !== totalPages) {
         pages.push(i);
       }
     }
 
-    // Add ellipsis before last page if needed
     if (end < totalPages - 1) {
       pages.push("...");
     }
 
-    // Always show last page (if more than 1 page)
     if (totalPages > 1) {
       pages.push(totalPages);
     }
@@ -187,20 +87,86 @@ export default function Result() {
   }, [gameType]);
 
   useEffect(() => {
-    if (timer <= 1 && !intervalRef.current) {
-      intervalRef.current = setInterval(() => fetchResults(1, true), 800);
-    }
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+    const unsub = onWSMessage((msg) => {
+      if (msg.type === 'game:result' && msg.gameType === gameType) {
+        if (activeBets && activeBets.length > 0) {
+          let totalWinAmount = 0;
+          let hasWon = false;
+          let hasLost = false;
+
+          activeBets.forEach((bet) => {
+            let winAmount = 0;
+            let isWinningBet = false;
+
+            if (bet.selectedBetColour) {
+              if (msg.colour === "violetRed") {
+                if (bet.selectedBetColour === "red") {
+                  winAmount = bet.betValue * 1.5;
+                  isWinningBet = true;
+                } else if (bet.selectedBetColour === "violet") {
+                  winAmount = bet.betValue * 4;
+                  isWinningBet = true;
+                } else {
+                  winAmount = 0;
+                  isWinningBet = false;
+                }
+              } else if (msg.colour === "violetGreen") {
+                if (bet.selectedBetColour === "green") {
+                  winAmount = bet.betValue * 1.5;
+                  isWinningBet = true;
+                } else if (bet.selectedBetColour === "violet") {
+                  winAmount = bet.betValue * 4;
+                  isWinningBet = true;
+                } else {
+                  winAmount = 0;
+                  isWinningBet = false;
+                }
+              } else {
+                if (bet.selectedBetColour === msg.colour) {
+                  winAmount = bet.betValue * 2;
+                  isWinningBet = true;
+                }
+              }
+            }
+
+            if (bet.selectedBetSize && bet.selectedBetSize === msg.size) {
+              winAmount += bet.betValue * 2;
+              isWinningBet = true;
+            }
+
+            if ((bet.selectedBetNumber !== undefined && bet.selectedBetNumber !== null) && bet.selectedBetNumber === msg.number) {
+              winAmount += bet.betValue * 9;
+              isWinningBet = true;
+            }
+
+            if (isWinningBet && winAmount > 0) {
+              totalWinAmount += winAmount;
+              hasWon = true;
+            } else if (!isWinningBet || winAmount === 0) {
+              hasLost = true;
+            }
+          });
+
+          if (hasWon) {
+            setWinAmount(totalWinAmount);
+            setBalance((prevBalance) => prevBalance + totalWinAmount);
+            setShowWinner(true);
+          } else if (hasLost && !hasWon) {
+            setShowLoser(true);
+          }
+
+          setActiveBets([]);
+        }
+
+        fetchResults(1, true);
       }
-    };
-  }, [timer]);
+    });
+
+    return unsub;
+  }, [gameType, activeBets, onWSMessage]);
 
   return (
     <div className="result-container mb-6 px-2">
-      {/* Header */}
       <div className="flex items-center justify-center gap-3 mb-5">
         <div className="w-7 h-7 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-md">
           <i className="fa-solid fa-trophy text-white text-sm"></i>
@@ -208,10 +174,8 @@ export default function Result() {
         <span className="text-gray-800 font-bold text-xl">Results History</span>
       </div>
 
-      {/* Divider */}
       <div className="h-1 bg-gradient-to-r from-teal-400 to-teal-600 rounded-full mb-5 shadow-sm"></div>
 
-      {/* Results Box */}
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
         <div className="bg-gradient-to-r from-teal-500 to-teal-600 px-3 py-4">
           <div
@@ -225,7 +189,6 @@ export default function Result() {
           </div>
         </div>
 
-        {/* Loading state */}
         {loading && (
           <div className="text-center py-12 text-gray-500">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto mb-3"></div>
@@ -233,7 +196,6 @@ export default function Result() {
           </div>
         )}
 
-        {/* Results */}
         {!loading && (
           <div>
             {results.map((item, index) => (
@@ -296,7 +258,6 @@ export default function Result() {
               </div>
             ))}
 
-            {/* Empty state */}
             {results.length === 0 && !loading && (
               <div className="text-center py-12 text-gray-500">
                 <div className="text-5xl mb-3">🎯</div>
@@ -307,10 +268,8 @@ export default function Result() {
         )}
       </div>
 
-      {/* Mobile-Optimized Pagination */}
       {pagination.totalPages > 1 && (
         <div className="mt-4 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          {/* Results info - Mobile optimized */}
           <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
             <div className="text-xs text-gray-600 text-center">
               Page {currentPage} of {pagination.totalPages} (
@@ -318,9 +277,7 @@ export default function Result() {
             </div>
           </div>
 
-          {/* Mobile Pagination Controls */}
           <div className="p-3">
-            {/* Previous/Next with Current Page */}
             <div className="flex items-center justify-between mb-5 px-4">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
@@ -349,9 +306,7 @@ export default function Result() {
               </button>
             </div>
 
-            {/* Quick Jump - Only show first few, current, and last few pages */}
             <div className="flex items-center justify-center gap-1 flex-wrap">
-              {/* First page */}
               {currentPage > 3 && (
                 <>
                   <button
@@ -366,7 +321,6 @@ export default function Result() {
                 </>
               )}
 
-              {/* Pages around current */}
               {Array.from(
                 { length: Math.min(5, pagination.totalPages) },
                 (_, i) => {
@@ -406,7 +360,6 @@ export default function Result() {
                 }
               )}
 
-              {/* Last page */}
               {currentPage < pagination.totalPages - 2 &&
                 pagination.totalPages > 5 && (
                   <>
@@ -426,7 +379,6 @@ export default function Result() {
         </div>
       )}
 
-      {/* Win popup */}
       {showWinner && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 px-4">
           <div className="relative w-full max-w-sm bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 p-8 rounded-3xl shadow-2xl">
@@ -464,7 +416,6 @@ export default function Result() {
         </div>
       )}
 
-      {/* Lose popup */}
       {showLoser && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 relative">

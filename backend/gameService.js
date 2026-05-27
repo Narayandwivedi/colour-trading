@@ -1,8 +1,9 @@
 const game = require("./models/game");
 const bet = require("./models/bet");
 const User = require("./models/user");
-const AdminResult = require("./models/AdminResult"); // Add AdminResult model
+const AdminResult = require("./models/AdminResult");
 const cron = require("node-cron");
+const { broadcast } = require("./websocketService");
 
 // Constants
 const Colours = ["red", "green"];
@@ -210,6 +211,14 @@ async function processGame(gameInstance, gameType) {
     gameInstance.status = "closed";
     await gameInstance.save();
 
+    broadcast('game:result', {
+      gameType,
+      period: gameInstance.period,
+      colour,
+      size,
+      number,
+    });
+
     const bets = await bet.find({ period: gameInstance.period }).lean();
     if (bets.length === 0) {
       console.log(`No bets to process for period ${gameInstance.period}`);
@@ -358,6 +367,13 @@ async function executeGameRound(gameType) {
   try {
     const period = await generatePeriodId(gameType);
     const newGame = await game.create({ period, gameType });
+
+    broadcast('game:open', {
+      gameType,
+      period: newGame.period,
+      createdAt: newGame.createdAt,
+      duration: GAME_TYPES[gameType].interval / 1000,
+    });
 
     console.log(`[${new Date().toISOString()}] ${gameType} game opened: ${period}`);
 

@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 
 export const AppContext = createContext();
@@ -18,15 +18,85 @@ export const AppContextProvider = (props) => {
   const [gameType , setGameType] = useState('30sec')
   const [finalDepositAmt , setFinalDepositAmt] = useState(100)
   const [loading, setLoading] = useState(true)
-  const [activeBets, setActiveBets] = useState([]);
+  const [activeBets, setActiveBets] = useState(() => {
+    try {
+      const saved = localStorage.getItem('activeBets');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [latestResult, setLatestResult] = useState(null);
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://api.winners11.in';
-  // const BACKEND_URL = 'http://localhost:8080';
-  
-  
-  
+  const WS_URL = BACKEND_URL.replace(/^http/, 'ws');
 
-  
+  const wsRef = useRef(null);
+  const wsListenersRef = useRef(new Set());
+
+  const sendWS = useCallback((msg) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(msg));
+    }
+  }, []);
+
+  const subscribeWS = useCallback((gameType) => {
+    sendWS({ type: 'subscribe', gameType });
+  }, [sendWS]);
+
+  const onWSMessage = useCallback((handler) => {
+    wsListenersRef.current.add(handler);
+    return () => wsListenersRef.current.delete(handler);
+  }, []);
+
+  useEffect(() => {
+    let reconnectTimer;
+    function connect() {
+      const ws = new WebSocket(WS_URL);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        subscribeWS(gameType);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          wsListenersRef.current.forEach(fn => fn(msg));
+        } catch (e) {}
+      };
+
+      ws.onclose = () => {
+        wsRef.current = null;
+        reconnectTimer = setTimeout(connect, 3000);
+      };
+
+      ws.onerror = () => {
+        ws.close();
+      };
+    }
+
+    connect();
+
+    return () => {
+      clearTimeout(reconnectTimer);
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      subscribeWS(gameType);
+    }
+  }, [gameType, subscribeWS]);
+
+  useEffect(() => {
+    localStorage.setItem('activeBets', JSON.stringify(activeBets));
+  }, [activeBets]);
+
   // 🔐 Check if user is logged in
 const checkLogin = async () => {
   try {
@@ -43,11 +113,10 @@ const checkLogin = async () => {
   } catch (err) {
     setUserData(null);
   } finally {
-    setLoading(false); // ✅ done checking
+    setLoading(false);
   }
 };
 
-// Rename checkLogin to checkAuthStatus for consistency with GoogleLogin component
 const checkAuthStatus = checkLogin;
 
   useEffect(() => {
@@ -70,10 +139,14 @@ const checkAuthStatus = checkLogin;
     finalDepositAmt , setFinalDepositAmt,
     betAllowed , setBetAllowed,
     activeBets , setActiveBets,
-    
-    BACKEND_URL,
+    latestResult, setLatestResult,
 
-    // Auth values
+    BACKEND_URL,
+    WS_URL,
+    sendWS,
+    subscribeWS,
+    onWSMessage,
+
     checkLogin,
     checkAuthStatus,
   };

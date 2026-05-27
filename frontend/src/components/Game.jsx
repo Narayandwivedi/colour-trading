@@ -116,7 +116,6 @@ export default function Game() {
                 period: period,
             };
             setActiveBets((prevBets) => [...prevBets, newBet]);
-            console.log(activeBets);
             
             setIsBetPopOpen(false);
        

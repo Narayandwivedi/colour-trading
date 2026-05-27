@@ -1,12 +1,14 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
+const http = require('http');
 const { exec } = require('child_process');
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const cron = require('node-cron');
 
 const { connectToDb } = require("./config/mongodb.js");
+const { setupWebSocket } = require("./websocketService");
 require("./gameService.js");
 
 console.log("server");
@@ -162,8 +164,11 @@ app.use((err, req, res, next) => {
 
 // server listen
 
+const server = http.createServer(app);
+setupWebSocket(server);
+
 connectToDb().then(() => {
-  app.listen(8080, () => {
-    console.log("server actiavte ho gya hai");
+  server.listen(8080, () => {
+    console.log("server activate ho gya hai");
   });
 });

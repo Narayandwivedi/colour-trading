@@ -1,8 +1,7 @@
 import axios from "axios";
-import React, { useState } from "react";
+import { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { AppContext } from "../context/AppContext";
-import { useContext } from "react";
 import {useNavigate} from 'react-router-dom'
 
 const AddUpi = () => {
@@ -31,13 +30,7 @@ const AddUpi = () => {
     }
 
    }catch(err){
-      if(err.response.data.message){
-        navigate("/withdraw")
-         toast.error(err.response.data.message)
-      }
-      else{
-        toast.error("some error while adding upi id try again later")
-      }
+      toast.error(err.response?.data?.message || "some error while adding upi id try again later")
    }
 
 

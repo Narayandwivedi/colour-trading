@@ -26,7 +26,7 @@ function BetCard({ Period, Bet, Amount, Result, status, payout, orderId }) {
       return {
         color: "text-violet-500",
         bg: "bg-violet-50",
-        border: "border:violet-200",
+        border: "border-violet-200",
       };
 
     if (Bet === "big")

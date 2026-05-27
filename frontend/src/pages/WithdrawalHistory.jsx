@@ -143,7 +143,6 @@ const WithdrawalHistory = () => {
         userId: userData._id,
       });
       if (data.success) {
-        console.log(data);
         setWithdrawHistory(data.history);
       }
     } catch (err) {

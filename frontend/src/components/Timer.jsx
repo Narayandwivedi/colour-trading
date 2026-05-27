@@ -1,10 +1,8 @@
 import { useContext, useState, useEffect, useRef } from "react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
-import { toast } from "react-toastify";
 import { Trophy } from "lucide-react";
 
-// ⏰ Clock UI
 function Watch({ selected }) {
   return (
     <div
@@ -20,7 +18,6 @@ function Watch({ selected }) {
   );
 }
 
-// ⏳ Game duration by type
 const getDurationByGameType = (type) => {
   switch (type) {
     case "1min": return 60;
@@ -31,28 +28,34 @@ const getDurationByGameType = (type) => {
 };
 
 export default function Game() {
-  
-  
   const [selectedTime, setSelectedTime] = useState("30sec");
-
-  const fetchInterval = useRef(null);
 
   const {
     timer,
     setTimer,
-    BACKEND_URL,
     period,
     setPeriod,
     periodCreatedAT,
     setPeriodCreatedAT,
     gameType,
     setGameType,
+    BACKEND_URL,
+    onWSMessage,
   } = useContext(AppContext);
 
   const minutes = Math.floor(timer / 60);
   const seconds = timer % 60;
 
-  // ⏳ Countdown timer logic
+  useEffect(() => {
+    const unsub = onWSMessage((msg) => {
+      if (msg.type === 'game:open' && msg.gameType === gameType) {
+        setPeriod(msg.period);
+        setPeriodCreatedAT(new Date(msg.createdAt));
+      }
+    });
+    return unsub;
+  }, [gameType, onWSMessage]);
+
   useEffect(() => {
     if (!periodCreatedAT) return;
 
@@ -64,87 +67,32 @@ export default function Game() {
       setTimer(timeLeft);
     }, 800);
 
-    
-
     return () => clearInterval(interval);
   }, [periodCreatedAT, gameType]);
 
-  // 📥 Fetch latest period
-  async function fetchLatestPeriodAndCheckChange(prevPeriod) {
-    try {
-      const { data } = await axios.get(
-        `${BACKEND_URL}/api/latest/period/${gameType}`,
-        { withCredentials: true }
-      );
-
-      if (data.success) {
-        const newPeriod = data.latestPeriod.period;
-        if (newPeriod !== prevPeriod) {
-          setPeriod(newPeriod);
-          setPeriodCreatedAT(new Date(data.latestPeriod.createdAt));
-          return true; // New period found
-        }
-      }
-      return false; // No new period yet
-    } catch (err) {
-      toast.error('error fetching latest period')
-      return false;
-    }
-  }
-
-  // ⏳ Start polling when timer ≤ 1 and continue until new period is found
   useEffect(() => {
-    let isMounted = true;
-
-    const startPolling = async () => {
-      if (timer <= 1 && !fetchInterval.current) {
-        fetchInterval.current = setInterval(async () => {
-          const foundNewPeriod = await fetchLatestPeriodAndCheckChange(period);
-          if (foundNewPeriod && isMounted) {
-            clearInterval(fetchInterval.current);
-            fetchInterval.current = null;
-          }
-        }, 800); // Poll every 800ms
-      }
-    };
-
-    startPolling();
-
-    return () => {
-      isMounted = false;
-      if (fetchInterval.current) {
-        clearInterval(fetchInterval.current);
-        fetchInterval.current = null;
-      }
-    };
-  }, [timer, period]);
-
-  // 📌 Initial fetch on gameType change
-  useEffect(() => {
-    async function initialFetch() {
+    async function fetchCurrentPeriod() {
       try {
         const { data } = await axios.get(
           `${BACKEND_URL}/api/latest/period/${gameType}`,
           { withCredentials: true }
         );
-
-        if (data.success) {
+        if (data.success && data.latestPeriod) {
           setPeriod(data.latestPeriod.period);
           setPeriodCreatedAT(new Date(data.latestPeriod.createdAt));
         }
       } catch (err) {
-        console.error("Error during initial period fetch:", err);
+        console.error("Failed to fetch current period:", err.message);
       }
     }
 
     if (gameType) {
-      initialFetch();
+      fetchCurrentPeriod();
     }
   }, [gameType]);
 
   return (
     <div className="Game-container mt-8 p-4 text-gray-700 mb-8 bg-gradient-to-br from-gray-50 to-gray-200 rounded-lg shadow-md">
-      {/* Game time options */}
       <div className="game-options flex justify-between px-4 mb-6">
         {["30sec", "1min", "3min"].map((label) => (
           <div
@@ -165,20 +113,20 @@ export default function Game() {
         ))}
       </div>
 
-      {/* Period and Timer Display */}
       <div className="game-counter mt-8 grid grid-cols-2 gap-4 text-center">
         <div className="bg-white p-4 rounded-lg shadow">
           <p className="text-gray-500 text-sm flex justify-center items-center gap-2">
             <Trophy className="w-5 h-5 text-yellow-500" /> Period
           </p>
-          <p className="text-xl font-semibold text-indigo-700 mt-1">{period}</p>
+          <p className="text-xl font-semibold text-indigo-700 mt-1">
+            {period || "---"}
+          </p>
         </div>
 
-        {/* count down */}
         <div className="bg-white p-4 rounded-lg shadow">
           <p className="text-gray-500 text-sm">Count Down</p>
           <p className="text-xl font-semibold text-indigo-700 mt-1">
-            {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
+            {periodCreatedAT ? `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}` : "---"}
           </p>
         </div>
       </div>

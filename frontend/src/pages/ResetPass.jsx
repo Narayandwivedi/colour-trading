@@ -25,17 +25,13 @@ const ResetPass = () => {
           email
         })
 
-        console.log(data);
-        
-
         if(data.success){
           toast.success(data.message)
           setOtpFormOpen(true)
         } 
        }catch(err){
-        console.log(err);
-        toast.error(err.message || 'some error while generating otp try again')
-       }
+         toast.error(err.response?.data?.message || err.message || 'some error while generating otp try again')
+        }
         
     }
 
@@ -53,7 +49,7 @@ const ResetPass = () => {
           toast.success(data.message)
         }
        }catch(err){
-        toast.error(err.message || error)
+        toast.error(err.response?.data?.message || err.message || 'failed to reset password')
        }
     }
 
