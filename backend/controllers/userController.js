@@ -19,6 +19,11 @@ function generateReferralCode() {
   return code;
 }
 
+async function getNextUserId() {
+  const maxUser = await userModel.findOne().sort({ userId: -1 }).select('userId').lean();
+  return maxUser && maxUser.userId ? maxUser.userId + 1 : 10001;
+}
+
 const handelUserSignup = async (req, res) => {
   try {
     if (!req.body || Object.keys(req.body).length === 0) {
@@ -84,6 +89,7 @@ const handelUserSignup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 8);
 
     const newUserData = {
+      userId: await getNextUserId(),
       fullName,
       email,
       mobile,
@@ -788,9 +794,10 @@ const editUser = async (req, res) => {
         success: true,
         message: "No changes detected",
         user: {
-          _id: user._id,
+          userId: user.userId,
           fullName: user.fullName,
           email: user.email,
+          mobile: user.mobile,
           balance: user.balance,
           withdrawableBalance: user.withdrawableBalance
         }
@@ -802,7 +809,7 @@ const editUser = async (req, res) => {
       userId,
       updateFields,
       { new: true, runValidators: true }
-    ).select('_id fullName email balance withdrawableBalance mobile role');
+    ).select('_id userId fullName email balance withdrawableBalance mobile role');
 
     // Create change summary
     const changes = [];
@@ -928,6 +935,7 @@ const handleGoogleAuth = async (req, res) => {
       const referralCode = generateReferralCode();
       
       const newUserData = {
+        userId: await getNextUserId(),
         fullName,
         email,
         googleId,

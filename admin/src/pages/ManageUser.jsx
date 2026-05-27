@@ -109,7 +109,7 @@ const ManageUser = () => {
     // Implement delete user functionality
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
-        const { data } = await axios.delete(`${BACKEND_URL}/api/admin/deleteuser/${userId}`);
+        const { data } = await axios.delete(`${BACKEND_URL}/api/admin/user/${userId}`);
         if (data.success) {
           toast.success('User deleted successfully');
           fetchAllUsers(); // Refresh the user list
@@ -366,7 +366,7 @@ const ManageUser = () => {
                     user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                   }`}>{user.isActive ? 'Active' : 'Banned'}</span>
                 </div>
-                <span className="text-gray-400 font-mono">{user._id.slice(-6)}</span>
+                <span className="text-gray-400 font-mono">#{user.userId}</span>
               </div>
             </div>
           ))}
@@ -404,7 +404,7 @@ const ManageUser = () => {
                       </div>
                     </td>
                     <td className="px-3 py-2">
-                      <span className="text-[10px] font-mono text-gray-500">{user._id.slice(-8)}</span>
+                      <span className="text-[10px] font-mono text-gray-500">#{user.userId}</span>
                     </td>
                     <td className="px-3 py-2">
                       <span className="text-xs text-gray-700">{user.mobile || '-'}</span>
@@ -511,7 +511,7 @@ const ManageUser = () => {
             <div className="p-4 space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">User ID</label>
-                <div className="text-xs text-gray-600 bg-gray-50 px-3 py-1.5 rounded font-mono">{editingUser._id}</div>
+                <div className="text-xs text-gray-600 bg-gray-50 px-3 py-1.5 rounded font-mono">#{editingUser.userId || editingUser._id.slice(-6)}</div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Full Name *</label>
