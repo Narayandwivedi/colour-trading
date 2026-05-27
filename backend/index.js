@@ -168,7 +168,7 @@ const server = http.createServer(app);
 setupWebSocket(server);
 
 connectToDb().then(() => {
-  server.listen(8080, () => {
+  server.listen(process.env.PORT, () => {
     console.log("server activate ho gya hai");
   });
 });
