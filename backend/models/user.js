@@ -67,6 +67,10 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
 
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
   isFirstDeposit: {
     type: Boolean,
     default: true,

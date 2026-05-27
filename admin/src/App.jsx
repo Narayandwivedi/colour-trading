@@ -67,7 +67,7 @@ function App() {
             />
           )}
 
-          <div className={`fixed md:static inset-y-0 left-0 z-40 w-72 md:w-64 bg-white shadow-xl border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
+          <div className={`fixed md:static inset-y-0 left-0 z-40 w-72 md:w-52 bg-white shadow-xl border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } md:translate-x-0 md:h-screen overflow-y-auto`}>
             {/* Logo/Header */}

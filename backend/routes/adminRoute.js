@@ -321,6 +321,29 @@ router.put("/reject-deposit", async (req, res) => {
   }
 });
 
+router.put("/toggle-user-status/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: "Invalid user ID" });
+    }
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    user.isActive = !user.isActive;
+    await user.save();
+    res.json({
+      success: true,
+      message: `User ${user.isActive ? 'activated' : 'deactivated'} successfully`,
+      isActive: user.isActive,
+    });
+  } catch (err) {
+    console.error("Error toggling user status:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 router.delete("/user/:id", async (req, res) => {
   try {
     const { id } = req.params;

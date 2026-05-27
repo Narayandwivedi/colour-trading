@@ -24,6 +24,7 @@ const ManageUser = () => {
     password: ''
   });
   const [isUpdating, setIsUpdating] = useState(false);
+  const [togglingIds, setTogglingIds] = useState(new Set());
 
   async function fetchAllUsers() {
     try {
@@ -57,8 +58,8 @@ const ManageUser = () => {
                          (user.referralCode || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesFilter = filterStatus === 'all' ||
-                         (filterStatus === 'active' && (user.balance || 0) > 0) ||
-                         (filterStatus === 'inactive' && (user.balance || 0) === 0) ||
+                         (filterStatus === 'active' && user.isActive) ||
+                         (filterStatus === 'banned' && !user.isActive) ||
                          (filterStatus === 'first-deposit' && user.isFirstDeposit) ||
                          (filterStatus === 'bank-added' && user.isBankAdded) ||
                          (filterStatus === 'upi-added' && user.isUpiAdded);
@@ -116,6 +117,23 @@ const ManageUser = () => {
       } catch (err) {
         toast.error(err.response?.data?.message || 'Failed to delete user');
       }
+    }
+  };
+
+  const toggleUserStatus = async (userId) => {
+    try {
+      setTogglingIds(prev => new Set(prev).add(userId));
+      const { data } = await axios.put(`${BACKEND_URL}/api/admin/toggle-user-status/${userId}`);
+      if (data.success) {
+        toast.success(data.message);
+        setUsers(prev => prev.map(u => u._id === userId ? { ...u, isActive: data.isActive } : u));
+      } else {
+        toast.error(data.message || 'Failed to toggle user status');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error toggling user status');
+    } finally {
+      setTogglingIds(prev => { const next = new Set(prev); next.delete(userId); return next; });
     }
   };
 
@@ -217,277 +235,249 @@ const ManageUser = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
+    <div className="p-2 sm:p-3">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-4 sm:mb-8">
-          <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">User Management</h1>
-          <p className="text-sm sm:text-base text-gray-600">Manage and monitor all user accounts</p>
+        <div className="mb-3 sm:mb-4">
+          <h1 className="text-base sm:text-lg font-bold text-gray-900">User Management</h1>
+          <p className="text-xs sm:text-sm text-gray-500">Manage and monitor all user accounts</p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-8">
-          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-6 border border-gray-200">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Users className="h-5 w-5 sm:h-8 sm:w-8 text-blue-600" />
-              </div>
-              <div className="ml-2 sm:ml-5 w-0 flex-1">
-                <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Total Users</dt>
-                <dd className="text-lg sm:text-2xl font-bold text-gray-900">{totalUsers.toLocaleString()}</dd>
+        <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <div className="bg-white rounded-lg shadow-sm p-2 sm:p-3 border border-gray-200">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 shrink-0" />
+              <div className="min-w-0">
+                <dt className="text-[10px] sm:text-xs text-gray-500 truncate">Total</dt>
+                <dd className="text-xs sm:text-sm font-bold text-gray-900">{totalUsers.toLocaleString()}</dd>
               </div>
             </div>
           </div>
-
-          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-6 border border-gray-200">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <UserCheck className="h-5 w-5 sm:h-8 sm:w-8 text-green-600" />
-              </div>
-              <div className="ml-2 sm:ml-5 w-0 flex-1">
-                <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Active Users</dt>
-                <dd className="text-lg sm:text-2xl font-bold text-gray-900">{activeUsers.toLocaleString()}</dd>
+          <div className="bg-white rounded-lg shadow-sm p-2 sm:p-3 border border-gray-200">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 shrink-0" />
+              <div className="min-w-0">
+                <dt className="text-[10px] sm:text-xs text-gray-500 truncate">Active</dt>
+                <dd className="text-xs sm:text-sm font-bold text-gray-900">{activeUsers.toLocaleString()}</dd>
               </div>
             </div>
           </div>
-
-          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-6 border border-gray-200">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Wallet className="h-5 w-5 sm:h-8 sm:w-8 text-purple-600" />
-              </div>
-              <div className="ml-2 sm:ml-5 w-0 flex-1">
-                <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Total Balance</dt>
-                <dd className="text-sm sm:text-2xl font-bold text-gray-900">{formatCurrency(totalBalance)}</dd>
+          <div className="bg-white rounded-lg shadow-sm p-2 sm:p-3 border border-gray-200">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Wallet className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600 shrink-0" />
+              <div className="min-w-0">
+                <dt className="text-[10px] sm:text-xs text-gray-500 truncate">Balance</dt>
+                <dd className="text-[11px] sm:text-sm font-bold text-gray-900 truncate">{formatCurrency(totalBalance)}</dd>
               </div>
             </div>
           </div>
-
-          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-6 border border-gray-200">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Download className="h-5 w-5 sm:h-8 sm:w-8 text-orange-600" />
-              </div>
-              <div className="ml-2 sm:ml-5 w-0 flex-1">
-                <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Withdrawable</dt>
-                <dd className="text-sm sm:text-2xl font-bold text-gray-900">{formatCurrency(totalWithdrawable)}</dd>
+          <div className="bg-white rounded-lg shadow-sm p-2 sm:p-3 border border-gray-200">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-600 shrink-0" />
+              <div className="min-w-0">
+                <dt className="text-[10px] sm:text-xs text-gray-500 truncate">Withdrawable</dt>
+                <dd className="text-[11px] sm:text-sm font-bold text-gray-900 truncate">{formatCurrency(totalWithdrawable)}</dd>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Filters and Search */}
-        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm p-3 sm:p-6 mb-4 sm:mb-6 border border-gray-200">
-          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
-                <input
-                  type="text"
-                  placeholder="Search by name, email, mobile, or referral code..."
-                  className="w-full pl-8 sm:pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+        {/* Filters */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-3 sm:mb-4">
+          <div className="flex items-center gap-2 p-2 sm:p-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full pl-7 sm:pl-8 pr-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <div className="sm:w-48">
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
-                <select
-                  className="w-full pl-8 sm:pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white text-sm"
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                >
-                  <option value="all">All Users</option>
-                  <option value="active">Active Users</option>
-                  <option value="inactive">Inactive Users</option>
-                  <option value="first-deposit">First Deposit</option>
-                  <option value="bank-added">Bank Added</option>
-                  <option value="upi-added">UPI Added</option>
-                </select>
-              </div>
+            <div className="relative w-32 sm:w-36">
+              <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <select
+                className="w-full pl-7 sm:pl-8 pr-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg appearance-none bg-white focus:ring-1 focus:ring-blue-500"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="all">All Users</option>
+                <option value="active">Active</option>
+                <option value="banned">Banned</option>
+                <option value="first-deposit">First Deposit</option>
+                <option value="bank-added">Bank Added</option>
+                <option value="upi-added">UPI Added</option>
+              </select>
             </div>
           </div>
         </div>
 
-        {/* User Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6">
+        {/* Mobile: User Cards */}
+        <div className="sm:hidden space-y-2 mb-4">
           {currentUsers.map((user) => (
-            <div key={user._id} className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-              {/* Header with Avatar and Actions */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center">
-                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
-                    <span className="text-xs sm:text-sm font-medium text-white">
-                      {(user.fullName || 'U').charAt(0).toUpperCase()}
-                    </span>
+            <div key={user._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center shrink-0">
+                    <span className="text-xs font-medium text-white">{(user.fullName || 'U').charAt(0).toUpperCase()}</span>
                   </div>
-                  <div className="ml-2 sm:ml-3">
-                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">{user.fullName || 'Unknown User'}</h3>
-                    <p className="text-xs text-gray-500 truncate">{user.email || 'No email'}</p>
-                    <p className="text-xs text-gray-400 truncate">📱 {user.mobile || 'No mobile'}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-gray-900 truncate">{user.fullName || 'Unknown'}</p>
+                    <p className="text-[10px] text-gray-500 truncate">{user.email || 'No email'}</p>
                   </div>
                 </div>
-                <div className="flex space-x-1">
-                  <button 
-                    onClick={() => handleView(user._id)}
-                    className="text-blue-600 hover:text-blue-900 p-1 rounded-full hover:bg-blue-50"
-                    title="View User"
-                  >
-                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                <div className="flex gap-1 shrink-0">
+                  <button onClick={() => toggleUserStatus(user._id)} disabled={togglingIds.has(user._id)} className={`p-0.5 rounded ${user.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-500 hover:bg-green-50'}`} title={user.isActive ? 'Deactivate' : 'Activate'}>
+                    {togglingIds.has(user._id) ? <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> : user.isActive ? <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg> : <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>}
                   </button>
-                  <button 
-                    onClick={() => handleEdit(user._id)}
-                    className="text-green-600 hover:text-green-900 p-1 rounded-full hover:bg-green-50"
-                    title="Edit User"
-                  >
-                    <Edit3 className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(user._id)}
-                    className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50"
-                    title="Delete User"
-                  >
-                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </button>
+                  <button onClick={() => handleEdit(user._id)} className="text-green-600 p-0.5 hover:bg-green-50 rounded" title="Edit"><Edit3 className="w-3 h-3" /></button>
+                  <button onClick={() => handleDelete(user._id)} className="text-red-600 p-0.5 hover:bg-red-50 rounded" title="Delete"><Trash2 className="w-3 h-3" /></button>
                 </div>
               </div>
-
-              {/* User ID */}
-              <div className="mb-3">
-                <p className="text-xs text-gray-500">User ID</p>
-                <p className="text-xs font-mono text-gray-800 bg-gray-50 px-2 py-1 rounded truncate">{user._id}</p>
-              </div>
-
-              {/* Balance Information */}
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <div className="bg-blue-50 p-2 rounded-lg">
-                  <div className="flex items-center mb-1">
-                    <Wallet className="h-3 w-3 text-blue-600 mr-1" />
-                    <span className="text-xs text-blue-600 font-medium">Balance</span>
-                  </div>
-                  <p className="text-sm font-bold text-blue-900">{formatCurrency(user.balance)}</p>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="bg-blue-50 p-1.5 rounded">
+                  <span className="text-[10px] text-blue-600 block">Balance</span>
+                  <span className="font-semibold text-blue-900">{formatCurrency(user.balance)}</span>
                 </div>
-                <div className="bg-green-50 p-2 rounded-lg">
-                  <div className="flex items-center mb-1">
-                    <Download className="h-3 w-3 text-green-600 mr-1" />
-                    <span className="text-xs text-green-600 font-medium">Withdrawable</span>
-                  </div>
-                  <p className="text-sm font-bold text-green-900">{formatCurrency(user.withdrawableBalance)}</p>
+                <div className="bg-green-50 p-1.5 rounded">
+                  <span className="text-[10px] text-green-600 block">Withdrawable</span>
+                  <span className="font-semibold text-green-900">{formatCurrency(user.withdrawableBalance)}</span>
+                </div>
+                <div className="bg-gray-50 p-1.5 rounded text-center">
+                  <span className="text-[10px] text-gray-500 block">Ref</span>
+                  <span className="font-semibold text-gray-800">{user.totalReferal || 0}</span>
                 </div>
               </div>
-
-              {/* Referral Information */}
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Referral Code</p>
-                  <p className="text-xs font-mono text-gray-800 bg-gray-100 px-2 py-1 rounded">{user.referralCode || 'N/A'}</p>
+              <div className="flex items-center justify-between mt-2 text-[10px]">
+                <div className="flex gap-1.5">
+                  <span className={`px-1.5 py-0.5 rounded-full font-medium ${
+                    user.isBankAdded ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>Bank</span>
+                  <span className={`px-1.5 py-0.5 rounded-full font-medium ${
+                    user.isUpiAdded ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>UPI</span>
+                  <span className={`px-1.5 py-0.5 rounded-full font-medium ${
+                    user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>{user.isActive ? 'Active' : 'Banned'}</span>
                 </div>
-                <div>
-                  <div className="flex items-center mb-1">
-                    <Repeat className="h-3 w-3 text-gray-500 mr-1" />
-                    <span className="text-xs text-gray-500">Referrals</span>
-                  </div>
-                  <p className="text-sm font-semibold text-gray-900">{user.totalReferal || 0}</p>
-                </div>
-              </div>
-
-              {/* Payment Methods */}
-              <div className="mb-3">
-                <p className="text-xs text-gray-500 mb-2">Payment Methods</p>
-                <div className="flex space-x-2">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    user.isBankAdded ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    <CreditCard className="inline h-3 w-3 mr-1" />
-                    Bank
-                  </span>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    user.isUpiAdded ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    <Wallet className="inline h-3 w-3 mr-1" />
-                    UPI
-                  </span>
-                </div>
-              </div>
-
-              {/* Status Badges */}
-              <div className="flex flex-wrap gap-1">
-                {(user.balance || 0) > 0 && (
-                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                    Active
-                  </span>
-                )}
-                {user.isFirstDeposit && (
-                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
-                    First Deposit
-                  </span>
-                )}
+                <span className="text-gray-400 font-mono">{user._id.slice(-6)}</span>
               </div>
             </div>
           ))}
         </div>
 
+        {/* Desktop: User Table */}
+        <div className="hidden sm:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-4">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="text-left px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">User</th>
+                  <th className="text-left px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">ID</th>
+                  <th className="text-left px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Mobile</th>
+                  <th className="text-right px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Balance</th>
+                  <th className="text-right px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Withdrawable</th>
+                  <th className="text-center px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Ref</th>
+                  <th className="text-center px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Payment</th>
+                  <th className="text-center px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                  <th className="text-right px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {currentUsers.map((user) => (
+                  <tr key={user._id} className="hover:bg-gray-50/50">
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center shrink-0">
+                          <span className="text-[10px] font-medium text-white">{(user.fullName || 'U').charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-gray-900 truncate max-w-[140px]">{user.fullName || 'Unknown'}</p>
+                          <p className="text-[10px] text-gray-500 truncate max-w-[140px]">{user.email || ''}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">
+                      <span className="text-[10px] font-mono text-gray-500">{user._id.slice(-8)}</span>
+                    </td>
+                    <td className="px-3 py-2">
+                      <span className="text-xs text-gray-700">{user.mobile || '-'}</span>
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <span className="text-xs font-semibold text-gray-900">{formatCurrency(user.balance)}</span>
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <span className="text-xs font-semibold text-gray-900">{formatCurrency(user.withdrawableBalance)}</span>
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <span className="text-xs text-gray-700">{user.totalReferal || 0}</span>
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <span className={`inline-block w-1.5 h-1.5 rounded-full ${user.isBankAdded ? 'bg-green-500' : 'bg-red-400'}`} title={user.isBankAdded ? 'Bank added' : 'No bank'} />
+                        <span className={`inline-block w-1.5 h-1.5 rounded-full ${user.isUpiAdded ? 'bg-green-500' : 'bg-red-400'}`} title={user.isUpiAdded ? 'UPI added' : 'No UPI'} />
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <span className={`inline-block px-1.5 py-0.5 text-[10px] font-medium rounded-full ${
+                        user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                        {user.isActive ? 'Active' : 'Banned'}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <div className="flex items-center justify-end gap-0.5">
+                        <button onClick={() => toggleUserStatus(user._id)} disabled={togglingIds.has(user._id)} className={`p-1 rounded ${user.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-500 hover:bg-green-50'}`} title={user.isActive ? 'Deactivate' : 'Activate'}>
+                          {togglingIds.has(user._id) ? <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={user.isActive ? "M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" : "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"}/></svg>}
+                        </button>
+                        <button onClick={() => handleEdit(user._id)} className="p-1 text-green-600 hover:bg-green-50 rounded" title="Edit"><Edit3 className="w-3 h-3" /></button>
+                        <button onClick={() => handleDelete(user._id)} className="p-1 text-red-600 hover:bg-red-50 rounded" title="Delete"><Trash2 className="w-3 h-3" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-3">
             <div className="flex items-center justify-between">
-              <div className="flex-1 flex justify-between sm:hidden">
+              <p className="text-[10px] sm:text-xs text-gray-600">
+                {indexOfFirstUser + 1}-{Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length}
+              </p>
+              <div className="flex items-center gap-1">
                 <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                   disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-3 py-2 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                  className="px-2 py-1 text-[10px] sm:text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Previous
+                  Prev
                 </button>
+                <div className="hidden sm:flex items-center gap-1">
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i + 1}
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`w-6 h-6 text-[10px] sm:text-xs font-medium rounded ${
+                        currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
                 <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="ml-3 relative inline-flex items-center px-3 py-2 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                  className="px-2 py-1 text-[10px] sm:text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>
-              </div>
-              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{indexOfFirstUser + 1}</span> to{' '}
-                    <span className="font-medium">{Math.min(indexOfLastUser, filteredUsers.length)}</span> of{' '}
-                    <span className="font-medium">{filteredUsers.length}</span> results
-                  </p>
-                </div>
-                <div>
-                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      disabled={currentPage === 1}
-                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      Previous
-                    </button>
-                    {[...Array(totalPages)].map((_, index) => (
-                      <button
-                        key={index + 1}
-                        onClick={() => setCurrentPage(index + 1)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                          currentPage === index + 1
-                            ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                        }`}
-                      >
-                        {index + 1}
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                      disabled={currentPage === totalPages}
-                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      Next
-                    </button>
-                  </nav>
-                </div>
               </div>
             </div>
           </div>
@@ -495,159 +485,58 @@ const ManageUser = () => {
 
         {/* No Results */}
         {filteredUsers.length === 0 && (
-          <div className="text-center py-12">
-            <UserX className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No users found</h3>
-            <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+          <div className="text-center py-8">
+            <UserX className="mx-auto h-8 w-8 text-gray-300" />
+            <p className="mt-1 text-xs text-gray-500">No users found. Try adjusting your search.</p>
           </div>
         )}
       </div>
 
       {/* Edit User Modal */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              {/* Modal Header */}
-              <div className="flex items-center justify-between pb-4 border-b">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Edit User
-                </h3>
-                <button
-                  onClick={handleCloseEditModal}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+      {isEditModalOpen && editingUser && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-900">Edit User</h3>
+              <button onClick={handleCloseEditModal} className="p-1 hover:bg-gray-100 rounded-lg">
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">User ID</label>
+                <div className="text-xs text-gray-600 bg-gray-50 px-3 py-1.5 rounded font-mono">{editingUser._id}</div>
               </div>
-
-              {/* Modal Body */}
-              <div className="mt-4 space-y-4">
-                {/* User ID Display */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    User ID
-                  </label>
-                  <div className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-md font-mono">
-                    {editingUser?._id}
-                  </div>
-                </div>
-
-                {/* Full Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={editFormData.fullName}
-                    onChange={handleEditFormChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter full name"
-                    required
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={editFormData.email}
-                    onChange={handleEditFormChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter email address"
-                    required
-                  />
-                </div>
-
-                {/* Balance */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Balance (₹)
-                  </label>
-                  <input
-                    type="number"
-                    name="balance"
-                    value={editFormData.balance}
-                    onChange={handleEditFormChange}
-                    min="0"
-                    step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter balance amount"
-                  />
-                </div>
-
-                {/* Withdrawable Balance */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Withdrawable Balance (₹)
-                  </label>
-                  <input
-                    type="number"
-                    name="withdrawableBalance"
-                    value={editFormData.withdrawableBalance}
-                    onChange={handleEditFormChange}
-                    min="0"
-                    step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter withdrawable balance"
-                  />
-                </div>
-
-                {/* New Password */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    New Password <span className="text-gray-500 text-xs">(Leave blank to keep current)</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={editFormData.password}
-                    onChange={handleEditFormChange}
-                    minLength="6"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter new password (minimum 6 characters)"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Only fill this field if you want to reset the user's password
-                  </p>
-                </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Full Name *</label>
+                <input type="text" name="fullName" value={editFormData.fullName} onChange={handleEditFormChange} className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500" />
               </div>
-
-              {/* Modal Footer */}
-              <div className="flex items-center justify-end pt-4 border-t mt-6 space-x-3">
-                <button
-                  onClick={handleCloseEditModal}
-                  disabled={isUpdating}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveUser}
-                  disabled={isUpdating}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center"
-                >
-                  {isUpdating ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Saving...
-                    </>
-                  ) : (
-                    'Save Changes'
-                  )}
-                </button>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Email *</label>
+                <input type="email" name="email" value={editFormData.email} onChange={handleEditFormChange} className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500" />
               </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Balance (₹)</label>
+                <input type="number" name="balance" value={editFormData.balance} onChange={handleEditFormChange} min="0" step="0.01" className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Withdrawable Balance (₹)</label>
+                <input type="number" name="withdrawableBalance" value={editFormData.withdrawableBalance} onChange={handleEditFormChange} min="0" step="0.01" className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">New Password <span className="text-gray-400 font-normal">(optional)</span></label>
+                <input type="password" name="password" value={editFormData.password} onChange={handleEditFormChange} minLength="6" className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500" placeholder="Leave blank to keep current" />
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2 p-4 border-t border-gray-200">
+              <button onClick={handleCloseEditModal} disabled={isUpdating} className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50">Cancel</button>
+              <button onClick={handleSaveUser} disabled={isUpdating} className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1">
+                {isUpdating ? (
+                  <><svg className="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Saving...</>
+                ) : 'Save'}
+              </button>
             </div>
           </div>
         </div>
