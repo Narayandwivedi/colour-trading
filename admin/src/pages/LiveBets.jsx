@@ -27,15 +27,15 @@ const LiveBets = () => {
 
   useEffect(() => {
     fetchBets();
-    // Auto-refresh every 15 seconds (fallback)
-    const interval = setInterval(fetchBets, 15000);
+    // Auto-refresh every 5 seconds (fallback)
+    const interval = setInterval(fetchBets, 5000);
     return () => clearInterval(interval);
   }, [fetchBets]);
 
-  // WebSocket: refresh bets when a game result is announced
+  // WebSocket: refresh bets when a game result is announced or a new bet is placed
   useEffect(() => {
     const unsub = onWSMessage((msg) => {
-      if (msg.type === 'game:result') {
+      if (msg.type === 'game:result' || msg.type === 'new-bet') {
         fetchBets();
       }
     });

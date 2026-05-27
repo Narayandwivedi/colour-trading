@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bet = require("../models/bet");
 const user = require("../models/user");
 const game = require("../models/game");
+const { broadcast } = require("../websocketService");
 
 const handlePlaceBet = async (req, res) => {
   const { userId, betAmount, period, betColour, betSize , betNumber } = req.body;
@@ -96,6 +97,8 @@ const handlePlaceBet = async (req, res) => {
 
     await getUser.save({ session });
     await session.commitTransaction();
+    
+    broadcast('new-bet', { bet: newBet[0], userId: getUser._id, userName: getUser.fullName });
     
     return res.json({ 
       success: true, 
