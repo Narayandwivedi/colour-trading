@@ -20,7 +20,7 @@ export default function Result() {
   } = useContext(GameContext);
   const { setBalance } = useContext(WalletContext);
 
-  const resultsPerPage = 10;
+  const resultsPerPage = 40;
 
   const fetchResults = async (page = 1, isInitialLoad = false) => {
     try {
