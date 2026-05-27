@@ -1,4 +1,4 @@
-import { useContext, useEffect, memo } from "react";
+import { useContext, useEffect, memo, useRef } from "react";
 import { GameContext, BACKEND_URL } from "../context/AppContext";
 import axios from "axios";
 import { Trophy } from "lucide-react";
@@ -42,6 +42,9 @@ export default function Game() {
 
   const minutes = Math.floor(timer / 60);
   const seconds = timer % 60;
+  
+  const periodRef = useRef(period);
+  periodRef.current = period;
 
   useEffect(() => {
     const unsub = onWSMessage((msg) => {
@@ -86,6 +89,29 @@ export default function Game() {
     if (gameType) {
       fetchCurrentPeriod();
     }
+  }, [gameType]);
+
+  // Polling fallback — keeps timer running if WebSocket briefly disconnects
+  useEffect(() => {
+    if (!gameType) return;
+
+    const id = setInterval(async () => {
+      try {
+        const { data } = await axios.get(
+          `${BACKEND_URL}/api/latest/period/${gameType}`,
+          { withCredentials: true }
+        );
+        if (data.success && data.latestPeriod) {
+          const newPeriod = data.latestPeriod.period;
+          if (newPeriod !== periodRef.current) {
+            setPeriod(newPeriod);
+            setPeriodCreatedAT(new Date(data.latestPeriod.createdAt));
+          }
+        }
+      } catch (e) {}
+    }, 5000);
+
+    return () => clearInterval(id);
   }, [gameType]);
 
   return (
