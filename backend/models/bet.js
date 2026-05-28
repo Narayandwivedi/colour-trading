@@ -22,6 +22,10 @@ const betSchema = new mongoose.Schema({
         min: 0,
         max: 9
     },
+    gameType: {
+        type: String,
+        enum: ["30sec", "1min", "3min"],
+    },
     betResult: {
         type: mongoose.Schema.Types.Mixed,  // Can store both strings and numbers
         // No enum since it can be colors, sizes, or numbers (0-9)

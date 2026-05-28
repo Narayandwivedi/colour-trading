@@ -77,6 +77,7 @@ const handlePlaceBet = async (req, res) => {
     // Create bet object
     const betData = {
       period,
+      gameType: checkGame.gameType,
       userId: getUser._id,
       betAmount: numericAmount,
     };

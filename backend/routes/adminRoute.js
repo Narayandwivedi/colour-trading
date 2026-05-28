@@ -140,6 +140,7 @@ router.get("/allwithdraw", async (req, res) => {
 router.get("/latestBets", async (req, res) => {
   try {
     const allBets = await Bet.find({ status: "pending" })
+      .populate("userId", "fullName userId")
       .sort({ createdAt: -1 })
       .lean();
     return res.json({ success: true, allBets });

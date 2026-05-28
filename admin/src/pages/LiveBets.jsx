@@ -51,7 +51,17 @@ const LiveBets = () => {
   const getBetTypeText = (bet) => {
     if (bet.betColour) return `Color: ${bet.betColour}`;
     if (bet.betSize) return `Size: ${bet.betSize}`;
+    if (bet.betNumber !== undefined && bet.betNumber !== null) return `Number: ${bet.betNumber}`;
     return "Number";
+  };
+
+  const getTimeframeLabel = (gameType) => {
+    switch (gameType) {
+      case "30sec": return "30s";
+      case "1min": return "1m";
+      case "3min": return "3m";
+      default: return "";
+    }
   };
 
   const getBetTypeColor = (bet) => {
@@ -150,10 +160,14 @@ const LiveBets = () => {
               {bets.map((bet) => (
                 <tr key={bet._id} className="hover:bg-gray-50/50">
                   <td className="px-3 py-2">
-                    <span className="text-xs font-mono text-gray-600">{bet.userId}</span>
+                    <div className="text-xs font-medium text-gray-800">{bet.userId?.fullName || 'N/A'}</div>
+                    {bet.userId?.userId && <div className="text-[10px] text-gray-400">ID: {bet.userId.userId}</div>}
                   </td>
                   <td className="px-3 py-2">
                     <span className="text-xs font-mono text-gray-600">{bet.period}</span>
+                    {bet.gameType && (
+                      <span className="ml-1.5 inline-flex px-1.5 py-0.5 text-[9px] font-semibold rounded bg-blue-100 text-blue-700 uppercase">{getTimeframeLabel(bet.gameType)}</span>
+                    )}
                   </td>
                   <td className="px-3 py-2">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full border ${getBetTypeColor(bet)}`}>
@@ -170,7 +184,7 @@ const LiveBets = () => {
                     </span>
                   </td>
                   <td className="px-3 py-2 text-xs text-gray-500">
-                    {new Date(bet.createdAt).toLocaleString()}
+                    {new Date(bet.createdAt).toLocaleString('en-GB', { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
                   </td>
                 </tr>
               ))}
@@ -195,14 +209,22 @@ const LiveBets = () => {
           bets.map((bet) => (
             <div key={bet._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
               <div className="flex items-center justify-between mb-2">
-                <div className="font-mono text-xs text-gray-500 truncate max-w-[120px]">{bet.userId}</div>
+                <div>
+                  <div className="text-xs text-gray-800 font-medium truncate max-w-[140px]">{bet.userId?.fullName || 'N/A'}</div>
+                  {bet.userId?.userId && <div className="text-[10px] text-gray-400">ID: {bet.userId.userId}</div>}
+                </div>
                 <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border capitalize ${getStatusColor(bet.status)}`}>
                   {bet.status}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <div>
-                  <div className="text-gray-600 font-mono">{bet.period}</div>
+                  <div className="text-gray-600 font-mono">
+                    {bet.period}
+                    {bet.gameType && (
+                      <span className="ml-1.5 inline-flex px-1.5 py-0.5 text-[9px] font-semibold rounded bg-blue-100 text-blue-700 uppercase">{getTimeframeLabel(bet.gameType)}</span>
+                    )}
+                  </div>
                   <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border mt-1 ${getBetTypeColor(bet)}`}>
                     {getBetTypeIcon(bet)}
                     {getBetTypeText(bet)}
@@ -210,7 +232,7 @@ const LiveBets = () => {
                 </div>
                 <div className="text-right shrink-0">
                   <div className="font-semibold text-gray-900">₹{bet.betAmount}</div>
-                  <div className="text-[10px] text-gray-400">{new Date(bet.createdAt).toLocaleString()}</div>
+                  <div className="text-[10px] text-gray-400">{new Date(bet.createdAt).toLocaleString('en-GB', { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}</div>
                 </div>
               </div>
             </div>
