@@ -412,17 +412,44 @@ export default function Result() {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 px-4">
           <div className="relative w-full max-w-sm bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 p-8 rounded-3xl shadow-2xl">
             <button
-              className="absolute top-4 right-4 text-white text-2xl hover:scale-110 transition transform"
               onClick={() => setShowWinner(false)}
+              className="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors"
+              aria-label="Close"
             >
-              <i className="fa-regular fa-circle-xmark drop-shadow-lg"></i>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
             </button>
 
             <div className="flex flex-col items-center justify-center">
               <div className="relative w-24 h-24 mb-8">
                 <div className="absolute w-full h-full rounded-full bg-yellow-300 blur-xl opacity-70"></div>
                 <div className="relative w-24 h-24 bg-gradient-to-br from-yellow-200 to-yellow-400 rounded-full flex items-center justify-center shadow-2xl border-4 border-white">
-                  <i className="fa-solid fa-trophy text-4xl text-yellow-700 drop-shadow-md"></i>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-10 w-10 text-yellow-700 drop-shadow-md"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                    />
+                  </svg>
                 </div>
               </div>
 
@@ -437,9 +464,16 @@ export default function Result() {
                 ₹{winAmount}
               </div>
 
-              <p className="text-white font-semibold text-sm opacity-90 text-center">
+              <p className="text-white font-semibold text-sm opacity-90 text-center mb-6">
                 Amazing! Keep playing to win even more! 🚀
               </p>
+
+              <button
+                onClick={() => setShowWinner(false)}
+                className="w-full bg-white text-orange-500 font-extrabold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                Continue Playing
+              </button>
             </div>
           </div>
         </div>
