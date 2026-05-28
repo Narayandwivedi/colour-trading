@@ -91,9 +91,8 @@ async function approveTransaction(req, res) {
     transaction.status = 'success';
     await transaction.save({ session });
     
-    // Update user balance
+    // Update user balance (only balance, not withdrawableBalance)
     user.balance += transaction.amount;
-    user.withdrawableBalance += transaction.amount;
     await user.save({ session });
     
     await session.commitTransaction();
