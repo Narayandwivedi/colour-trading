@@ -1,10 +1,12 @@
 import React, { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import UPIQRCode from '../components/UPIQRCODE';
 import { AuthContext, WalletContext, BACKEND_URL } from '../context/AppContext';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
 const PaymentPage = () => {
+  const navigate = useNavigate();
   const [utr, setUtr] = useState('');
   const [error, setError] = useState('');
   const { finalDepositAmt, setFinalDepositAmt } = useContext(WalletContext);
@@ -31,6 +33,7 @@ const PaymentPage = () => {
         toast.success(data.message);
         setUtr('');
         setFinalDepositAmt(null);
+        navigate('/colourtrading');
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Error processing deposit");
